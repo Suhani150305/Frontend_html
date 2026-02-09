@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Faculty Dashboard</title>
+</head>
+<body>
+
+<h2>Faculty Achievement Verification</h2>
+
+<table border="1">
+<thead>
+<tr>
+<th>Student</th>
+<th>Title</th>
+<th>Status</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody id="list"></tbody>
+</table>
+
+<script>
+if(localStorage.getItem("userRole")!=="faculty"){
+    alert("Unauthorized");
+    location.href="login.html";
+}
+
+fetch("http://localhost:5000/achievement/all")
+.then(res=>res.json())
+.then(data=>{
+    document.getElementById("list").innerHTML=data.map(a=>`
+    <tr>
+        <td>${a.studentId}</td>
+        <td>${a.title}</td>
+        <td>${a.status}</td>
+        <td>
+            <button onclick="update('${a._id}','Approved')">Approve</button>
+            <button onclick="update('${a._id}','Rejected')">Reject</button>
+        </td>
+    </tr>`).join("");
+});
+
+function update(id,status){
+    fetch("http://localhost:5000/achievement/update",{
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body:JSON.stringify({id,status})
+    }).then(()=>location.reload());
+}
+</script>
+
+</body>
+</html>

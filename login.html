@@ -1,0 +1,766 @@
+<!--DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>EduAchieve | Login</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f1f5f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .login-box {
+            background: white;
+            padding: 30px;
+            width: 350px;
+            border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #2563eb;
+        }
+        label {
+            font-size: 14px;
+            margin-top: 10px;
+            display: block;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+        button {
+            width: 100%;
+            margin-top: 20px;
+            padding: 12px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #1e40af;
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-box">
+    <h2>EduAchieve Login</h2>
+
+    <label>Username</label>
+    <input type="text" id="username" placeholder="Enter username">
+
+    <label>Password</label>
+    <input type="password" id="password" placeholder="Enter password">
+
+    <label>Role</label>
+    <select id="role">
+        <option value="student">Student</option>
+        <option value="faculty">Faculty</option>
+        <option value="admin">Admin</option>
+    </select>
+
+    <button onclick="login()">Login</button>
+</div>
+
+<script>
+async function login() {
+    const username = document.getElementById("username").value.trim();
+    const password = document.getElementById("password").value.trim();
+    const role = document.getElementById("role").value;
+
+    if (!username || !password) {
+        alert("Please enter username and password");
+        return;
+    }
+
+    try {
+        const response = await fetch("http://localhost:5000/login", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ username, password, role })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            alert(data.message || "Login failed");
+            return;
+        }
+
+        // Save role
+        localStorage.setItem("userRole", data.role);
+
+       
+
+        // Redirect based on role
+        if (data.role === "admin") {
+            window.location.href = "admin_dashboard.html";
+        } else if (data.role === "faculty") {
+            window.location.href = "faculty_dashboard.html";
+        } else {
+            window.location.href = "studentdashboard.html";
+        }
+
+    } catch (error) {
+        console.error(error);
+        alert("Cannot connect to server");
+    }
+}
+</script>
+
+
+</body>
+</html-->
+
+<!--DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>EduAchieve | Secure Login</title>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f1f5f9; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        
+        .login-box { 
+            background: white; padding: 40px; border-radius: 12px; 
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); width: 100%; max-width: 380px; text-align: center; 
+        }
+        
+        .brand h1 { color: #2563eb; margin: 0; }
+        .brand p { color: #64748b; margin-bottom: 20px; }
+
+        /* Role Switcher */
+        .role-toggle { display: flex; background: #e2e8f0; padding: 5px; border-radius: 8px; margin-bottom: 20px; gap: 5px; }
+        .role-toggle button { flex: 1; padding: 10px; border: none; cursor: pointer; background: transparent; font-weight: bold; color: #64748b; border-radius: 6px; transition: 0.3s; font-size: 13px; }
+        .role-toggle button.active { background: white; color: #2563eb; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+
+        /* Inputs */
+        .input-group { text-align: left; margin-bottom: 15px; }
+        .input-group label { display: block; font-size: 14px; margin-bottom: 8px; color: #475569; }
+        .input-group input { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; transition: 0.2s; }
+        .input-group input:focus { border-color: #2563eb; outline: none; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+        
+        /* Error Banner (New Feature) */
+        .error-banner {
+            background: #fee2e2;
+            color: #b91c1c;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            margin-bottom: 20px;
+            display: none; /* Hidden by default */
+            border: 1px solid #fca5a5;
+            text-align: left;
+        }
+
+        .login-btn { width: 100%; padding: 12px; background: #2563eb; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: 600; margin-top: 10px; }
+        .login-btn:disabled { background: #94a3b8; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+
+<div class="login-box">
+    <div class="brand">
+        <h1>EduAchieve</h1>
+        <p>Academic Excellence Portal</p>
+    </div>
+
+    <div id="loginError" class="error-banner">
+        <i class="fas fa-exclamation-circle"></i> <span>Invalid credentials</span>
+    </div>
+
+    <div class="role-toggle">
+        <button id="studentBtn" class="active" onclick="selectRole('student')">Student</button>
+        <button id="facultyBtn" onclick="selectRole('faculty')">Faculty</button>
+        <button id="adminBtn" onclick="selectRole('admin')">Admin</button>
+    </div>
+
+    <form id="loginForm">
+        <div class="input-group">
+            <label>Username / Email</label>
+            <input type="text" id="email" placeholder="Enter username" required>
+        </div>
+        <div class="input-group">
+            <label>Password</label>
+            <input type="password" id="password" placeholder="••••••••" required>
+        </div>
+        <button type="submit" id="submitBtn" class="login-btn">Sign In</button>
+    </form>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+<script>
+    let currentRole = 'student';
+
+    function selectRole(role) {
+        currentRole = role;
+        document.getElementById('studentBtn').classList.toggle('active', role === 'student');
+        document.getElementById('facultyBtn').classList.toggle('active', role === 'faculty');
+        document.getElementById('adminBtn').classList.toggle('active', role === 'admin');
+        
+        // Hide error when switching roles
+        document.getElementById('loginError').style.display = 'none';
+    }
+
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const username = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const submitBtn = document.getElementById('submitBtn');
+        const errorBanner = document.getElementById('loginError');
+
+        // Reset UI
+        errorBanner.style.display = 'none';
+        submitBtn.disabled = true;
+        submitBtn.innerText = "Authenticating...";
+
+        try {
+            // Send data to backend
+            const res = await fetch("http://localhost:5000/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username, password, role: currentRole })
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                // Success!
+                localStorage.setItem('userRole', data.role);
+                
+                Toastify({
+                    text: `Login successful! Redirecting...`,
+                    duration: 2000,
+                    gravity: "top",
+                    position: "right",
+                    style: { background: "#22c55e" }
+                }).showToast();
+
+                setTimeout(() => {
+                    const routes = {
+                        'student': 'studentdashboard.html',
+                        'faculty': 'faculty_dashboard.html',
+                        'admin': 'admin_dashboard.html' // Updated to match your file name
+                    };
+                    window.location.href = routes[data.role];
+                }, 1000);
+
+            } else {
+                // Error (Invalid credentials)
+                throw new Error(data.message || "Invalid credentials");
+            }
+
+        } catch (error) {
+            // Show error in the box
+            errorBanner.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${error.message}`;
+            errorBanner.style.display = 'block';
+            
+            // Reset button
+            submitBtn.disabled = false;
+            submitBtn.innerText = "Sign In";
+        }
+    });
+
+    // Clear error when user starts typing again
+    document.querySelectorAll('input').forEach(input => {
+        input.addEventListener('input', () => {
+            document.getElementById('loginError').style.display = 'none';
+        });
+    });
+</script>
+
+</body>
+</html-->
+
+<!--DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>EduAchieve | Secure Login</title>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f1f5f9; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .login-box { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); width: 100%; max-width: 380px; text-align: center; }
+        .brand h1 { color: #2563eb; margin: 0; }
+        .brand p { color: #64748b; margin-bottom: 20px; }
+        .role-toggle { display: flex; background: #e2e8f0; padding: 5px; border-radius: 8px; margin-bottom: 20px; gap: 5px; }
+        .role-toggle button { flex: 1; padding: 10px; border: none; cursor: pointer; background: transparent; font-weight: bold; color: #64748b; border-radius: 6px; transition: 0.3s; font-size: 13px; }
+        .role-toggle button.active { background: white; color: #2563eb; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .input-group { text-align: left; margin-bottom: 15px; }
+        .input-group label { display: block; font-size: 14px; margin-bottom: 8px; color: #475569; }
+        .input-group input { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; transition: 0.2s; }
+        .input-group input:focus { border-color: #2563eb; outline: none; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+        .error-banner { background: #fee2e2; color: #b91c1c; padding: 12px; border-radius: 6px; font-size: 14px; margin-bottom: 20px; display: none; border: 1px solid #fca5a5; text-align: left; }
+        .login-btn { width: 100%; padding: 12px; background: #2563eb; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: 600; margin-top: 10px; }
+        .login-btn:disabled { background: #94a3b8; cursor: not-allowed; }
+        .forgot-link { display: block; margin-top: 15px; font-size: 13px; color: #2563eb; text-decoration: none; cursor: pointer; }
+        .forgot-link:hover { text-decoration: underline; }
+
+        /* Modal Styles */
+        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center; }
+        .modal-content { background-color: white; padding: 25px; border-radius: 12px; width: 300px; text-align: center; }
+    </style>
+</head>
+<body>
+
+<div class="login-box">
+    <div class="brand"> <h1>EduAchieve</h1> <p>Academic Excellence Portal</p> </div>
+    <div id="loginError" class="error-banner"> <i class="fas fa-exclamation-circle"></i> <span>Invalid credentials</span> </div>
+    <div class="role-toggle">
+        <button id="studentBtn" class="active" onclick="selectRole('student')">Student</button>
+        <button id="facultyBtn" onclick="selectRole('faculty')">Faculty</button>
+        <button id="adminBtn" onclick="selectRole('admin')">Admin</button>
+    </div>
+    <form id="loginForm">
+        <div class="input-group"> <label>Username / Email</label> <input type="text" id="email" placeholder="Enter username" required> </div>
+        <div class="input-group"> <label>Password</label> <input type="password" id="password" placeholder="••••••••" required> </div>
+        <button type="submit" id="submitBtn" class="login-btn">Sign In</button>
+    </form>
+    <a class="forgot-link" onclick="openForgotModal()">Forgot Password?</a>
+</div>
+
+<div id="forgotModal" class="modal">
+    <div class="modal-content">
+        <h3 style="margin-top:0; color:#2563eb;">Reset Password</h3>
+        <p style="font-size:13px; color:#64748b;">Enter your username to set a new password.</p>
+        <input type="text" id="resetUsername" placeholder="Username (Roll No)" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #cbd5e1; border-radius:6px;">
+        <input type="password" id="resetNewPwd" placeholder="New Password" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #cbd5e1; border-radius:6px;">
+        <button class="login-btn" onclick="resetPassword()">Reset Now</button>
+        <button style="margin-top:10px; background:none; border:none; color:#64748b; cursor:pointer;" onclick="closeForgotModal()">Cancel</button>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+<script>
+    let currentRole = 'student';
+    function selectRole(role) {
+        currentRole = role;
+        document.querySelectorAll('.role-toggle button').forEach(b => b.classList.remove('active'));
+        document.getElementById(role + 'Btn').classList.add('active');
+        document.getElementById('loginError').style.display = 'none';
+    }
+
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const username = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const submitBtn = document.getElementById('submitBtn');
+        const errorBanner = document.getElementById('loginError');
+
+        errorBanner.style.display = 'none'; submitBtn.disabled = true; submitBtn.innerText = "Authenticating...";
+
+        try {
+            const res = await fetch("http://localhost:5000/login", {
+                method: "POST", headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username, password, role: currentRole })
+            });
+            const data = await res.json();
+
+            if (res.ok) {
+                localStorage.setItem('userRole', data.role);
+                Toastify({ text: `Login successful!`, duration: 2000, style: { background: "#22c55e" } }).showToast();
+                setTimeout(() => {
+                    const routes = { 'student': 'studentdashboard.html', 'faculty': 'faculty_dashboard.html', 'admin': 'admin_dashboard.html' };
+                    window.location.href = routes[data.role];
+                }, 1000);
+            } else { throw new Error(data.message); }
+        } catch (error) {
+            errorBanner.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${error.message}`;
+            errorBanner.style.display = 'block'; submitBtn.disabled = false; submitBtn.innerText = "Sign In";
+        }
+    });
+
+    // Forgot Password Logic
+    function openForgotModal() { document.getElementById('forgotModal').style.display = 'flex'; }
+    function closeForgotModal() { document.getElementById('forgotModal').style.display = 'none'; }
+    
+    async function resetPassword() {
+        const username = document.getElementById('resetUsername').value;
+        const newPassword = document.getElementById('resetNewPwd').value;
+        
+        if(!username || !newPassword) { alert("Please fill all fields"); return; }
+        
+        const res = await fetch("http://localhost:5000/forgot-password", {
+            method: "POST", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, newPassword })
+        });
+        const data = await res.json();
+        alert(data.message);
+        if(res.ok) closeForgotModal();
+    }
+</script>
+</body>
+</html-->
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>EduAchieve | Secure Login</title>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <style>
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            background: #f1f5f9; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            margin: 0; 
+        }
+        
+        .login-box { 
+            background: white; 
+            padding: 40px; 
+            border-radius: 12px; 
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); 
+            width: 100%; 
+            max-width: 380px; 
+            text-align: center; 
+        }
+        
+        .brand h1 { color: #2563eb; margin: 0; }
+        .brand p { color: #64748b; margin-bottom: 20px; }
+
+        /* Role Toggles */
+        .role-toggle { 
+            display: flex; 
+            background: #e2e8f0; 
+            padding: 5px; 
+            border-radius: 8px; 
+            margin-bottom: 20px; 
+            gap: 5px; 
+        }
+        .role-toggle button { 
+            flex: 1; 
+            padding: 10px; 
+            border: none; 
+            cursor: pointer; 
+            background: transparent; 
+            font-weight: bold; 
+            color: #64748b; 
+            border-radius: 6px; 
+            transition: 0.3s; 
+            font-size: 13px; 
+        }
+        .role-toggle button.active { 
+            background: white; 
+            color: #2563eb; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+        }
+
+        /* Inputs */
+        .input-group { text-align: left; margin-bottom: 15px; }
+        .input-group label { display: block; font-size: 14px; margin-bottom: 8px; color: #475569; }
+        .input-group input { 
+            width: 100%; 
+            padding: 12px; 
+            border: 1px solid #cbd5e1; 
+            border-radius: 6px; 
+            box-sizing: border-box; 
+            transition: 0.2s; 
+        }
+        .input-group input:focus { 
+            border-color: #2563eb; 
+            outline: none; 
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); 
+        }
+        
+        /* Error Box (Inline) */
+        .error-banner { 
+            background: #fee2e2; 
+            color: #b91c1c; 
+            padding: 12px; 
+            border-radius: 6px; 
+            font-size: 14px; 
+            margin-bottom: 20px; 
+            display: none; /* Hidden by default */
+            border: 1px solid #fca5a5; 
+            text-align: left; 
+        }
+
+        .login-btn { 
+            width: 100%; 
+            padding: 12px; 
+            background: #2563eb; 
+            color: white; 
+            border: none; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-size: 16px; 
+            font-weight: 600; 
+            margin-top: 10px; 
+        }
+        .login-btn:disabled { background: #94a3b8; cursor: not-allowed; }
+        
+        .forgot-link { 
+            display: block; 
+            margin-top: 15px; 
+            font-size: 13px; 
+            color: #2563eb; 
+            text-decoration: none; 
+            cursor: pointer; 
+        }
+        .forgot-link:hover { text-decoration: underline; }
+
+        /* Modal Styles */
+        .modal { 
+            display: none; 
+            position: fixed; 
+            z-index: 100; 
+            left: 0; 
+            top: 0; 
+            width: 100%; 
+            height: 100%; 
+            background-color: rgba(0,0,0,0.5); 
+            align-items: center; 
+            justify-content: center; 
+        }
+        .modal-content { 
+            background-color: white; 
+            padding: 25px; 
+            border-radius: 12px; 
+            width: 320px; 
+            text-align: center; 
+        }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="login-box">
+    <div class="brand"> 
+        <h1>EduAchieve</h1> 
+        <p>Academic Excellence Portal</p> 
+    </div>
+
+    <div id="loginError" class="error-banner"> 
+        <i class="fas fa-exclamation-circle"></i> <span>Invalid credentials</span> 
+    </div>
+
+    <div class="role-toggle">
+        <button id="studentBtn" class="active" onclick="selectRole('student')">Student</button>
+        <button id="facultyBtn" onclick="selectRole('faculty')">Faculty</button>
+        <button id="adminBtn" onclick="selectRole('admin')">Admin</button>
+    </div>
+
+    <form id="loginForm">
+        <div class="input-group"> 
+            <label>Username / Email</label> 
+            <input type="text" id="email" placeholder="Enter username" required> 
+        </div>
+        <div class="input-group"> 
+            <label>Password</label> 
+            <input type="password" id="password" placeholder="••••••••" required> 
+        </div>
+        <button type="submit" id="submitBtn" class="login-btn">Sign In</button>
+    </form>
+    
+    <a class="forgot-link" onclick="openForgotModal()">Forgot Password?</a>
+</div>
+
+<div id="forgotModal" class="modal">
+    <div class="modal-content">
+        <h3 style="margin-top:0; color:#2563eb;">Reset Password</h3>
+        
+        <div id="step1">
+            <p style="font-size:13px; color:#64748b;">Enter your username & registered email.</p>
+            
+            <div class="input-group">
+                <input type="text" id="resetUsername" placeholder="Username (Roll No)" style="width:100%;">
+            </div>
+            <div class="input-group">
+                <input type="email" id="resetEmail" placeholder="Registered Email" style="width:100%;">
+            </div>
+            
+            <button class="login-btn" onclick="sendOTP()">Get OTP</button>
+        </div>
+
+        <div id="step2" class="hidden">
+            <p style="font-size:13px; color:#10b981;">OTP sent! Check your email.</p>
+            
+            <div class="input-group">
+                <input type="text" id="resetOTP" placeholder="Enter 6-digit OTP" style="width:100%; text-align:center; letter-spacing:2px;">
+            </div>
+            <div class="input-group">
+                <input type="password" id="resetNewPwd" placeholder="New Password" style="width:100%;">
+            </div>
+            
+            <button class="login-btn" onclick="verifyAndReset()">Reset Password</button>
+        </div>
+
+        <button style="margin-top:10px; background:none; border:none; color:#64748b; cursor:pointer;" onclick="closeForgotModal()">Cancel</button>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
+<script>
+    let currentRole = 'student';
+
+    function selectRole(role) {
+        currentRole = role;
+        // Update Buttons
+        document.querySelectorAll('.role-toggle button').forEach(b => b.classList.remove('active'));
+        document.getElementById(role + 'Btn').classList.add('active');
+        
+        // Hide error message on toggle
+        document.getElementById('loginError').style.display = 'none';
+    }
+
+    // LOGIN LOGIC
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const username = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const submitBtn = document.getElementById('submitBtn');
+        const errorBanner = document.getElementById('loginError');
+
+        // Reset UI
+        errorBanner.style.display = 'none'; 
+        submitBtn.disabled = true; 
+        submitBtn.innerText = "Authenticating...";
+
+        try {
+            // Using relative URL works because we are serving from the same port (5000)
+            const res = await fetch("http://localhost:5000/login", {
+                method: "POST", 
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username, password, role: currentRole })
+            });
+            
+            const data = await res.json();
+
+            if (res.ok) {
+                // Login Success
+                localStorage.setItem('userRole', data.role);
+                
+                Toastify({ 
+                    text: `Login successful! Redirecting...`, 
+                    duration: 2000, 
+                    style: { background: "#22c55e" },
+                    position: "center"
+                }).showToast();
+
+                setTimeout(() => {
+                    // Redirect based on role
+                    const routes = { 
+                        'student': 'studentdashboard.html', 
+                        'faculty': 'faculty_dashboard.html', 
+                        'admin': 'admin_dashboard.html' 
+                    };
+                    window.location.href = routes[data.role];
+                }, 1000);
+
+            } else { 
+                // Login Failed
+                throw new Error(data.message || "Invalid credentials"); 
+            }
+        } catch (error) {
+            // Show Inline Error
+            errorBanner.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${error.message}`;
+            errorBanner.style.display = 'block'; 
+            submitBtn.disabled = false; 
+            submitBtn.innerText = "Sign In";
+        }
+    });
+
+    // --- FORGOT PASSWORD LOGIC ---
+    
+    function openForgotModal() { 
+        document.getElementById('forgotModal').style.display = 'flex'; 
+        // Reset Steps
+        document.getElementById('step1').classList.remove('hidden');
+        document.getElementById('step2').classList.add('hidden');
+        // Clear Fields
+        document.getElementById('resetUsername').value = "";
+        document.getElementById('resetEmail').value = "";
+        document.getElementById('resetOTP').value = "";
+        document.getElementById('resetNewPwd').value = "";
+    }
+    
+    function closeForgotModal() { 
+        document.getElementById('forgotModal').style.display = 'none'; 
+    }
+    
+    async function sendOTP() {
+        const username = document.getElementById('resetUsername').value;
+        const email = document.getElementById('resetEmail').value;
+        
+        if(!username || !email) { 
+            alert("Please enter both Username and Email"); 
+            return; 
+        }
+
+        try {
+            const res = await fetch("http://localhost:5000/send-otp", {
+                method: "POST", 
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username, email })
+            });
+            const data = await res.json();
+            
+            if(res.ok) {
+                alert(data.message); // "OTP sent"
+                document.getElementById('step1').classList.add('hidden');
+                document.getElementById('step2').classList.remove('hidden');
+            } else {
+                alert(data.message); // "User not found"
+            }
+        } catch(e) {
+            alert("Connection Error. Is server running?");
+        }
+    }
+
+    async function verifyAndReset() {
+        const username = document.getElementById('resetUsername').value;
+        const otp = document.getElementById('resetOTP').value;
+        const newPassword = document.getElementById('resetNewPwd').value;
+
+        if(!otp || !newPassword) { 
+            alert("Please enter OTP and New Password"); 
+            return; 
+        }
+
+        try {
+            const res = await fetch("http://localhost:5000/verify-reset-password", {
+                method: "POST", 
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username, otp, newPassword })
+            });
+            const data = await res.json();
+            
+            if(res.ok) {
+                alert("Success! Password updated. Please login.");
+                closeForgotModal();
+            } else {
+                alert("Error: " + data.message); // "Invalid OTP"
+            }
+        } catch(e) {
+            alert("Connection Error.");
+        }
+    }
+</script>
+
+</body>
+</html>
