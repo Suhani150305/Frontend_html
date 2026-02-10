@@ -766,7 +766,7 @@ async function login() {
 </html-->
 
 
-<!DOCTYPE html>
+<!--DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -1003,6 +1003,378 @@ async function login() {
 
             if (res.ok) {
                 localStorage.setItem('userRole', data.role);
+                Toastify({ text: "Login Successful!", style: { background: "#10b981" } }).showToast();
+                setTimeout(() => {
+                    const map = { 'student': 'studentdashboard.html', 'faculty': 'faculty_dashboard.html', 'admin': 'admin_dashboard.html' };
+                    window.location.href = map[data.role];
+                }, 1000);
+            } else {
+                Toastify({ text: data.message, style: { background: "#ef4444" } }).showToast();
+                btn.disabled = false; btn.innerText = "Sign In";
+            }
+        } catch (e) {
+            Toastify({ text: "Server Error", style: { background: "#ef4444" } }).showToast();
+            btn.disabled = false; btn.innerText = "Sign In";
+        }
+    });
+
+    // FORGOT PASSWORD LOGIC
+    function resetForgotState() {
+        document.getElementById('step1').classList.remove('hidden');
+        document.getElementById('step2').classList.add('hidden');
+        document.getElementById('resetUsername').value = "";
+        document.getElementById('resetEmail').value = "";
+        document.getElementById('resetOTP').value = "";
+        document.getElementById('resetNewPwd').value = "";
+        document.getElementById('otpBtn').disabled = false;
+        document.getElementById('otpBtn').innerText = "Get OTP";
+        stopTimers();
+    }
+
+    async function sendOTP() {
+        const username = document.getElementById('resetUsername').value;
+        const email = document.getElementById('resetEmail').value;
+        const btn = document.getElementById('otpBtn');
+
+        if(!username || !email) return alert("Fill all fields");
+
+        btn.disabled = true; btn.innerText = "Sending...";
+
+        try {
+            const res = await fetch(`${API_URL}/send-otp`, {
+                method: "POST", headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username, email })
+            });
+            const data = await res.json();
+
+            if (res.ok || data.message.includes("OTP")) {
+                document.getElementById('step1').classList.add('hidden');
+                document.getElementById('step2').classList.remove('hidden');
+                startSessionTimer(300); // 5 mins
+                startResendTimer();
+                Toastify({ text: "OTP Sent!", style: { background: "#3b82f6" } }).showToast();
+            } else {
+                alert(data.message);
+                btn.disabled = false; btn.innerText = "Get OTP";
+            }
+        } catch(e) {
+            alert("Connection Error");
+            btn.disabled = false; btn.innerText = "Get OTP";
+        }
+    }
+
+    async function verifyAndReset() {
+        const username = document.getElementById('resetUsername').value;
+        const otp = document.getElementById('resetOTP').value;
+        const newPassword = document.getElementById('resetNewPwd').value;
+
+        if(!otp || !newPassword) return alert("Enter OTP & Password");
+
+        try {
+            const res = await fetch(`${API_URL}/verify-reset-password`, {
+                method: "POST", headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username, otp, newPassword })
+            });
+            const data = await res.json();
+
+            if (res.ok) {
+                alert("Password Updated! Please Login.");
+                switchView('login');
+            } else {
+                alert(data.message);
+            }
+        } catch(e) { alert("Error connecting to server"); }
+    }
+
+    // TIMERS
+    function stopTimers() { clearInterval(timerInterval); clearInterval(resendInterval); }
+
+    function startSessionTimer(duration) {
+        let timer = duration, min, sec;
+        const display = document.getElementById('otpTimer');
+        const btn = document.getElementById('verifyBtn');
+        
+        btn.disabled = false; btn.innerText = "Reset Password";
+        display.style.background = "#fff1f2"; display.style.color = "#e11d48";
+
+        stopTimers();
+        timerInterval = setInterval(() => {
+            min = parseInt(timer / 60, 10);
+            sec = parseInt(timer % 60, 10);
+            display.textContent = `⏱️ ${min}:${sec < 10 ? "0" + sec : sec}`;
+
+            if (--timer < 0) {
+                stopTimers();
+                display.textContent = "⚠️ Expired";
+                btn.disabled = true; btn.innerText = "Expired";
+            }
+        }, 1000);
+    }
+
+    function startResendTimer() {
+        let time = 30;
+        const link = document.getElementById('resendText');
+        link.className = "resend-link"; link.onclick = null;
+
+        resendInterval = setInterval(() => {
+            link.innerText = `Resend OTP in ${time}s`;
+            if (time <= 0) {
+                clearInterval(resendInterval);
+                link.innerText = "Resend OTP";
+                link.className = "resend-link resend-active";
+                link.onclick = function() { sendOTP(); };
+            }
+            time -= 1;
+        }, 1000);
+    }
+</script>
+
+</body>
+</html-->
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>EduAchieve | Secure Login</title>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            background: #f1f5f9; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            margin: 0; 
+        }
+        
+        .login-box { 
+            background: white; 
+            padding: 40px; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); 
+            width: 100%; 
+            max-width: 380px; 
+            text-align: center; 
+            transition: height 0.3s;
+        }
+        
+        .brand h1 { color: #4f46e5; margin: 0; font-size: 24px; }
+        .brand p { color: #64748b; margin-bottom: 25px; font-size: 14px; }
+
+        /* Role Toggles */
+        .role-toggle { 
+            display: flex; 
+            background: #f1f5f9; 
+            padding: 4px; 
+            border-radius: 8px; 
+            margin-bottom: 25px; 
+        }
+        .role-toggle button { 
+            flex: 1; 
+            padding: 8px; 
+            border: none; 
+            cursor: pointer; 
+            background: transparent; 
+            font-weight: 600; 
+            color: #64748b; 
+            border-radius: 6px; 
+            font-size: 13px; 
+            transition: 0.2s; 
+        }
+        .role-toggle button.active { 
+            background: white; 
+            color: #4f46e5; 
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1); 
+        }
+
+        /* Inputs */
+        .input-group { text-align: left; margin-bottom: 15px; }
+        .input-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: #334155; }
+        .input-group input { 
+            width: 100%; 
+            padding: 12px; 
+            border: 1px solid #e2e8f0; 
+            border-radius: 8px; 
+            box-sizing: border-box; 
+            transition: 0.2s; 
+            font-size: 14px;
+            color: #1e293b;
+        }
+        .input-group input:focus { 
+            border-color: #4f46e5; 
+            outline: none; 
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); 
+        }
+        
+        /* Buttons */
+        .btn-primary { 
+            width: 100%; 
+            padding: 12px; 
+            background: #4f46e5; 
+            color: white; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-size: 15px; 
+            font-weight: 600; 
+            margin-top: 10px; 
+            transition: 0.2s; 
+        }
+        .btn-primary:hover { background: #4338ca; }
+        .btn-primary:disabled { background: #94a3b8; cursor: not-allowed; }
+
+        /* Links */
+        .link-text { 
+            display: block; 
+            margin-top: 20px; 
+            font-size: 13px; 
+            color: #4f46e5; 
+            text-decoration: none; 
+            cursor: pointer; 
+            font-weight: 600;
+        }
+        .link-text:hover { text-decoration: underline; }
+
+        /* Views (Toggle between Login and Forgot) */
+        .view-section { display: block; animation: fadeIn 0.3s ease; }
+        .hidden { display: none !important; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Timer & Resend */
+        .timer-box {
+            background: #fff1f2;
+            color: #e11d48;
+            font-weight: bold;
+            padding: 8px;
+            border-radius: 6px;
+            font-size: 14px;
+            margin-bottom: 15px;
+            border: 1px solid #fecdd3;
+        }
+        .resend-link { font-size: 12px; color: #64748b; margin-top: 10px; display: block; }
+        .resend-active { color: #4f46e5; cursor: pointer; font-weight: bold; text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+<div class="login-box">
+    <div class="brand"> 
+        <h1>EduAchieve</h1> 
+        <p>Academic Excellence Portal</p> 
+    </div>
+
+    <div id="viewLogin" class="view-section">
+        <div class="role-toggle">
+            <button id="studentBtn" class="active" onclick="selectRole('student')">Student</button>
+            <button id="facultyBtn" onclick="selectRole('faculty')">Faculty</button>
+            <button id="adminBtn" onclick="selectRole('admin')">Admin</button>
+        </div>
+
+        <form id="loginForm">
+            <div class="input-group"> 
+                <label>Username / Email</label> 
+                <input type="text" id="loginId" placeholder="Enter ID (Roll No)" required> 
+            </div>
+            <div class="input-group"> 
+                <label>Password</label> 
+                <input type="password" id="loginPwd" placeholder="••••••••" required> 
+            </div>
+            <button type="submit" id="submitBtn" class="btn-primary">Sign In</button>
+        </form>
+        
+        <a class="link-text" onclick="switchView('forgot')">Forgot Password?</a>
+    </div>
+
+    <div id="viewForgot" class="view-section hidden">
+        <h3 style="color:#334155; margin-bottom:15px; font-size:18px;">Reset Password</h3>
+        
+        <div id="step1">
+            <p style="font-size:13px; color:#64748b; margin-bottom:15px;">Enter your details to receive an OTP.</p>
+            <div class="input-group">
+                <label>Username (Roll No)</label> 
+                <input type="text" id="resetUsername" placeholder="e.g. 101"> 
+            </div>
+            <div class="input-group">
+                <label>Registered Email</label> 
+                <input type="email" id="resetEmail" placeholder="e.g. student@gmail.com"> 
+            </div>
+            <button class="btn-primary" onclick="sendOTP()" id="otpBtn">Get OTP</button>
+        </div>
+
+        <div id="step2" class="hidden">
+            <div id="otpTimer" class="timer-box">⏱️ 05:00</div>
+            
+            <div class="input-group">
+                <label>Enter OTP</label> 
+                <input type="text" id="resetOTP" placeholder="6-Digit Code" style="text-align:center; letter-spacing:3px; font-weight:bold; font-size:16px;"> 
+            </div>
+            <div class="input-group">
+                <label>New Password</label> 
+                <input type="password" id="resetNewPwd" placeholder="New Password"> 
+            </div>
+            
+            <button class="btn-primary" onclick="verifyAndReset()" id="verifyBtn">Reset Password</button>
+            <span id="resendText" class="resend-link">Resend OTP in 30s</span>
+        </div>
+
+        <a class="link-text" style="color:#64748b; font-size:12px; margin-top:15px;" onclick="switchView('login')">← Back to Login</a>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
+<script>
+    const API_URL = "http://localhost:5000";
+    let currentRole = 'student';
+    let timerInterval, resendInterval;
+
+    function selectRole(role) {
+        currentRole = role;
+        document.querySelectorAll('.role-toggle button').forEach(b => b.classList.remove('active'));
+        document.getElementById(role + 'Btn').classList.add('active');
+    }
+
+    function switchView(view) {
+        if(view === 'forgot') {
+            document.getElementById('viewLogin').classList.add('hidden');
+            document.getElementById('viewForgot').classList.remove('hidden');
+            resetForgotState();
+        } else {
+            document.getElementById('viewForgot').classList.add('hidden');
+            document.getElementById('viewLogin').classList.remove('hidden');
+            stopTimers();
+        }
+    }
+
+    // LOGIN
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('submitBtn');
+        const username = document.getElementById('loginId').value;
+        const password = document.getElementById('loginPwd').value;
+
+        btn.disabled = true; btn.innerText = "Checking...";
+
+        try {
+            const res = await fetch(`${API_URL}/login`, {
+                method: "POST", headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username, password, role: currentRole })
+            });
+            const data = await res.json();
+
+            if (res.ok) {
+                // 👇 THIS IS THE CRITICAL FIX 👇
+                localStorage.setItem('userRole', data.role);
+                localStorage.setItem('username', username); // Saves Roll No for Dashboard
+                
                 Toastify({ text: "Login Successful!", style: { background: "#10b981" } }).showToast();
                 setTimeout(() => {
                     const map = { 'student': 'studentdashboard.html', 'faculty': 'faculty_dashboard.html', 'admin': 'admin_dashboard.html' };
