@@ -6990,7 +6990,7 @@ document.addEventListener("DOMContentLoaded", () => { loadDashboard(); });
 
 
 
-<!DOCTYPE html>
+<!--DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -7512,6 +7512,583 @@ async function saveStudent() {
 }
 async function deleteFaculty(id) { if(confirm("Delete?")) { await fetch(`http://localhost:5000/faculty/${id}`, {method:"DELETE"}); loadFaculty(); }}
 async function deleteStudent(id) { if(confirm("Delete?")) { await fetch(`http://localhost:5000/students/${id}`, {method:"DELETE"}); loadStudents(); }}
+function logout() { localStorage.clear(); window.location.href = "login.html"; }
+function resetSystem() { if(confirm("Reset System?")) alert("System Reset (Demo)"); }
+
+document.addEventListener("DOMContentLoaded", () => { loadDashboard(); });
+</script>
+
+</body>
+</html-->
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>EduAchieve | Admin Console</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<style>
+    :root {
+        --bg-color: #f3f4f6; --sidebar-bg: #1e293b; --sidebar-text: #e2e8f0; --card-bg: #ffffff;
+        --text-main: #1f2937; --text-muted: #6b7280; --border-color: #e5e7eb;
+        --primary: #4f46e5; --primary-hover: #4338ca; --success: #10b981; --danger: #ef4444;
+    }
+    body.dark-mode {
+        --bg-color: #0f172a; --sidebar-bg: #020617; --card-bg: #1e293b;
+        --text-main: #f1f5f9; --text-muted: #94a3b8; --border-color: #334155;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+    body { background-color: var(--bg-color); color: var(--text-main); display: flex; transition: 0.3s; }
+
+    /* SIDEBAR */
+    .sidebar { width: 260px; height: 100vh; background: var(--sidebar-bg); color: var(--sidebar-text); position: fixed; display: flex; flex-direction: column; z-index: 100; }
+    .sidebar-header { padding: 25px; font-size: 22px; font-weight: 700; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .sidebar-menu { flex: 1; padding: 20px 0; }
+    .menu-item { width: 100%; padding: 15px 25px; background: none; border: none; color: var(--sidebar-text); text-align: left; cursor: pointer; font-size: 15px; display: flex; gap: 12px; transition: 0.2s; }
+    .menu-item:hover, .menu-item.active { background: rgba(255,255,255,0.1); border-left: 4px solid var(--primary); }
+    
+    .sidebar-footer { padding: 20px; border-top: 1px solid rgba(255,255,255,0.1); }
+    .action-btn { width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .btn-logout { background: #334155; color: white; }
+    .btn-reset { background: #7f1d1d; color: #fecaca; }
+    .theme-toggle { margin: 0 20px 20px; padding: 10px; background: rgba(255,255,255,0.1); border-radius: 8px; cursor: pointer; text-align: center; display: justify-content: center; display: flex; gap: 8px; }
+
+    /* MAIN CONTENT */
+    .main-content { margin-left: 260px; padding: 30px; width: calc(100% - 260px); min-height: 100vh; }
+    .section { display: none; animation: fadeIn 0.3s ease; }
+    .active-section { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* CARDS & TABLES */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 30px; }
+    .card { background: var(--card-bg); padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); border: 1px solid var(--border-color); position: relative; overflow: hidden; }
+    .stats-grid .card { cursor: pointer; transition: 0.2s; }
+    .stats-grid .card:hover { transform: translateY(-5px); border-color: var(--primary); }
+    
+    .card h2 { font-size: 28px; color: var(--primary); margin-top: 5px; }
+    .card p { color: var(--text-muted); font-size: 14px; }
+
+    .header-actions { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
+    input, select { padding: 10px 15px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-color); color: var(--text-main); outline: none; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th { text-align: left; padding: 15px; background: var(--bg-color); color: var(--text-muted); border-bottom: 2px solid var(--border-color); }
+    td { padding: 15px; border-bottom: 1px solid var(--border-color); font-size: 14px; }
+    
+    /* BADGES */
+    .status-pill { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; }
+    .status-admin { background: #fee2e2; color: #b91c1c; } 
+    .status-student { background: #dcfce7; color: #15803d; }
+    .status-proctor { background: #d1fae5; color: #065f46; }
+    .status-hod { background: #ffedd5; color: #9a3412; }
+    .status-coord { background: #fef9c3; color: #854d0e; }
+    .count-badge { background: rgba(0,0,0,0.1); padding: 2px 6px; border-radius: 50%; font-size: 10px; }
+
+    /* MODAL SYSTEM - FIXED CONGESTION */
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); justify-content: center; align-items: center; z-index: 1000; }
+    .modal-content { 
+        background: var(--card-bg); 
+        padding: 30px; 
+        border-radius: 16px; 
+        width: 480px; 
+        max-height: 90vh; 
+        overflow-y: auto; 
+        box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); 
+        border: 1px solid var(--border-color); 
+    }
+    .modal-content h3 { margin-bottom: 20px; color: var(--primary); display: flex; align-items: center; gap: 10px; }
+    
+    .form-group { margin-bottom: 15px; display: flex; flex-direction: column; gap: 6px; }
+    .form-group label { font-size: 13px; font-weight: 600; color: var(--text-muted); }
+    .form-group input, .form-group select { width: 100%; margin-bottom: 0; }
+    
+    .checkbox-grid { 
+        display: grid; grid-template-columns: 1fr 1fr; gap: 10px; 
+        background: var(--bg-color); padding: 15px; border-radius: 8px; margin: 10px 0 20px;
+    }
+    .checkbox-row { display: flex; align-items: center; gap: 10px; font-size: 14px; }
+    .checkbox-row input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; }
+
+    .modal-btns { margin-top: 20px; display: flex; gap: 10px; justify-content: flex-end; }
+    .btn { padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; font-size: 14px; transition: 0.2s; }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-secondary { background: var(--bg-color); color: var(--text-muted); border: 1px solid var(--border-color); }
+    
+    .notify-icon { font-size: 18px; margin-right: 8px; cursor: pointer; transition: 0.2s; }
+    .notify-icon:hover { transform: scale(1.2); }
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="sidebar-header"> <i class="fas fa-graduation-cap"></i> EduAchieve </div>
+  <div class="sidebar-menu">
+    <button class="menu-item active" onclick="switchTab('dashboard', this)"> <i class="fas fa-th-large"></i> Dashboard </button>
+    <button class="menu-item" onclick="switchTab('faculty', this)"> <i class="fas fa-chalkboard-teacher"></i> Faculty List </button>
+    <button class="menu-item" onclick="switchTab('students', this)"> <i class="fas fa-user-graduate"></i> Students </button>
+    <button class="menu-item" onclick="switchTab('allocations', this)"> <i class="fas fa-project-diagram"></i> Allocations </button>
+    <button class="menu-item" onclick="switchTab('security', this)"> <i class="fas fa-shield-alt"></i> Credentials </button>
+  </div>
+  <div class="theme-toggle" onclick="toggleTheme()"> <i class="fas fa-moon"></i> <span>Dark Mode</span> </div>
+  <div class="sidebar-footer">
+    <button class="action-btn btn-logout" onclick="logout()"> <i class="fas fa-sign-out-alt"></i> Logout </button>
+    <button class="action-btn btn-reset" onclick="resetSystem()"> <i class="fas fa-trash-alt"></i> Reset System </button>
+  </div>
+</div>
+
+<div class="main-content">
+
+    <div id="dashboard" class="section active-section">
+      <h1>System Overview</h1>
+      <div class="stats-grid">
+        <div class="card" onclick="switchTab('students', document.querySelectorAll('.menu-item')[2])">
+            <p>Total Students</p><h2 id="totalStudents">0</h2>
+        </div>
+        <div class="card" onclick="switchTab('faculty', document.querySelectorAll('.menu-item')[1])">
+            <p>Total Faculty</p><h2 id="totalFaculty">0</h2>
+        </div>
+        <div class="card" onclick="openActionModal()">
+            <p>Unassigned Students</p><h2 id="unassignedStudents" style="color:#ef4444;">0</h2>
+        </div>
+        <div class="card" onclick="openActionModal()">
+            <p>System Status</p><h2 id="actionCount" style="font-size: 18px;">Check Alerts</h2>
+        </div>
+      </div>
+    </div>
+
+    <div id="faculty" class="section">
+      <div class="card">
+          <h2>Faculty Directory</h2>
+          <div class="header-actions">
+            <input type="text" id="facultySearch" placeholder="Search by name..." onkeyup="renderFaculty()">
+            <select id="facultyFilterDept" onchange="renderFaculty()"> 
+                <option value="all">All Depts</option><option value="CE">CE</option><option value="IT">IT</option><option value="CSBS">CSBS</option><option value="AI">AI</option> 
+            </select>
+            <button class="btn btn-primary" onclick="openFacultyModal()">+ Add Faculty</button>
+          </div>
+        <table>
+          <thead><tr><th>Name</th><th>Dept</th><th>Roles</th><th>Contact</th><th>Actions</th></tr></thead>
+          <tbody id="facultyList"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="students" class="section">
+      <div class="card">
+          <h2>Student Enrollment</h2>
+          <div class="header-actions">
+            <input type="text" id="studentSearch" placeholder="Search Name/Roll..." onkeyup="renderStudents()">
+            <select id="studentFilterDept" onchange="renderStudents()"> <option value="all">All Depts</option><option value="CE">CE</option><option value="IT">IT</option><option value="CSBS">CSBS</option><option value="AI">AI</option> </select>
+            <select id="studentFilterSem" onchange="renderStudents()"> <option value="all">All Sem</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option> </select>
+            <button class="btn" style="background-color: #8b5cf6; color: white;" onclick="openPromoteModal()"> <i class="fas fa-level-up-alt"></i> Promote </button>
+            <button class="btn" style="background-color: #10b981; color: white;" onclick="openCSVModal()"> <i class="fas fa-file-csv"></i> Bulk Upload </button>
+            <button class="btn btn-primary" onclick="openStudentModal()">+ Add Student</button>
+          </div>
+        <table>
+          <thead><tr><th>Name</th><th>Roll No</th><th>Sem</th><th>Dept</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="studentList"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="allocations" class="section">
+      <div class="card">
+          <h2>Proctor Allocations</h2>
+          <div class="header-actions">
+            <select id="allocFilterDept" onchange="renderAllocations()"> <option value="all">All Depts</option><option value="CE">CE</option><option value="IT">IT</option><option value="CSBS">CSBS</option><option value="AI">AI</option> </select>
+            <button class="btn btn-primary" onclick="openAllocationModal()">+ Assign Class to Proctor</button>
+          </div>
+        <table>
+          <thead><tr><th>Proctor Name</th><th>Department</th><th>Semester</th><th>Count</th><th>Actions</th></tr></thead>
+          <tbody id="allocationList"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="security" class="section">
+      <div class="card">
+        <h2><i class="fas fa-user-shield"></i> Credential Manager</h2>
+        <table>
+            <thead><tr><th>Username</th><th>Email</th><th>Role</th><th>Password</th><th>Actions</th></tr></thead>
+            <tbody id="credentialList"></tbody>
+        </table>
+      </div>
+    </div>
+</div>
+
+<div class="modal" id="facultyModal">
+  <div class="modal-content">
+    <h3><i class="fas fa-user-plus"></i> Add New Faculty</h3>
+    <div class="form-group">
+        <label>Full Name</label>
+        <input id="fName" placeholder="Enter name">
+    </div>
+    <div class="form-group">
+        <label>Department</label>
+        <select id="fDept">
+            <option value="CE">CE</option><option value="IT">IT</option>
+            <option value="CSBS">CSBS</option><option value="AI">AI</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label>Email Address</label>
+        <input id="fEmail" placeholder="email@institution.edu">
+    </div>
+    <label>System Roles</label>
+    <div class="checkbox-grid">
+        <div class="checkbox-row"><input type="checkbox" id="fRoleHOD"><label>HOD</label></div>
+        <div class="checkbox-row"><input type="checkbox" id="fRoleCoord"><label>Coordinator</label></div>
+        <div class="checkbox-row"><input type="checkbox" id="fRoleProctor"><label>Proctor</label></div>
+    </div>
+    <div class="modal-btns">
+        <button class="btn btn-secondary" onclick="closeFacultyModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveFaculty()">Save Faculty</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="editFacultyModal">
+  <div class="modal-content">
+    <h3><i class="fas fa-edit"></i> Edit Faculty</h3>
+    <div class="form-group"><label>Name</label><input id="editFName"></div>
+    <div class="form-group">
+        <label>Dept</label>
+        <select id="editFDept"><option value="CE">CE</option><option value="IT">IT</option><option value="CSBS">CSBS</option><option value="AI">AI</option></select>
+    </div>
+    <div class="form-group"><label>Email</label><input id="editFEmail"></div>
+    <div class="checkbox-grid">
+        <div class="checkbox-row"><input type="checkbox" id="editFRoleHOD"><label>HOD</label></div>
+        <div class="checkbox-row"><input type="checkbox" id="editFRoleCoord"><label>Coordinator</label></div>
+        <div class="checkbox-row"><input type="checkbox" id="editFRoleProctor"><label>Proctor</label></div>
+    </div>
+    <div class="modal-btns">
+        <button class="btn btn-secondary" onclick="closeEditFacultyModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="updateFaculty()">Update Changes</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="studentModal">
+  <div class="modal-content">
+    <h3><i class="fas fa-user-plus"></i> Add Student</h3>
+    <div class="form-group"><label>Full Name</label><input id="sName"></div>
+    <div class="form-group"><label>Roll Number</label><input id="sRoll"></div>
+    <div class="form-group"><label>Email</label><input id="sEmail"></div>
+    <div class="form-group">
+        <label>Semester</label>
+        <select id="sSem">
+            <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option>
+            <option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label>Department</label>
+        <select id="sDept"><option value="CE">CE</option><option value="IT">IT</option><option value="CSBS">CSBS</option><option value="AI">AI</option></select>
+    </div>
+    <div class="modal-btns">
+        <button class="btn btn-secondary" onclick="closeStudentModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveStudent()">Register Student</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="csvModal">
+    <div class="modal-content">
+        <h3><i class="fas fa-file-csv"></i> Bulk Student Upload</h3>
+        <div class="form-group">
+            <label>Department</label>
+            <select id="csvDept"><option value="" disabled selected>Select Dept</option><option value="CE">CE</option><option value="IT">IT</option><option value="CSBS">CSBS</option><option value="AI">AI</option></select>
+        </div>
+        <div class="form-group">
+            <label>Semester</label>
+            <select id="csvSem"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option></select>
+        </div>
+        <div class="form-group">
+            <label>Select CSV File</label>
+            <input type="file" id="csvFile" accept=".csv" style="border: 2px dashed var(--border-color); padding: 20px; background: var(--bg-color);">
+        </div>
+        <div class="modal-btns">
+            <button class="btn btn-secondary" onclick="closeCSVModal()">Cancel</button>
+            <button class="btn btn-primary" onclick="processCSVUpload()">Upload Students</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="allocationModal">
+  <div class="modal-content">
+    <h3><i class="fas fa-link"></i> Assign Class to Proctor</h3>
+    <div class="form-group">
+        <label>Department</label>
+        <select id="allocDept"><option value="CE">CE</option><option value="IT">IT</option><option value="CSBS">CSBS</option><option value="AI">AI</option></select>
+    </div>
+    <div class="form-group">
+        <label>Semester</label>
+        <select id="allocSem"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option></select>
+    </div>
+    <div class="form-group">
+        <label>Select Proctor</label>
+        <select id="allocFaculty"></select>
+    </div>
+    <div class="modal-btns">
+        <button class="btn btn-secondary" onclick="closeAllocationModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveClassAllocation()">Confirm Assignment</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="actionModal">
+    <div class="modal-content">
+        <h3>⚠️ Action Required</h3>
+        <p style="color: var(--text-muted); margin-bottom:15px;">Students without an assigned proctor:</p>
+        <div id="unassignedList" style="max-height:200px; overflow-y:auto; border:1px solid var(--border-color); padding:10px; border-radius:8px; background: var(--bg-color);"></div>
+        <div class="modal-btns">
+            <button class="btn btn-primary" onclick="switchTab('allocations', document.querySelectorAll('.menu-item')[3]); closeActionModal();">Go to Allocations</button>
+            <button class="btn btn-secondary" onclick="closeActionModal()">Close</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="userEditModal">
+    <div class="modal-content">
+        <h3>Update User</h3>
+        <p>User: <b id="editUserTitle"></b></p>
+        <div class="form-group"><label>Email</label><input type="email" id="editUserEmail"></div>
+        <div class="form-group"><label>New Password</label><input type="text" id="editUserPwd" placeholder="Leave blank to keep current"></div>
+        <div class="modal-btns"><button class="btn btn-primary" onclick="saveUserCredentials()">Update</button><button class="btn btn-secondary" onclick="closeUserEditModal()">Cancel</button></div>
+    </div>
+</div>
+
+<div class="modal" id="promoteModal">
+    <div class="modal-content">
+        <h3>🚀 Promote Batch</h3>
+        <div class="form-group">
+            <label>Dept</label>
+            <select id="promDept"><option value="CE">CE</option><option value="IT">IT</option><option value="CSBS">CSBS</option><option value="AI">AI</option></select>
+        </div>
+        <div class="form-group">
+            <label>Promotion Step</label>
+            <select id="promSem">
+                <option value="1">Sem 1 -> 2</option><option value="2">Sem 2 -> 3</option><option value="3">Sem 3 -> 4</option>
+                <option value="4">Sem 4 -> 5</option><option value="5">Sem 5 -> 6</option><option value="6">Sem 6 -> 7</option>
+                <option value="7">Sem 7 -> 8</option><option value="8">Sem 8 -> Alumni</option>
+            </select>
+        </div>
+        <div class="modal-btns"><button class="btn btn-primary" onclick="promoteStudents()">Promote</button><button class="btn btn-secondary" onclick="closePromoteModal()">Cancel</button></div>
+    </div>
+</div>
+
+<script>
+const API_URL = "http://localhost:5000";
+
+function toggleTheme() {
+    document.body.classList.toggle('dark-mode');
+    const isDark = document.body.classList.contains('dark-mode');
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    document.querySelector('.theme-toggle span').innerText = isDark ? 'Light Mode' : 'Dark Mode';
+    document.querySelector('.theme-toggle i').className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+}
+if(localStorage.getItem('theme') === 'dark') toggleTheme();
+
+function switchTab(id, btn) {
+  document.querySelectorAll(".section").forEach(s => s.classList.remove("active-section"));
+  document.querySelectorAll(".menu-item").forEach(b => b.classList.remove("active"));
+  document.getElementById(id).classList.add("active-section");
+  if(btn) btn.classList.add("active");
+  if (id === "dashboard") loadDashboard();
+  if (id === "faculty") loadFaculty();
+  if (id === "students") loadStudents();
+  if (id === "allocations") loadAllocations();
+  if (id === "security") loadCredentials();
+}
+
+// --- DASHBOARD & ALERTS ---
+let unassignedStudentsList = [];
+async function loadDashboard() {
+  const s = await fetch(`${API_URL}/students`).then(r => r.json());
+  const f = await fetch(`${API_URL}/faculty`).then(r => r.json());
+  unassignedStudentsList = s.filter(i => !i.proctorId);
+  document.getElementById("totalStudents").innerText = s.length;
+  document.getElementById("totalFaculty").innerText = f.length;
+  document.getElementById("unassignedStudents").innerText = unassignedStudentsList.length;
+}
+
+function openActionModal() {
+    const listDiv = document.getElementById("unassignedList");
+    listDiv.innerHTML = unassignedStudentsList.length ? "" : "<p>All students are assigned! 🎉</p>";
+    unassignedStudentsList.forEach(s => {
+        listDiv.innerHTML += `<div style="border-bottom:1px solid #eee; padding:8px; font-size:13px;"><b>${s.name}</b> (${s.dept} Sem ${s.sem})</div>`;
+    });
+    document.getElementById("actionModal").style.display = "flex";
+}
+function closeActionModal() { document.getElementById("actionModal").style.display = "none"; }
+
+// --- FACULTY ---
+let allFaculty = [], allStudents = [], currentEditFacultyId = null;
+async function loadFaculty() {
+  const [f, s] = await Promise.all([fetch(`${API_URL}/faculty`), fetch(`${API_URL}/students`)]);
+  allFaculty = await f.json(); allStudents = await s.json();
+  renderFaculty();
+}
+
+function renderFaculty() {
+  const search = document.getElementById("facultySearch").value.toLowerCase();
+  const dept = document.getElementById("facultyFilterDept").value;
+  const list = document.getElementById("facultyList"); list.innerHTML = "";
+  
+  allFaculty.filter(f => f.name.toLowerCase().includes(search) && (dept === "all" || f.dept === dept)).forEach(f => {
+      const myStudents = allStudents.filter(s => s.proctorId === f._id);
+      let listStr = ""; myStudents.forEach((s, i) => listStr += `${i+1}. ${s.name} (${s.rollNo})\n`);
+      const wa = `https://wa.me/?text=Hello ${f.name}, Students:%0A${encodeURIComponent(listStr)}`;
+      const mail = `mailto:?subject=Students&body=${encodeURIComponent(listStr)}`;
+      
+      let roles = [];
+      if(f.roles?.hod) roles.push('<span class="status-pill status-hod">HOD</span>');
+      if(f.roles?.coordinator) roles.push('<span class="status-pill status-coord">Coord</span>');
+      if(f.roles?.proctor) roles.push(`<span class="status-pill status-proctor">Proctor <span class="count-badge">${myStudents.length}</span></span>`);
+      if(roles.length === 0) roles.push('<span class="status-pill status-faculty">Faculty</span>');
+
+      list.innerHTML += `<tr><td><b>${f.name}</b></td><td>${f.dept}</td><td>${roles.join(" ")}</td>
+      <td><a href="${wa}" target="_blank"><i class="fab fa-whatsapp notify-icon" style="color:#25D366"></i></a><a href="${mail}"><i class="fas fa-envelope notify-icon" style="color:#4f46e5"></i></a></td>
+      <td><button class="btn btn-sm btn-primary" onclick="openEditFacultyModal('${f._id}')">Edit</button> <button class="btn btn-sm btn-secondary" onclick="deleteFaculty('${f._id}')"><i class="fas fa-trash"></i></button></td></tr>`;
+  });
+}
+
+function openFacultyModal() { document.getElementById("facultyModal").style.display="flex"; }
+function closeFacultyModal() { document.getElementById("facultyModal").style.display="none"; }
+async function saveFaculty() {
+    const n=document.getElementById("fName").value; const d=document.getElementById("fDept").value; const e=document.getElementById("fEmail").value;
+    const r = { hod: document.getElementById("fRoleHOD").checked, coordinator: document.getElementById("fRoleCoord").checked, proctor: document.getElementById("fRoleProctor").checked };
+    await fetch(`${API_URL}/faculty`, { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({name:n, dept:d, email:e, roles:r}) });
+    closeFacultyModal(); loadFaculty();
+}
+
+function openEditFacultyModal(id) {
+    const f = allFaculty.find(x => x._id === id); if(!f) return;
+    currentEditFacultyId = id;
+    document.getElementById("editFName").value = f.name; document.getElementById("editFDept").value = f.dept; document.getElementById("editFEmail").value = f.email || "";
+    document.getElementById("editFRoleHOD").checked = f.roles?.hod; document.getElementById("editFRoleCoord").checked = f.roles?.coordinator; document.getElementById("editFRoleProctor").checked = f.roles?.proctor;
+    document.getElementById("editFacultyModal").style.display = "flex";
+}
+function closeEditFacultyModal() { document.getElementById("editFacultyModal").style.display = "none"; }
+async function updateFaculty() {
+    const name = document.getElementById("editFName").value; const dept = document.getElementById("editFDept").value; const email = document.getElementById("editFEmail").value;
+    const roles = { hod: document.getElementById("editFRoleHOD").checked, coordinator: document.getElementById("editFRoleCoord").checked, proctor: document.getElementById("editFRoleProctor").checked };
+    await fetch(`${API_URL}/faculty/${currentEditFacultyId}`, { method: "PUT", headers: {"Content-Type":"application/json"}, body: JSON.stringify({name,dept,email,roles}) });
+    closeEditFacultyModal(); loadFaculty();
+}
+
+// --- STUDENTS ---
+let currentEditStudentId = null;
+async function loadStudents() {
+  allStudents = await fetch(`${API_URL}/students`).then(r => r.json());
+  renderStudents();
+}
+function renderStudents() {
+    const search = document.getElementById("studentSearch").value.toLowerCase();
+    const dept = document.getElementById("studentFilterDept").value;
+    const sem = document.getElementById("studentFilterSem").value;
+    const list = document.getElementById("studentList"); list.innerHTML = "";
+    allStudents.filter(s => (s.name.toLowerCase().includes(search) || s.rollNo.includes(search)) && (dept === "all" || s.dept === dept) && (sem === "all" || String(s.sem) === sem)).forEach(s => {
+        list.innerHTML += `<tr><td>${s.name}</td><td>${s.rollNo}</td><td>${s.sem}</td><td>${s.dept}</td><td><span class="status-pill status-student">${s.status}</span></td>
+        <td><button class="btn btn-sm btn-primary" onclick="openEditStudentModal('${s._id}')">Edit</button> <button class="btn btn-sm btn-secondary" onclick="deleteStudent('${s._id}')"><i class="fas fa-trash"></i></button></td></tr>`;
+    });
+}
+
+function openStudentModal() { document.getElementById("studentModal").style.display="flex"; }
+function closeStudentModal() { document.getElementById("studentModal").style.display="none"; }
+async function saveStudent() {
+    const n=document.getElementById("sName").value; const r=document.getElementById("sRoll").value; const e=document.getElementById("sEmail").value;
+    const s=document.getElementById("sSem").value; const d=document.getElementById("sDept").value;
+    await fetch(`${API_URL}/students`, { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({name:n, rollNo:r, email:e, sem:s, dept:d}) });
+    closeStudentModal(); loadStudents();
+}
+
+// --- PROMOTION ---
+function openPromoteModal() { document.getElementById("promoteModal").style.display = "flex"; }
+function closePromoteModal() { document.getElementById("promoteModal").style.display = "none"; }
+async function promoteStudents() {
+    const dept = document.getElementById("promDept").value; const fromSem = document.getElementById("promSem").value;
+    if(confirm(`Promote ${dept} Sem ${fromSem}?`)) {
+        const res = await fetch(`${API_URL}/students/promote`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ dept, fromSem }) });
+        const data = await res.json(); alert(data.message); closePromoteModal(); loadStudents();
+    }
+}
+
+// --- CSV ---
+function openCSVModal() { document.getElementById("csvModal").style.display = "flex"; }
+function closeCSVModal() { document.getElementById("csvModal").style.display = "none"; }
+function processCSVUpload() {
+    const dept = document.getElementById("csvDept").value; const sem = document.getElementById("csvSem").value; const file = document.getElementById("csvFile").files[0];
+    if(!file || !dept) return alert("Select Dept and File");
+    const reader = new FileReader();
+    reader.onload = async function(e) {
+        const rows = e.target.result.split('\n');
+        let data = [], start = rows[0].toLowerCase().includes('name') ? 1 : 0;
+        for(let i=start; i<rows.length; i++) {
+            const c = rows[i].split(',');
+            if(c.length >= 2) {
+                let name = isNaN(c[0]) ? c[0] : c[1];
+                let roll = isNaN(c[0]) ? c[1] : c[0];
+                let email = (c[2] && c[2].includes('@')) ? c[2] : `${roll.trim()}@student.edu`;
+                if(name && roll) data.push({ name: name.trim(), rollNo: roll.trim(), email: email.trim(), sem, dept, status:'Enrolled' });
+            }
+        }
+        if(confirm(`Upload ${data.length} students?`)) {
+            await fetch(`${API_URL}/students/bulk`, { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify(data) });
+            closeCSVModal(); loadStudents();
+        }
+    };
+    reader.readAsText(file);
+}
+
+// --- ALLOCATION ---
+async function loadAllocations() {
+    await loadFaculty();
+    const s = await fetch(`${API_URL}/students`).then(r => r.json());
+    const list = document.getElementById("allocationList"); list.innerHTML = "";
+    const filter = document.getElementById("allocFilterDept").value;
+    const groups = {};
+    s.forEach(st => { if(st.proctorId) { const k = `${st.proctorId}-${st.dept}-${st.sem}`; if(!groups[k]) groups[k] = { pid: st.proctorId, d: st.dept, s: st.sem, c: 0 }; groups[k].c++; }});
+    Object.values(groups).forEach(g => {
+        if(filter !== "all" && g.d !== filter) return;
+        const pname = allFaculty.find(f => f._id === g.pid)?.name || "Unknown";
+        list.innerHTML += `<tr><td style="color:var(--primary); font-weight:bold">${pname}</td><td>${g.d}</td><td>Sem ${g.s}</td><td><span class="status-pill status-proctor">${g.c} Students</span></td><td><button class="btn btn-sm btn-secondary" onclick="unassign('${g.d}', '${g.s}')">Remove</button></td></tr>`;
+    });
+}
+function openAllocationModal() { 
+    document.getElementById("allocFaculty").innerHTML = allFaculty.filter(f => f.roles?.proctor).map(f => `<option value="${f._id}">${f.name}</option>`).join("");
+    document.getElementById("allocationModal").style.display="flex"; 
+}
+function closeAllocationModal() { document.getElementById("allocationModal").style.display="none"; }
+async function saveClassAllocation() {
+    const d = document.getElementById("allocDept").value; const s = document.getElementById("allocSem").value; const f = document.getElementById("allocFaculty").value;
+    await fetch(`${API_URL}/allocate/class`, { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({ dept: d, sem: s, facultyId: f }) });
+    closeAllocationModal(); loadAllocations();
+}
+async function unassign(d, s) { if(confirm("Remove?")) { await fetch(`${API_URL}/allocate/class`, { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({ dept: d, sem: s, facultyId: null }) }); loadAllocations(); } }
+
+// --- SECURITY ---
+async function loadCredentials() {
+    const users = await fetch(`${API_URL}/users`).then(r => r.json());
+    const list = document.getElementById("credentialList"); list.innerHTML = "";
+    users.forEach(u => {
+        list.innerHTML += `<tr><td><b>${u.username}</b></td><td>${u.email||'-'}</td><td><span class="status-pill status-${u.role}">${u.role}</span></td><td>${u.role==='admin'?'***':u.password}</td><td><button class="btn btn-sm btn-primary" onclick="openUserEdit('${u.username}','${u.email}')">Edit</button></td></tr>`;
+    });
+}
+function openUserEdit(u, e) { currentEditUserId = u; document.getElementById("editUserTitle").innerText = u; document.getElementById("editUserEmail").value = (e&&e!=='undefined')?e:''; document.getElementById("userEditModal").style.display="flex"; }
+function closeUserEditModal() { document.getElementById("userEditModal").style.display="none"; }
+async function saveUserCredentials() {
+    const email = document.getElementById("editUserEmail").value; const password = document.getElementById("editUserPwd").value;
+    const p = { username: currentEditUserId, email }; if(password) p.password = password;
+    await fetch(`${API_URL}/admin/update-user`, { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify(p) });
+    closeUserEditModal(); loadCredentials();
+}
+
+// --- HELPERS ---
+async function deleteFaculty(id) { if(confirm("Delete?")) { await fetch(`${API_URL}/faculty/${id}`, {method:"DELETE"}); loadFaculty(); }}
+async function deleteStudent(id) { if(confirm("Delete?")) { await fetch(`${API_URL}/students/${id}`, {method:"DELETE"}); loadStudents(); }}
 function logout() { localStorage.clear(); window.location.href = "login.html"; }
 function resetSystem() { if(confirm("Reset System?")) alert("System Reset (Demo)"); }
 
