@@ -53,7 +53,7 @@ function update(id,status){
 </html-->
 
 
-<!DOCTYPE html>
+<!--DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -322,4 +322,329 @@ function update(id,status){
 </script>
 
 </body>
-</html>
+</html-->
+
+<!--DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>EduAchieve | Faculty Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    
+    <style>
+        :root { --primary: #4f46e5; --bg: #f8fafc; --sidebar: #0f172a; --text: #334155; --success: #10b981; --danger: #ef4444; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); margin: 0; display: flex; color: var(--text); }
+
+        /* SIDEBAR */
+        .sidebar { width: 260px; height: 100vh; background: var(--sidebar); color: white; position: fixed; display: flex; flex-direction: column; }
+        .sidebar-header { padding: 25px; font-size: 20px; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; gap: 10px; align-items: center; }
+        .sidebar-menu { flex: 1; padding: 20px 0; }
+        .menu-item { width: 100%; padding: 15px 25px; background: none; border: none; color: #e2e8f0; text-align: left; cursor: pointer; font-size: 14px; display: flex; gap: 12px; align-items: center; opacity: 0.8; transition: 0.2s; }
+        .menu-item:hover, .menu-item.active { background: rgba(255,255,255,0.1); border-left: 4px solid var(--primary); opacity: 1; }
+        
+        /* MAIN CONTENT */
+        .main-content { margin-left: 260px; padding: 30px; width: calc(100% - 260px); }
+        .section { display: none; animation: fadeIn 0.3s ease; }
+        .active-section { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        h1 { font-size: 24px; margin-bottom: 20px; }
+
+        /* CARDS */
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px; }
+        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; }
+        .card h2 { margin: 5px 0 0; color: var(--primary); font-size: 32px; }
+        .card p { margin: 0; color: #64748b; font-size: 13px; font-weight: 600; text-transform: uppercase; }
+
+        /* TABLES */
+        .table-container { background: white; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; margin-bottom: 30px; }
+        .table-header { padding: 20px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 15px 20px; background: #f8fafc; color: #64748b; font-size: 12px; text-transform: uppercase; font-weight: 600; border-bottom: 1px solid #e2e8f0; }
+        td { padding: 15px 20px; border-bottom: 1px solid #e2e8f0; font-size: 14px; vertical-align: middle; }
+        
+        /* BUTTONS & BADGES */
+        .btn { padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; font-size: 13px; transition: 0.2s; }
+        .btn-approve { background: #dcfce7; color: #166534; }
+        .btn-reject { background: #fee2e2; color: #991b1b; }
+        .btn-report { background: #334155; color: white; display: flex; align-items: center; gap: 5px; }
+        .btn-report:hover { background: #1e293b; }
+        
+        .status-pill { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+        .status-Pending { background: #fef3c7; color: #92400e; }
+        .status-Approved { background: #dcfce7; color: #166534; }
+        .status-Rejected { background: #fee2e2; color: #991b1b; }
+
+        .profile-badge { display: flex; align-items: center; gap: 10px; padding: 20px; border-top: 1px solid rgba(255,255,255,0.1); margin-top: auto; }
+        .profile-pic { width: 40px; height: 40px; border-radius: 50%; background: var(--primary); display: flex; align-items: center; justify-content: center; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="sidebar-header"> <i class="fas fa-university"></i> EduAchieve </div>
+    <div class="sidebar-menu">
+        <button class="menu-item active" onclick="switchTab('dashboard', this)"> <i class="fas fa-th-large"></i> Dashboard </button>
+        <button class="menu-item" onclick="switchTab('my-class', this)"> <i class="fas fa-users"></i> My Class </button>
+        <button class="menu-item" onclick="switchTab('verification', this)"> <i class="fas fa-check-circle"></i> Verification </button>
+    </div>
+    
+    <div class="profile-badge">
+        <div class="profile-pic" id="navProfilePic">F</div>
+        <div>
+            <div style="font-size:14px; font-weight:bold;" id="navFacultyName">Loading...</div>
+            <div style="font-size:11px; opacity:0.7;">Faculty</div>
+        </div>
+    </div>
+    <button class="menu-item" onclick="logout()" style="color:#f87171; margin-bottom:10px;"> <i class="fas fa-sign-out-alt"></i> Logout </button>
+</div>
+
+<div class="main-content">
+
+    <div id="dashboard" class="section active-section">
+        <h1>Faculty Overview</h1>
+        <div class="stats-grid">
+            <div class="card">
+                <p>Assigned Students</p>
+                <h2 id="totalStudents">0</h2>
+            </div>
+            <div class="card">
+                <p>Pending Verifications</p>
+                <h2 id="pendingCount">0</h2>
+            </div>
+            <div class="card">
+                <p>Department</p>
+                <h2 id="myDept" style="font-size: 20px;">-</h2>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <div class="table-header"><h3>Recent Requests</h3></div>
+            <table>
+                <thead><tr><th>Student</th><th>Title</th><th>Category</th><th>Status</th></tr></thead>
+                <tbody id="recentList"><tr><td colspan="4">Loading...</td></tr></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="my-class" class="section">
+        <h1>My Assigned Students</h1>
+        <div class="table-container">
+            <div class="table-header">
+                <h3><i class="fas fa-users"></i> Proctor List</h3>
+                <input placeholder="Search student..." style="padding:8px; border-radius:6px; border:1px solid #ccc;">
+            </div>
+            <table>
+                <thead><tr><th>Roll No</th><th>Name</th><th>Semester</th><th>Email</th><th>Actions</th></tr></thead>
+                <tbody id="myStudentList"><tr><td colspan="5">Fetching from Admin...</td></tr></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="verification" class="section">
+        <h1>Achievement Verification</h1>
+        <div class="table-container">
+            <table>
+                <thead><tr><th>Student</th><th>Title</th><th>Proof</th><th>Status</th><th>Action</th></tr></thead>
+                <tbody id="verificationList"></tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+<script>
+    const API_URL = "http://localhost:5000";
+    const myUsername = localStorage.getItem('username'); // Login Username (e.g. "Dr. Smith")
+    let myFacultyId = null;
+    let allAchievements = []; // Store fetched achievements
+
+    if(localStorage.getItem("userRole") !== "faculty"){
+        alert("Unauthorized Access");
+        window.location.href = "login.html";
+    }
+
+    function switchTab(id, btn) {
+        document.querySelectorAll(".section").forEach(s => s.classList.remove("active-section"));
+        document.querySelectorAll(".menu-item").forEach(b => b.classList.remove("active"));
+        document.getElementById(id).classList.add("active-section");
+        btn.classList.add("active");
+    }
+
+    async function loadData() {
+        try {
+            // 1. Get Faculty Info
+            const fRes = await fetch(`${API_URL}/faculty`);
+            const faculty = await fRes.json();
+            
+            // Match logged in user to Faculty DB
+            const me = faculty.find(f => f.name.toLowerCase().replace(/\s/g,'') === myUsername.toLowerCase().replace(/\s/g,'')) || faculty[0]; 
+
+            if(me) {
+                myFacultyId = me._id;
+                document.getElementById('navFacultyName').innerText = me.name;
+                document.getElementById('navProfilePic').innerText = me.name.charAt(0);
+                document.getElementById('myDept').innerText = me.dept;
+                
+                loadMyStudents();
+                loadAchievements();
+            } else {
+                alert("Faculty profile not found.");
+            }
+        } catch(e) { console.error("Error loading data", e); }
+    }
+
+    async function loadMyStudents() {
+        const sRes = await fetch(`${API_URL}/students`);
+        const students = await sRes.json();
+        
+        // Filter my assigned students
+        const myStudents = students.filter(s => s.proctorId === myFacultyId);
+        document.getElementById('totalStudents').innerText = myStudents.length;
+        
+        const list = document.getElementById('myStudentList');
+        if(myStudents.length === 0) {
+            list.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px;">No students assigned.</td></tr>`;
+            return;
+        }
+
+        list.innerHTML = myStudents.map(s => `
+            <tr>
+                <td><b>${s.rollNo}</b></td>
+                <td>${s.name}</td>
+                <td>Sem ${s.sem}</td>
+                <td>${s.email || '-'}</td>
+                <td>
+                    <button class="btn btn-report" onclick="generateReport('${s.rollNo}', '${s.name}')">
+                        <i class="fas fa-file-pdf"></i> Report
+                    </button>
+                </td>
+            </tr>
+        `).join("");
+    }
+
+    async function loadAchievements() {
+        // Fetch achievements specifically for this proctor
+        const res = await fetch(`${API_URL}/achievements?proctorId=${myFacultyId}`);
+        allAchievements = await res.json();
+        
+        document.getElementById('pendingCount').innerText = allAchievements.filter(d => d.status === 'Pending').length;
+        
+        const vList = document.getElementById('verificationList');
+        if(allAchievements.length === 0) {
+            vList.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px;">No achievements submitted yet.</td></tr>`;
+        } else {
+            vList.innerHTML = allAchievements.map(a => `
+                <tr>
+                    <td><b>${a.studentName}</b><br><small>${a.studentRoll}</small></td>
+                    <td>${a.title}<br><small style="color:#64748b">${a.description || ''}</small></td>
+                    <td>
+                        ${a.fileData ? `<a href="${a.fileData}" download="proof" style="color:#4f46e5; font-weight:bold;">View Proof</a>` : '<span style="color:#94a3b8">No File</span>'}
+                    </td>
+                    <td><span class="status-pill status-${a.status}">${a.status}</span></td>
+                    <td>
+                        ${a.status === 'Pending' ? `
+                        <button class="btn btn-approve" onclick="updateStatus('${a._id}', 'Approved')"><i class="fas fa-check"></i></button>
+                        <button class="btn btn-reject" onclick="updateStatus('${a._id}', 'Rejected')"><i class="fas fa-times"></i></button>
+                        ` : '-'}
+                    </td>
+                </tr>
+            `).join("");
+        }
+
+        // Dashboard Recent List (Top 5)
+        document.getElementById('recentList').innerHTML = allAchievements.slice(0,5).map(a => `
+            <tr><td>${a.studentName}</td><td>${a.title}</td><td>${a.category}</td><td><span class="status-pill status-${a.status}">${a.status}</span></td></tr>
+        `).join("");
+    }
+
+    async function updateStatus(id, status) {
+        await fetch(`${API_URL}/achievements/verify`, {
+            method: "POST", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id, status })
+        });
+        Toastify({ text: `Marked as ${status}`, style: { background: status === 'Approved' ? "#10b981" : "#ef4444" } }).showToast();
+        loadAchievements(); // Refresh list
+    }
+
+    // --- ⭐ GENERATE PDF REPORT ⭐ ---
+    function generateReport(rollNo, name) {
+        // Filter achievements for this student only
+        const studentAch = allAchievements.filter(a => a.studentRoll === rollNo && a.status === 'Approved');
+        
+        if(studentAch.length === 0) {
+            alert("No approved achievements found for this student.");
+            return;
+        }
+
+        const printWindow = window.open('', '', 'height=600,width=800');
+        let html = `
+            <html>
+            <head>
+                <title>Achievement Report - ${name}</title>
+                <style>
+                    body { font-family: 'Segoe UI', sans-serif; padding: 40px; }
+                    .header { text-align: center; margin-bottom: 40px; border-bottom: 2px solid #4f46e5; padding-bottom: 20px; }
+                    h1 { color: #4f46e5; margin: 0; }
+                    .meta { margin-top: 10px; color: #64748b; }
+                    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                    th, td { border: 1px solid #e2e8f0; padding: 12px; text-align: left; }
+                    th { background: #f8fafc; color: #334155; }
+                    .footer { margin-top: 50px; text-align: center; font-size: 12px; color: #94a3b8; }
+                </style>
+            </head>
+            <body>
+                <div class="header">
+                    <h1>EduAchieve Official Report</h1>
+                    <div class="meta">
+                        <strong>Student:</strong> ${name} (${rollNo}) <br>
+                        <strong>Generated By:</strong> ${localStorage.getItem('username')} (Faculty) <br>
+                        <strong>Date:</strong> ${new Date().toLocaleDateString()}
+                    </div>
+                </div>
+                
+                <h3>Verified Achievements</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Category</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
+
+        studentAch.forEach(a => {
+            html += `<tr><td>${a.title}</td><td>${a.category}</td><td>${a.date}</td></tr>`;
+        });
+
+        html += `
+                    </tbody>
+                </table>
+                <div class="footer">This report is computer generated by EduAchieve Portal.</div>
+            </body>
+            </html>
+        `;
+
+        printWindow.document.write(html);
+        printWindow.document.close();
+        printWindow.print();
+    }
+
+    function logout() {
+        localStorage.clear();
+        window.location.href = "login.html";
+    }
+
+    window.onload = loadData;
+</script>
+
+</body>
+</html-->
+
+
+
