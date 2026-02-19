@@ -324,6 +324,9 @@ function update(id,status){
 </body>
 </html-->
 
+
+
+<!--life saver-->
 <!--DOCTYPE html>
 <html lang="en">
 <head>
@@ -648,3 +651,2846 @@ function update(id,status){
 
 
 
+<!--DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>EduAchieve | Faculty Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    
+    <style>
+        :root { --primary: #4f46e5; --bg: #f8fafc; --sidebar: #0f172a; --text: #334155; --success: #10b981; --danger: #ef4444; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); margin: 0; display: flex; color: var(--text); }
+
+        /* SIDEBAR */
+        .sidebar { width: 260px; height: 100vh; background: var(--sidebar); color: white; position: fixed; display: flex; flex-direction: column; }
+        .sidebar-header { padding: 25px; font-size: 20px; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; gap: 10px; align-items: center; }
+        .sidebar-menu { flex: 1; padding: 20px 0; }
+        .menu-item { width: 100%; padding: 15px 25px; background: none; border: none; color: #e2e8f0; text-align: left; cursor: pointer; font-size: 14px; display: flex; gap: 12px; align-items: center; opacity: 0.8; transition: 0.2s; }
+        .menu-item:hover, .menu-item.active { background: rgba(255,255,255,0.1); border-left: 4px solid var(--primary); opacity: 1; }
+        
+        /* MAIN CONTENT */
+        .main-content { margin-left: 260px; padding: 30px; width: calc(100% - 260px); }
+        .section { display: none; animation: fadeIn 0.3s ease; }
+        .active-section { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        h1 { font-size: 24px; margin-bottom: 20px; }
+
+        /* CARDS & CHARTS */
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px; }
+        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; }
+        .card h2 { margin: 5px 0 0; color: var(--primary); font-size: 32px; }
+        .card p { margin: 0; color: #64748b; font-size: 13px; font-weight: 600; text-transform: uppercase; }
+        .chart-container { background: white; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 30px; height: 320px; }
+
+        /* TABLES */
+        .table-container { background: white; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; margin-bottom: 30px; }
+        .table-header { padding: 20px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
+        .bulk-actions { padding: 12px 20px; background: #f1f5f9; display: none; gap: 10px; align-items: center; border-bottom: 1px solid #e2e8f0; transition: 0.3s; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 15px 20px; background: #f8fafc; color: #64748b; font-size: 12px; text-transform: uppercase; font-weight: 600; border-bottom: 1px solid #e2e8f0; }
+        td { padding: 15px 20px; border-bottom: 1px solid #e2e8f0; font-size: 14px; vertical-align: middle; }
+        
+        /* BUTTONS & BADGES */
+        .btn { padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; font-size: 13px; transition: 0.2s; }
+        .btn-approve { background: #dcfce7; color: #166534; }
+        .btn-reject { background: #fee2e2; color: #991b1b; }
+        .btn-report { background: #334155; color: white; display: flex; align-items: center; gap: 5px; }
+        
+        .status-pill { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+        .status-Pending { background: #fef3c7; color: #92400e; }
+        .status-Approved { background: #dcfce7; color: #166534; }
+        .status-Rejected { background: #fee2e2; color: #991b1b; }
+
+        /* MODAL */
+        .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); justify-content: center; align-items: center; }
+        .modal-content { background: white; width: 85%; height: 85%; border-radius: 12px; position: relative; display: flex; flex-direction: column; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
+        .modal-header { padding: 15px 25px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+        .close-modal { font-size: 28px; cursor: pointer; color: #94a3b8; }
+
+        .profile-badge { display: flex; align-items: center; gap: 10px; padding: 20px; border-top: 1px solid rgba(255,255,255,0.1); margin-top: auto; }
+        .profile-pic { width: 40px; height: 40px; border-radius: 50%; background: var(--primary); display: flex; align-items: center; justify-content: center; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="sidebar-header"> <i class="fas fa-university"></i> EduAchieve </div>
+    <div class="sidebar-menu">
+        <button class="menu-item active" onclick="switchTab('dashboard', this)"> <i class="fas fa-th-large"></i> Dashboard </button>
+        <button class="menu-item" onclick="switchTab('my-class', this)"> <i class="fas fa-users"></i> My Class </button>
+        <button class="menu-item" onclick="switchTab('verification', this)"> <i class="fas fa-check-circle"></i> Verification </button>
+    </div>
+    
+    <div class="profile-badge">
+        <div class="profile-pic" id="navProfilePic">F</div>
+        <div>
+            <div style="font-size:14px; font-weight:bold;" id="navFacultyName">Loading...</div>
+            <div style="font-size:11px; opacity:0.7;">Faculty</div>
+        </div>
+    </div>
+    <button class="menu-item" onclick="logout()" style="color:#f87171; margin-bottom:10px;"> <i class="fas fa-sign-out-alt"></i> Logout </button>
+</div>
+
+<div class="main-content">
+
+    <div id="dashboard" class="section active-section">
+        <h1>Faculty Overview</h1>
+        <div class="stats-grid">
+            <div class="card"><p>Assigned Students</p><h2 id="totalStudents">0</h2></div>
+            <div class="card"><p>Pending Verifications</p><h2 id="pendingCount">0</h2></div>
+            <div class="card"><p>Department</p><h2 id="myDept" style="font-size: 20px;">-</h2></div>
+        </div>
+
+        <div class="chart-container">
+            <canvas id="classChart"></canvas>
+        </div>
+
+        <div class="table-container">
+            <div class="table-header"><h3>Recent Requests</h3></div>
+            <table>
+                <thead><tr><th>Student</th><th>Title</th><th>Category</th><th>Status</th></tr></thead>
+                <tbody id="recentList"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="my-class" class="section">
+        <h1>My Assigned Students</h1>
+        <div class="table-container">
+            <div class="table-header">
+                <h3><i class="fas fa-users"></i> Proctor List</h3>
+                <input id="studentSearch" placeholder="Search roll or name..." onkeyup="filterStudents()" style="padding:8px 15px; border-radius:8px; border:1px solid #e2e8f0; width: 250px;">
+            </div>
+            <table>
+                <thead><tr><th>Roll No</th><th>Name</th><th>Semester</th><th>Email</th><th>Actions</th></tr></thead>
+                <tbody id="myStudentList"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="verification" class="section">
+        <h1>Achievement Verification</h1>
+        <div class="table-container">
+            <div class="bulk-actions" id="bulkBar">
+                <span id="selectedCount" style="font-weight: 600; color: var(--text); font-size: 14px;">0 selected</span>
+                <button class="btn btn-approve" onclick="bulkAction('Approved')">Bulk Approve</button>
+                <button class="btn btn-reject" onclick="bulkAction('Rejected')">Bulk Reject</button>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th width="40"><input type="checkbox" id="selectAll" onclick="toggleSelectAll()"></th>
+                        <th>Student</th>
+                        <th>Title</th>
+                        <th>Proof</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="verificationList"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div id="proofModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="proofTitle">View Document</h3>
+            <span class="close-modal" onclick="closeProofModal()">&times;</span>
+        </div>
+        <div id="proofBody" style="flex:1; overflow: hidden; background: #525659;">
+            </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const API_URL = "http://localhost:5000";
+    const myUsername = localStorage.getItem('username');
+    let myFacultyId = null;
+    let allAchievements = [];
+    let myStudents = [];
+    let dashboardChart = null;
+
+    if(localStorage.getItem("userRole") !== "faculty"){
+        alert("Unauthorized Access");
+        window.location.href = "login.html";
+    }
+
+    function switchTab(id, btn) {
+        document.querySelectorAll(".section").forEach(s => s.classList.remove("active-section"));
+        document.querySelectorAll(".menu-item").forEach(b => b.classList.remove("active"));
+        document.getElementById(id).classList.add("active-section");
+        btn.classList.add("active");
+    }
+
+    async function loadData() {
+        try {
+            const fRes = await fetch(`${API_URL}/faculty`);
+            const faculty = await fRes.json();
+            const me = faculty.find(f => f.name.toLowerCase().replace(/\s/g,'') === myUsername.toLowerCase().replace(/\s/g,'')) || faculty[0]; 
+
+            if(me) {
+                myFacultyId = me._id;
+                document.getElementById('navFacultyName').innerText = me.name;
+                document.getElementById('navProfilePic').innerText = me.name.charAt(0);
+                document.getElementById('myDept').innerText = me.dept;
+                
+                await loadMyStudents();
+                await loadAchievements();
+            }
+        } catch(e) { console.error("Error loading data", e); }
+    }
+
+    async function loadMyStudents() {
+        const sRes = await fetch(`${API_URL}/students`);
+        const students = await sRes.json();
+        myStudents = students.filter(s => s.proctorId === myFacultyId);
+        document.getElementById('totalStudents').innerText = myStudents.length;
+        renderStudentList(myStudents);
+    }
+
+    function renderStudentList(listData) {
+        const list = document.getElementById('myStudentList');
+        if(listData.length === 0) {
+            list.innerHTML = `<tr><td colspan="5" style="text-align:center;">No students found.</td></tr>`;
+            return;
+        }
+        list.innerHTML = listData.map(s => `
+            <tr>
+                <td><b>${s.rollNo}</b></td>
+                <td>${s.name}</td>
+                <td>Sem ${s.sem}</td>
+                <td>${s.email || '-'}</td>
+                <td><button class="btn btn-report" onclick="generateReport('${s.rollNo}', '${s.name}')"><i class="fas fa-file-pdf"></i> Report</button></td>
+            </tr>
+        `).join("");
+    }
+
+    // --- 3. STUDENT SEARCH FILTER ---
+    function filterStudents() {
+        const query = document.getElementById('studentSearch').value.toLowerCase();
+        const filtered = myStudents.filter(s => s.name.toLowerCase().includes(query) || s.rollNo.toLowerCase().includes(query));
+        renderStudentList(filtered);
+    }
+
+    async function loadAchievements() {
+        const res = await fetch(`${API_URL}/achievements?proctorId=${myFacultyId}`);
+        allAchievements = await res.json();
+        
+        const pending = allAchievements.filter(d => d.status === 'Pending');
+        document.getElementById('pendingCount').innerText = pending.length;
+        
+        renderVerificationList(allAchievements);
+        updateDashboardChart();
+
+        // Dashboard Recent List
+        document.getElementById('recentList').innerHTML = allAchievements.slice(0,5).map(a => `
+            <tr><td>${a.studentName}</td><td>${a.title}</td><td>${a.category}</td><td><span class="status-pill status-${a.status}">${a.status}</span></td></tr>
+        `).join("");
+    }
+
+    function renderVerificationList(data) {
+        const vList = document.getElementById('verificationList');
+        if(data.length === 0) {
+            vList.innerHTML = `<tr><td colspan="6" style="text-align:center;">No submissions yet.</td></tr>`;
+            return;
+        }
+        vList.innerHTML = data.map(a => `
+            <tr>
+                <td><input type="checkbox" class="ach-checkbox" value="${a._id}" onchange="updateBulkUI()"></td>
+                <td><b>${a.studentName}</b><br><small>${a.studentRoll}</small></td>
+                <td>${a.title}</td>
+                <td>
+                    <button class="btn" style="background:#eef2ff; color:#4f46e5;" onclick="openProofModal('${a._id}')">
+                        <i class="fas fa-eye"></i> View
+                    </button>
+                </td>
+                <td><span class="status-pill status-${a.status}">${a.status}</span></td>
+                <td>
+                    ${a.status === 'Pending' ? `
+                        <button class="btn btn-approve" onclick="updateStatus('${a._id}', 'Approved')"><i class="fas fa-check"></i></button>
+                        <button class="btn btn-reject" onclick="updateStatus('${a._id}', 'Rejected')"><i class="fas fa-times"></i></button>
+                    ` : '-'}
+                </td>
+            </tr>
+        `).join("");
+    }
+
+    // --- 1. REJECTION FEEDBACK ---
+    async function updateStatus(id, status) {
+        let feedback = "";
+        if(status === 'Rejected') {
+            feedback = prompt("Reason for rejection (Optional):");
+            if(feedback === null) return; // User cancelled prompt
+        }
+
+        try {
+            await fetch(`${API_URL}/achievements/verify`, {
+                method: "POST", headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ id, status, feedback })
+            });
+            Toastify({ text: `Marked as ${status}`, style: { background: status === 'Approved' ? "#10b981" : "#ef4444" } }).showToast();
+            loadAchievements();
+        } catch(e) { console.error(e); }
+    }
+
+    // --- 2. PROOF VIEWER MODAL ---
+    function openProofModal(achId) {
+        const ach = allAchievements.find(a => a._id === achId);
+        if(!ach || !ach.fileData) return alert("File missing or corrupted.");
+        
+        document.getElementById('proofTitle').innerText = `${ach.studentName} - ${ach.title}`;
+        const container = document.getElementById('proofBody');
+        
+        if(ach.fileData.includes("data:application/pdf")) {
+            container.innerHTML = `<iframe src="${ach.fileData}" width="100%" height="100%" style="border:none;"></iframe>`;
+        } else {
+            container.innerHTML = `<div style="height:100%; display:flex; align-items:center; justify-content:center; overflow:auto;"><img src="${ach.fileData}" style="max-width:100%; max-height:100%; box-shadow: 0 0 20px rgba(0,0,0,0.5);"></div>`;
+        }
+        document.getElementById('proofModal').style.display = 'flex';
+    }
+
+    function closeProofModal() {
+        document.getElementById('proofModal').style.display = 'none';
+        document.getElementById('proofBody').innerHTML = '';
+    }
+
+    // --- 4. BULK VERIFICATION ---
+    function toggleSelectAll() {
+        const isChecked = document.getElementById('selectAll').checked;
+        document.querySelectorAll('.ach-checkbox').forEach(cb => cb.checked = isChecked);
+        updateBulkUI();
+    }
+
+    function updateBulkUI() {
+        const checked = document.querySelectorAll('.ach-checkbox:checked');
+        const bar = document.getElementById('bulkBar');
+        document.getElementById('selectedCount').innerText = `${checked.length} selected`;
+        bar.style.display = checked.length > 0 ? 'flex' : 'none';
+    }
+
+    async function bulkAction(status) {
+        const checked = document.querySelectorAll('.ach-checkbox:checked');
+        const ids = Array.from(checked).map(cb => cb.value);
+        if(!confirm(`Apply ${status} to ${ids.length} items?`)) return;
+
+        for(let id of ids) {
+            await fetch(`${API_URL}/achievements/verify`, {
+                method: "POST", headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ id, status })
+            });
+        }
+        document.getElementById('selectAll').checked = false;
+        Toastify({ text: `Bulk ${status} Complete`, background: "var(--primary)" }).showToast();
+        loadAchievements();
+    }
+
+    // --- 5. CLASS STATISTICS CHARTS ---
+    function updateDashboardChart() {
+        const ctx = document.getElementById('classChart').getContext('2d');
+        const cats = ["Certificate", "Internship", "Competition"];
+        const counts = cats.map(c => allAchievements.filter(a => a.category === c).length);
+
+        if(dashboardChart) dashboardChart.destroy();
+        
+        dashboardChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: cats,
+                datasets: [{
+                    label: 'Submissions by Category',
+                    data: counts,
+                    backgroundColor: ['#4f46e5', '#10b981', '#f59e0b'],
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+            }
+        });
+    }
+
+    function generateReport(rollNo, name) {
+        const studentAch = allAchievements.filter(a => a.studentRoll === rollNo && a.status === 'Approved');
+        if(studentAch.length === 0) return alert("No approved achievements found.");
+
+        const printWindow = window.open('', '', 'height=600,width=800');
+        let html = `<html><head><style>body{font-family:sans-serif;padding:40px;}table{width:100%;border-collapse:collapse;margin-top:20px;}th,td{border:1px solid #ddd;padding:12px;text-align:left;}h1{color:#4f46e5;}</style></head><body>
+            <h1>EduAchieve Report: ${name}</h1><p>Roll: ${rollNo}</p>
+            <table><thead><tr><th>Title</th><th>Category</th><th>Date</th></tr></thead><tbody>`;
+        studentAch.forEach(a => html += `<tr><td>${a.title}</td><td>${a.category}</td><td>${a.date}</td></tr>`);
+        html += `</tbody></table></body></html>`;
+        printWindow.document.write(html);
+        printWindow.document.close();
+        printWindow.print();
+    }
+
+    function logout() { localStorage.clear(); window.location.href = "login.html"; }
+    window.onload = loadData;
+</script>
+
+</body>
+</html-->
+
+
+
+
+
+<!--mine-->
+
+<!--DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>EduAchieve | Faculty Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    
+    <style>
+        :root { --primary: #4f46e5; --bg: #f8fafc; --sidebar: #0f172a; --text: #334155; --success: #10b981; --danger: #ef4444; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); margin: 0; display: flex; color: var(--text); }
+
+        /* SIDEBAR */
+        .sidebar { width: 260px; height: 100vh; background: var(--sidebar); color: white; position: fixed; display: flex; flex-direction: column; }
+        .sidebar-header { padding: 25px; font-size: 20px; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; gap: 10px; align-items: center; }
+        .sidebar-menu { flex: 1; padding: 20px 0; }
+        .menu-item { width: 100%; padding: 15px 25px; background: none; border: none; color: #e2e8f0; text-align: left; cursor: pointer; font-size: 14px; display: flex; gap: 12px; align-items: center; opacity: 0.8; transition: 0.2s; }
+        .menu-item:hover, .menu-item.active { background: rgba(255,255,255,0.1); border-left: 4px solid var(--primary); opacity: 1; }
+        
+        /* MAIN CONTENT */
+        .main-content { margin-left: 260px; padding: 30px; width: calc(100% - 260px); }
+        .section { display: none; animation: fadeIn 0.3s ease; }
+        .active-section { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* CARDS */
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px; }
+        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; }
+        .card h2 { margin: 5px 0 0; color: var(--primary); font-size: 32px; }
+        .card p { margin: 0; color: #64748b; font-size: 13px; font-weight: 600; text-transform: uppercase; }
+
+        /* TABLES */
+        .table-container { background: white; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; margin-bottom: 30px; }
+        .table-header { padding: 20px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 15px 20px; background: #f8fafc; color: #64748b; font-size: 12px; text-transform: uppercase; font-weight: 600; border-bottom: 1px solid #e2e8f0; }
+        td { padding: 15px 20px; border-bottom: 1px solid #e2e8f0; font-size: 14px; }
+
+        /* FILTERS */
+        .filter-group { display: flex; gap: 10px; }
+        select, input { padding: 8px 12px; border-radius: 6px; border: 1px solid #e2e8f0; outline: none; }
+
+        /* MODAL */
+        .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; }
+        .modal-content { background: white; width: 80%; height: 85%; border-radius: 12px; display: flex; flex-direction: column; }
+
+        .btn { padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; }
+        .btn-approve { background: #dcfce7; color: #166534; }
+        .btn-reject { background: #fee2e2; color: #991b1b; }
+        
+        .status-pill { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+        .status-Pending { background: #fef3c7; color: #92400e; }
+        .status-Approved { background: #dcfce7; color: #166534; }
+        .status-Rejected { background: #fee2e2; color: #991b1b; }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="sidebar-header"> <i class="fas fa-university"></i> EduAchieve </div>
+    <div class="sidebar-menu">
+        <button class="menu-item active" onclick="switchTab('dashboard', this)"> <i class="fas fa-th-large"></i> Dashboard </button>
+        <button class="menu-item" onclick="switchTab('my-class', this)"> <i class="fas fa-users"></i> My Class </button>
+        <button class="menu-item" onclick="switchTab('verification', this)"> <i class="fas fa-check-circle"></i> Verification </button>
+        <button id="deptTab" class="menu-item hidden" onclick="switchTab('dept-view', this)"> <i class="fas fa-chart-line"></i> Dept Analytics </button>
+    </div>
+    
+    <div style="padding: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
+        <div id="navFacultyName" style="font-weight: bold;">Loading...</div>
+        <div id="facultyRoleLabel" style="font-size: 11px; opacity: 0.7;">Faculty</div>
+    </div>
+    <button class="menu-item" onclick="logout()" style="color:#f87171;"> <i class="fas fa-sign-out-alt"></i> Logout </button>
+</div>
+
+<div class="main-content">
+
+    <div id="dashboard" class="section active-section">
+        <h1>Faculty Overview</h1>
+        <div class="stats-grid">
+            <div class="card"><p>My Students</p><h2 id="totalStudents">0</h2></div>
+            <div class="card"><p>To Verify</p><h2 id="pendingCount">0</h2></div>
+            <div class="card"><p>Department</p><h2 id="myDept" style="font-size: 20px;">-</h2></div>
+        </div>
+
+        <div class="table-container">
+            <div class="table-header"><h3>Recent Activity</h3></div>
+            <table>
+                <thead><tr><th>Student</th><th>Title</th><th>Date</th><th>Status</th></tr></thead>
+                <tbody id="recentList"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="my-class" class="section">
+        <h1>My Proctor Class</h1>
+        
+        <div class="card" style="margin-bottom: 20px; height: 250px;">
+            <canvas id="semChart"></canvas>
+        </div>
+
+        <div class="table-container">
+            <div class="table-header">
+                <div class="filter-group">
+                    <select id="filterDept" onchange="applyClassFilters()">
+                        <option value="all">All Depts</option>
+                        <option value="CE">CE</option><option value="IT">IT</option>
+                        <option value="CSBS">CSBS</option><option value="AI">AI</option>
+                    </select>
+                    <select id="filterSem" onchange="applyClassFilters()">
+                        <option value="all">All Semesters</option>
+                        <option value="1">Sem 1</option><option value="2">Sem 2</option>
+                        <option value="3">Sem 3</option><option value="4">Sem 4</option>
+                        <option value="5">Sem 5</option><option value="6">Sem 6</option>
+                        <option value="7">Sem 7</option><option value="8">Sem 8</option>
+                    </select>
+                </div>
+                <input id="classSearch" placeholder="Search name..." onkeyup="applyClassFilters()">
+            </div>
+            <table>
+                <thead><tr><th>Roll No</th><th>Name</th><th>Dept</th><th>Sem</th><th>Actions</th></tr></thead>
+                <tbody id="myStudentList"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="verification" class="section">
+        <h1>Verify Achievements</h1>
+        <div class="table-container">
+            <table>
+                <thead><tr><th>Student</th><th>Achievement</th><th>Proof</th><th>Status</th><th>Action</th></tr></thead>
+                <tbody id="verificationList"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!--div id="dept-view" class="section">
+        <h1>Strategic Departmental Overview</h1>
+    <div class="stats-grid">
+        <div class="card">
+            <p>Managed Departments</p>
+            <h2 id="deptCount">0</h2>
+        </div>
+        <div class="card">
+            <p>Overall Placement Readiness</p>
+            <h2 id="readinessScore">0%</h2>
+            <small>Students with 3+ Approved Items</small>
+        </div>
+        <div class="card">
+            <p>Active Proctors</p>
+            <h2 id="activeProctors">0</h2>
+        </div>
+    </div>
+
+    <div class="chart-container" style="height: 400px;">
+        <canvas id="deptComparisonChart"></canvas>
+    </div>
+        <h1 id="deptViewTitle">Department Analytics</h1>
+        <div class="stats-grid">
+            <div class="card"><p>Total Dept Students</p><h2 id="deptTotalStudents">0</h2></div>
+            <div class="card"><p>Approved Achievements</p><h2 id="deptTotalApproved">0</h2></div>
+            <div class="card"><p>Pending Global</p><h2 id="deptTotalPending">0</h2></div>
+        </div>
+        <div class="table-container">
+            <div class="table-header"><h3>Proctor Performance</h3></div>
+            <table>
+                <thead><tr><th>Proctor Name</th><th>Students</th><th>Approved Items</th></tr></thead>
+                <tbody id="deptProctorStats"></tbody>
+            </table>
+        </div>
+    </div>
+    
+</div-->
+<!--FINEST-->
+<!--div id="dept-view" class="section">
+    <h1>Strategic Departmental Overview</h1>
+    <div class="table-header">
+    <h3>Proctor Performance Breakdown</h3>
+    <button class="btn btn-report" id="notifyAllBtn" onclick="notifyAllProctors()">
+        <i class="fas fa-bell"></i> Notify Pending Proctors
+    </button>
+</div>
+    <div class="stats-grid">
+        <div class="card">
+            <p>Managed Departments</p>
+            <h2 id="deptCount">0</h2>
+        </div>
+        <div class="card">
+            <p>Placement Readiness</p>
+            <h2 id="readinessScore">0%</h2>
+            <small>Students with 3+ Approved Items</small>
+        </div>
+        <div class="card">
+            <p>Active Proctors</p>
+            <h2 id="activeProctors">0</h2>
+        </div>
+    </div>
+
+    <div class="stats-grid">
+        <div class="card"><p>Total Students (All Depts)</p><h2 id="deptTotalStudents">0</h2></div>
+        <div class="card"><p>Approved Achievements</p><h2 id="deptTotalApproved">0</h2></div>
+        <div class="card"><p>Pending Global</p><h2 id="deptTotalPending" style="color: var(--danger);">0</h2></div>
+    </div>
+
+    <div class="chart-container" style="height: 350px; margin-bottom: 30px; background: white; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0;">
+        <canvas id="deptComparisonChart"></canvas>
+    </div>
+
+    <div class="table-container">
+        <div class="table-header"><h3>Proctor Performance Breakdown</h3></div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Proctor Name</th>
+                    <th>Department</th>
+                    <th>Assigned Students</th>
+                    <th>Approved Items</th>
+                </tr>
+            </thead>
+            <tbody id="deptProctorStats"></tbody>
+        </table>
+    </div>
+</div>
+
+
+<div id="proofModal" class="modal">
+    <div class="modal-content">
+        <div style="padding:15px; border-bottom:1px solid #eee; display:flex; justify-content:space-between;">
+            <h3>Document Preview</h3>
+            <button onclick="closeProofModal()" style="border:none; background:none; font-size:20px; cursor:pointer;">&times;</button>
+        </div>
+        <div id="proofBody" style="flex:1;"></div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const API_URL = "http://localhost:5000";
+    const myUsername = localStorage.getItem('username');
+    let myFacultyId = null;
+    let facultyData = null;
+    let allAchievements = [];
+    let myStudents = [];
+    let semChart = null;
+
+    async function loadData() {
+        try {
+            const fRes = await fetch(`${API_URL}/faculty`);
+            const facultyList = await fRes.json();
+            facultyData = facultyList.find(f => f.name.toLowerCase().replace(/\s/g,'') === myUsername.toLowerCase().replace(/\s/g,''));
+
+            if (facultyData) {
+                myFacultyId = facultyData._id;
+                document.getElementById('navFacultyName').innerText = facultyData.name;
+                document.getElementById('myDept').innerText = facultyData.dept;
+                
+                // HOD / Coordinator Access Logic
+                if(facultyData.roles.hod || facultyData.roles.coordinator) {
+                    document.getElementById('deptTab').classList.remove('hidden');
+                    document.getElementById('facultyRoleLabel').innerText = facultyData.roles.hod ? "HOD" : "Coordinator";
+                    loadDeptAnalytics();
+                }
+
+                await loadMyStudents();
+                await loadAchievements();
+            }
+        } catch(e) { console.error(e); }
+    }
+
+    async function loadMyStudents() {
+        const sRes = await fetch(`${API_URL}/students`);
+        const allStudents = await sRes.json();
+        myStudents = allStudents.filter(s => s.proctorId === myFacultyId);
+        document.getElementById('totalStudents').innerText = myStudents.length;
+        applyClassFilters();
+    }
+
+    function applyClassFilters() {
+        const dFilter = document.getElementById('filterDept').value;
+        const sFilter = document.getElementById('filterSem').value;
+        const search = document.getElementById('classSearch').value.toLowerCase();
+
+        const filtered = myStudents.filter(s => {
+            const matchDept = dFilter === 'all' || s.dept === dFilter;
+            const matchSem = sFilter === 'all' || String(s.sem) === sFilter;
+            const matchSearch = s.name.toLowerCase().includes(search) || s.rollNo.includes(search);
+            return matchDept && matchSem && matchSearch;
+        });
+
+        document.getElementById('myStudentList').innerHTML = filtered.map(s => `
+            <tr>
+                <td><b>${s.rollNo}</b></td>
+                <td>${s.name}</td>
+                <td>${s.dept}</td>
+                <td>Sem ${s.sem}</td>
+                <td><button class="btn btn-approve" style="background:#eef2ff; color:#4f46e5;" onclick="generateReport('${s.rollNo}', '${s.name}')">Report</button></td>
+            </tr>
+        `).join("");
+    }
+
+    async function loadAchievements() {
+        const res = await fetch(`${API_URL}/achievements?proctorId=${myFacultyId}`);
+        allAchievements = await res.json();
+        
+        document.getElementById('pendingCount').innerText = allAchievements.filter(a => a.status === 'Pending').length;
+        
+        // Verification List
+        document.getElementById('verificationList').innerHTML = allAchievements.map(a => `
+            <tr>
+                <td><b>${a.studentName}</b></td>
+                <td>${a.title}</td>
+                <td><button class="btn" style="color:var(--primary)" onclick="openProofModal('${a._id}')">View</button></td>
+                <td><span class="status-pill status-${a.status}">${a.status}</span></td>
+                <td>
+                    ${a.status === 'Pending' ? `
+                        <button class="btn btn-approve" onclick="updateStatus('${a._id}', 'Approved')">✔</button>
+                        <button class="btn btn-reject" onclick="updateStatus('${a._id}', 'Rejected')">✖</button>
+                    ` : '-'}
+                </td>
+            </tr>
+        `).join("");
+
+        // Dashboard Recent
+        document.getElementById('recentList').innerHTML = allAchievements.slice(0,5).map(a => `
+            <tr><td>${a.studentName}</td><td>${a.title}</td><td>${a.date}</td><td><span class="status-pill status-${a.status}">${a.status}</span></td></tr>
+        `).join("");
+
+        updateSemChart();
+    }
+
+    function updateSemChart() {
+        const ctx = document.getElementById('semChart').getContext('2d');
+        const semCounts = {};
+        // Group my student achievements by semester
+        allAchievements.forEach(a => {
+            const student = myStudents.find(s => s.rollNo === a.studentRoll);
+            const sem = student ? `Sem ${student.sem}` : "Other";
+            semCounts[sem] = (semCounts[sem] || 0) + 1;
+        });
+
+        if(semChart) semChart.destroy();
+        semChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: Object.keys(semCounts),
+                datasets: [{
+                    label: 'Achievements by Semester',
+                    data: Object.values(semCounts),
+                    borderColor: '#4f46e5',
+                    backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+    }
+
+  async function loadDeptAnalytics() {
+    const [sRes, aRes, fRes] = await Promise.all([
+        fetch(`${API_URL}/students`),
+        fetch(`${API_URL}/achievements`),
+        fetch(`${API_URL}/faculty`)
+    ]);
+    const allStudents = await sRes.json();
+    const allAchievements = await aRes.json();
+    const allFaculty = await fRes.json();
+
+    // 1. Filter students belonging to ANY of the HOD's departments
+    const deptStudents = allStudents.filter(s => facultyData.dept.includes(s.dept));
+
+    // 2. Filter achievements belonging to those students
+    const deptAchievements = allAchievements.filter(a => {
+        const student = allStudents.find(st => st.rollNo === a.studentRoll);
+        return student && facultyData.dept.includes(student.dept);
+    });
+
+    // Update the UI Cards
+    document.getElementById('deptTotalStudents').innerText = deptStudents.length;
+    document.getElementById('deptTotalApproved').innerText = deptAchievements.filter(a => a.status === 'Approved').length;
+    document.getElementById('deptTotalPending').innerText = deptAchievements.filter(a => a.status === 'Pending').length;
+
+    // 3. Update Proctor Table for all assigned departments
+    const proctors = allFaculty.filter(f => 
+        f.roles.proctor && f.dept.some(d => facultyData.dept.includes(d))
+    );
+
+    document.getElementById('deptProctorStats').innerHTML = proctors.map(p => {
+        const pStudents = allStudents.filter(s => s.proctorId === p._id);
+        const pApproved = allAchievements.filter(a => a.proctorId === p._id && a.status === 'Approved');
+        return `<tr><td>${p.name}</td><td>${pStudents.length}</td><td>${pApproved.length} Items</td></tr>`;
+    }).join("");
+}
+
+    async function updateStatus(id, status) {
+        let feedback = status === 'Rejected' ? prompt("Enter rejection reason:") : "";
+        if (status === 'Rejected' && feedback === null) return;
+
+        await fetch(`${API_URL}/achievements/verify`, {
+            method: "POST", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id, status, feedback })
+        });
+        loadAchievements();
+    }
+
+    function openProofModal(id) {
+        const a = allAchievements.find(item => item._id === id);
+        const body = document.getElementById('proofBody');
+        if (a.fileData.includes("pdf")) {
+            body.innerHTML = `<iframe src="${a.fileData}" width="100%" height="100%"></iframe>`;
+        } else {
+            body.innerHTML = `<img src="${a.fileData}" style="max-width:100%; display:block; margin:auto;">`;
+        }
+        document.getElementById('proofModal').style.display = 'flex';
+    }
+
+    function closeProofModal() { document.getElementById('proofModal').style.display = 'none'; }
+
+    function switchTab(id, btn) {
+        // Prevent HOD from accessing 'My Class' if you want to strictly block it
+        if(id === 'my-class'  && facultyData && facultyData.roles.hod) {
+            alert("HODs manage Department Analytics directly.");
+            return;
+        }
+        document.querySelectorAll(".section").forEach(s => s.classList.remove("active-section"));
+        document.querySelectorAll(".menu-item").forEach(b => b.classList.remove("active"));
+        document.getElementById(id).classList.add("active-section");
+        btn.classList.add("active");
+    }
+let deptChart = null;
+async function loadData() {
+        try {
+            const fRes = await fetch(`${API_URL}/faculty`);
+            const facultyList = await fRes.json();
+            facultyData = facultyList.find(f => f.name.toLowerCase().replace(/\s/g,'') === myUsername.toLowerCase().replace(/\s/g,''));
+
+            if (facultyData) {
+                myFacultyId = facultyData._id;
+                document.getElementById('navFacultyName').innerText = facultyData.name;
+                document.getElementById('myDept').innerText = Array.isArray(facultyData.dept) ? facultyData.dept.join(", ") : facultyData.dept;
+                
+                // --- ⭐ HOD SPECIFIC VIEW LOGIC ⭐ ---
+                const myClassBtn = document.querySelectorAll(".menu-item")[1]; // Selects 'My Class' button
+                const deptBtn = document.getElementById('deptTab');
+
+                if(facultyData.roles.hod) {
+                    // Hide 'My Class' for HOD
+                    myClassBtn.classList.add('hidden');
+                    
+                    // Show Dept Analytics and set it as active
+                    deptBtn.classList.remove('hidden');
+                    document.getElementById('facultyRoleLabel').innerText = "Head of Department";
+                    
+                    // Redirect HOD to Dept Analytics by default instead of Dashboard if preferred
+                    switchTab('dept-view', deptBtn);
+                    loadDeptAnalytics();
+                } else if(facultyData.roles.coordinator) {
+                    // Coordinators see both
+                    deptBtn.classList.remove('hidden');
+                    document.getElementById('facultyRoleLabel').innerText = "Coordinator";
+                    loadDeptAnalytics();
+                }
+
+                await loadMyStudents();
+                await loadAchievements();
+            }
+        } catch(e) { console.error(e); }
+    }
+async function loadDeptAnalytics() {
+    try {
+        const [sRes, aRes, fRes] = await Promise.all([
+            fetch(`${API_URL}/students`),
+            fetch(`${API_URL}/achievements`),
+            fetch(`${API_URL}/faculty`)
+        ]);
+        const allStudents = await sRes.json();
+        const achievements = await aRes.json();
+        const allFaculty = await fRes.json();
+
+        // 1. Filter data based on the HOD's multiple departments
+        const managedDepts = Array.isArray(facultyData.dept) ? facultyData.dept : [facultyData.dept];
+        const deptStudents = allStudents.filter(s => managedDepts.includes(s.dept));
+        const deptFaculty = allFaculty.filter(f => f.roles.proctor && f.dept.some(d => managedDepts.includes(d)));
+        
+        // 2. Calculate Strategic Metrics
+        const approvedAchs = achievements.filter(a => {
+            const student = allStudents.find(st => st.rollNo === a.studentRoll);
+            return student && managedDepts.includes(student.dept) && a.status === 'Approved';
+        });
+
+        const pendingAchs = achievements.filter(a => {
+            const student = allStudents.find(st => st.rollNo === a.studentRoll);
+            return student && managedDepts.includes(student.dept) && a.status === 'Pending';
+        });
+
+        // Readiness Score: Students with 3 or more approved items
+        const readyStudents = deptStudents.filter(s => {
+            const count = approvedAchs.filter(a => a.studentRoll === s.rollNo).length;
+            return count >= 3;
+        }).length;
+
+        const readinessPercent = deptStudents.length > 0 ? (readyStudents / deptStudents.length) * 100 : 0;
+
+        // 3. Update UI Cards
+        document.getElementById('deptCount').innerText = managedDepts.length;
+        document.getElementById('readinessScore').innerText = readinessPercent.toFixed(1) + "%";
+        document.getElementById('activeProctors').innerText = deptFaculty.length;
+        document.getElementById('deptTotalStudents').innerText = deptStudents.length;
+        document.getElementById('deptTotalApproved').innerText = approvedAchs.length;
+        document.getElementById('deptTotalPending').innerText = pendingAchs.length;
+
+        // 4. Multi-Dept Comparison Chart
+        updateDeptComparisonChart(managedDepts, approvedAchs, allStudents);
+
+        // 5. Proctor Performance Table
+        document.getElementById('deptProctorStats').innerHTML = deptFaculty.map(p => {
+            const pStudents = deptStudents.filter(s => s.proctorId === p._id).length;
+            const pApproved = approvedAchs.filter(a => a.proctorId === p._id).length;
+            const pDept = Array.isArray(p.dept) ? p.dept.join(", ") : p.dept;
+            return `<tr>
+                <td><b>${p.name}</b></td>
+                <td><span class="status-pill" style="background:#eef2ff; color:#4f46e5;">${pDept}</span></td>
+                <td>${pStudents} Students</td>
+                <td><b style="color:var(--success)">${pApproved} Approved</b></td>
+            </tr>`;
+        }).join("");
+
+    } catch (e) { console.error("HOD Analytics Error:", e); }
+}
+
+function updateDeptComparisonChart(depts, approvedAchs, students) {
+    const ctx = document.getElementById('deptComparisonChart').getContext('2d');
+    
+    const dataPerDept = depts.map(d => {
+        return approvedAchs.filter(a => {
+            const s = students.find(st => st.rollNo === a.studentRoll);
+            return s && s.dept === d;
+        }).length;
+    });
+
+    if(deptChart) deptChart.destroy();
+    deptChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: depts,
+            datasets: [{
+                label: 'Approved Achievements per Department',
+                data: dataPerDept,
+                backgroundColor: ['#4f46e5', '#10b981', '#f59e0b', '#ef4444'],
+                borderRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+        }
+    });
+}
+
+async function notifyAllProctors() {
+    try {
+        // 1. Fetch fresh data to ensure we have the latest status
+        const [fRes, aRes] = await Promise.all([
+            fetch(`${API_URL}/faculty`),
+            fetch(`${API_URL}/achievements`)
+        ]);
+        const allFacultyList = await fRes.json();
+        const latestAchievements = await aRes.json();
+
+        const managedDepts = Array.isArray(facultyData.dept) ? facultyData.dept : [facultyData.dept];
+
+        // 2. Identify proctors with strict ID matching
+        const pendingProctors = allFacultyList.filter(f => {
+            // Check if proctor belongs to HOD's departments
+            const depts = Array.isArray(f.dept) ? f.dept : [f.dept];
+            const isInDept = depts.some(d => managedDepts.includes(d));
+            
+            // Check if they are a proctor and have pending items
+            const hasPending = latestAchievements.some(a => {
+                // Use toString() to handle ObjectId vs String comparison
+                const isMatch = a.proctorId && a.proctorId.toString() === f._id.toString();
+                return isMatch && a.status === 'Pending';
+            });
+            
+            console.log(`Checking ${f.name}: In Dept: ${isInDept}, Has Pending: ${hasPending}`); // Debug log
+            return isInDept && f.roles.proctor && hasPending;
+        });
+
+        if (pendingProctors.length === 0) {
+            return alert("No proctors currently have pending verifications! 🎉");
+        }
+
+        if (!confirm(`Found ${pendingProctors.length} proctors with pending tasks. Send emails?`)) return;
+
+        const btn = document.getElementById('notifyAllBtn');
+        btn.disabled = true;
+        btn.innerText = "Sending...";
+
+        const notificationData = pendingProctors.map(p => ({
+            email: p.email,
+            name: p.name,
+            pendingCount: latestAchievements.filter(a => a.proctorId.toString() === p._id.toString() && a.status === 'Pending').length
+        }));
+
+        const res = await fetch(`${API_URL}/notify-proctors`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ 
+                hodName: facultyData.name,
+                proctors: notificationData 
+            })
+        });
+
+        if (res.ok) {
+            Toastify({ text: "Emails Sent Successfully!", style: { background: "#10b981" } }).showToast();
+        } else {
+            alert("The request reached the server, but emails failed. Check your Gmail App Password in server.js");
+        }
+    } catch (e) {
+        console.error("Notify Error:", e);
+        alert("An error occurred. Press F12 and check the Console for details.");
+    } finally {
+        const btn = document.getElementById('notifyAllBtn');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-bell"></i> Notify Pending Proctors';
+    }
+}
+
+    function logout() { localStorage.clear(); window.location.href = "login.html"; }
+    window.onload = loadData;
+</script>
+</body>
+</html-->
+
+<!--DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>EduAchieve | Faculty Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <style>
+        :root { --primary: #4f46e5; --bg: #f8fafc; --sidebar: #0f172a; --text: #334155; --success: #10b981; --danger: #ef4444; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); margin: 0; display: flex; color: var(--text); }
+        .sidebar { width: 260px; height: 100vh; background: var(--sidebar); color: white; position: fixed; display: flex; flex-direction: column; }
+        .sidebar-header { padding: 25px; font-size: 20px; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; gap: 10px; align-items: center; }
+        .sidebar-menu { flex: 1; padding: 20px 0; }
+        .menu-item { width: 100%; padding: 15px 25px; background: none; border: none; color: #e2e8f0; text-align: left; cursor: pointer; font-size: 14px; display: flex; gap: 12px; align-items: center; opacity: 0.8; transition: 0.2s; }
+        .menu-item:hover, .menu-item.active { background: rgba(255,255,255,0.1); border-left: 4px solid var(--primary); opacity: 1; }
+        .main-content { margin-left: 260px; padding: 30px; width: calc(100% - 260px); }
+        .section { display: none; animation: fadeIn 0.3s ease; }
+        .active-section { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px; }
+        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; }
+        .card h2 { margin: 5px 0 0; color: var(--primary); font-size: 32px; }
+        .card p { margin: 0; color: #64748b; font-size: 13px; font-weight: 600; text-transform: uppercase; }
+        .table-container { background: white; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; margin-bottom: 30px; }
+        .table-header { padding: 20px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 15px 20px; background: #f8fafc; color: #64748b; font-size: 12px; text-transform: uppercase; font-weight: 600; border-bottom: 1px solid #e2e8f0; }
+        td { padding: 15px 20px; border-bottom: 1px solid #e2e8f0; font-size: 14px; }
+        .btn { padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; transition: 0.2s; }
+        .btn-approve { background: #dcfce7; color: #166534; }
+        .btn-reject { background: #fee2e2; color: #991b1b; }
+        .btn-report { background: #4f46e5; color: white; display: flex; align-items: center; gap: 8px; }
+        .status-pill { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+        .status-Approved { background: #dcfce7; color: #166534; }
+        .status-Pending { background: #fef3c7; color: #92400e; }
+        .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; }
+        .modal-content { background: white; width: 80%; height: 85%; border-radius: 12px; display: flex; flex-direction: column; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="sidebar-header"> <i class="fas fa-university"></i> EduAchieve </div>
+    <div class="sidebar-menu" id="sidebarMenu">
+        <div id="proctorNav">
+            <button class="menu-item active" onclick="switchTab('dashboard', this)"> <i class="fas fa-th-large"></i> Dashboard </button>
+            <button class="menu-item" onclick="switchTab('my-class', this)"> <i class="fas fa-users"></i> My Class </button>
+            <button class="menu-item" onclick="switchTab('verification', this)"> <i class="fas fa-check-circle"></i> Verification </button>
+        </div>
+        <div id="hodNav" class="hidden">
+            <button class="menu-item" onclick="switchTab('dept-view', this)"> <i class="fas fa-chart-pie"></i> Strategic Overview </button>
+            <button class="menu-item" onclick="switchTab('hod-proctors', this)"> <i class="fas fa-chalkboard-teacher"></i> Proctor Breakdown </button>
+            <button class="menu-item" onclick="switchTab('hod-achievers', this)"> <i class="fas fa-trophy"></i> Achiever Rankings </button>
+        </div>
+    </div>
+    <div style="padding: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
+        <div id="navFacultyName" style="font-weight: bold;">Loading...</div>
+        <div id="facultyRoleLabel" style="font-size: 11px; opacity: 0.7;">Faculty</div>
+    </div>
+    <button class="menu-item" onclick="logout()" style="color:#f87171;"> <i class="fas fa-sign-out-alt"></i> Logout </button>
+</div>
+
+<div class="main-content">
+    <div id="dashboard" class="section active-section">
+        <h1>Faculty Overview</h1>
+        <div class="stats-grid">
+            <div class="card"><p>My Students</p><h2 id="totalStudents">0</h2></div>
+            <div class="card"><p>To Verify</p><h2 id="pendingCount">0</h2></div>
+            <div class="card"><p>Department</p><h2 id="myDept" style="font-size: 18px;">-</h2></div>
+        </div>
+        <div class="table-container">
+            <div class="table-header"><h3>Recent Activity</h3></div>
+            <table>
+                <thead><tr><th>Student</th><th>Title</th><th>Date</th><th>Status</th></tr></thead>
+                <tbody id="recentList"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="my-class" class="section">
+        <h1>My Proctor Class</h1>
+        <div class="card" style="margin-bottom: 20px; height: 250px;"><canvas id="semChart"></canvas></div>
+        <div class="table-container">
+            <div class="table-header">
+                <h3>Student List</h3>
+                <input id="classSearch" placeholder="Search..." onkeyup="applyClassFilters()" style="padding:8px; border-radius:6px; border:1px solid #ddd;">
+            </div>
+            <table>
+                <thead><tr><th>Roll No</th><th>Name</th><th>Dept</th><th>Sem</th><th>Actions</th></tr></thead>
+                <tbody id="myStudentList"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="verification" class="section">
+        <h1>Verify Achievements</h1>
+        <div class="table-container">
+            <table>
+                <thead><tr><th>Student</th><th>Achievement</th><th>Proof</th><th>Status</th><th>Action</th></tr></thead>
+                <tbody id="verificationList"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="dept-view" class="section">
+        <h1>Strategic Departmental Overview</h1>
+        <div class="stats-grid">
+            <div class="card"><p>Managed Depts</p><h2 id="deptCount">0</h2></div>
+            <div class="card"><p>Placement Readiness</p><h2 id="readinessScore">0%</h2><small>Students w/ 3+ items</small></div>
+            <div class="card"><p>Total Students</p><h2 id="deptTotalStudents">0</h2></div>
+        </div>
+        <div class="card" style="height: 350px; margin-bottom: 30px;"><canvas id="deptComparisonChart"></canvas></div>
+    </div>
+
+    <div id="hod-proctors" class="section">
+        <div class="table-header">
+            <h3>Proctor Performance Breakdown</h3>
+            <button class="btn btn-report" id="notifyAllBtn" onclick="notifyAllProctors()"><i class="fas fa-bell"></i> Notify Pending Proctors</button>
+        </div>
+        <div class="table-container">
+            <table>
+                <thead><tr><th>Proctor Name</th><th>Department</th><th>Students</th><th>Pending Items</th></tr></thead>
+                <tbody id="deptProctorStats"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="hod-achievers" class="section">
+        <h1>Achiever Rankings</h1>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
+            <div class="card" style="height: 450px; overflow-y: auto;">
+                <p style="font-weight: bold; color: var(--primary); margin-bottom: 15px;">🏆 Overall Top Achievers</p>
+                <div id="topStudentsList"></div>
+            </div>
+            <div class="card" style="height: 450px; overflow-y: auto;">
+                <p style="font-weight: bold; color: var(--primary); margin-bottom: 15px;">📍 Dept-wise Leaders</p>
+                <div id="deptLeadersList"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="proofModal" class="modal">
+    <div class="modal-content">
+        <div style="padding:15px; border-bottom:1px solid #eee; display:flex; justify-content:space-between;">
+            <h3>Document Preview</h3>
+            <button onclick="closeProofModal()" style="border:none; background:none; font-size:20px; cursor:pointer;">&times;</button>
+        </div>
+        <div id="proofBody" style="flex:1; background:#525659; overflow:auto;"></div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const API_URL = "http://localhost:5000";
+    const myUsername = localStorage.getItem('username');
+    let myFacultyId, facultyData, allAchievements = [], myStudents = [], deptChart, semChart;
+
+    function switchTab(id, btn) {
+        document.querySelectorAll(".section").forEach(s => s.classList.remove("active-section"));
+        document.querySelectorAll(".menu-item").forEach(b => b.classList.remove("active"));
+        const target = document.getElementById(id);
+        if(target) target.classList.add("active-section");
+        if(btn) btn.classList.add("active");
+    }
+
+    async function loadData() {
+        try {
+            const fRes = await fetch(`${API_URL}/faculty`);
+            const facultyList = await fRes.json();
+            facultyData = facultyList.find(f => f.name.toLowerCase().replace(/\s/g,'') === myUsername.toLowerCase().replace(/\s/g,''));
+
+            if (facultyData) {
+                myFacultyId = facultyData._id;
+                document.getElementById('navFacultyName').innerText = facultyData.name;
+                document.getElementById('myDept').innerText = Array.isArray(facultyData.dept) ? facultyData.dept.join(", ") : facultyData.dept;
+                
+                if(facultyData.roles.hod) {
+                    document.getElementById('proctorNav').classList.add('hidden');
+                    document.getElementById('hodNav').classList.remove('hidden');
+                    document.getElementById('facultyRoleLabel').innerText = "Head of Department";
+                    switchTab('dept-view', document.querySelector('#hodNav .menu-item'));
+                    loadDeptAnalytics();
+                } else {
+                    document.getElementById('facultyRoleLabel').innerText = "Proctor";
+                    loadProctorDashboard();
+                }
+            }
+        } catch(e) { console.error(e); }
+    }
+
+    async function loadProctorDashboard() {
+        const [sRes, aRes] = await Promise.all([
+            fetch(`${API_URL}/students`), 
+            fetch(`${API_URL}/achievements?proctorId=${myFacultyId}`)
+        ]);
+        const students = await sRes.json();
+        myStudents = students.filter(s => s.proctorId === myFacultyId);
+        allAchievements = await aRes.json();
+        
+        document.getElementById('totalStudents').innerText = myStudents.length;
+        document.getElementById('pendingCount').innerText = allAchievements.filter(a => a.status === 'Pending').length;
+        
+        renderVerification();
+        renderMyClass();
+        document.getElementById('recentList').innerHTML = allAchievements.slice(0,5).map(a => 
+            `<tr><td>${a.studentName}</td><td>${a.title}</td><td>${a.date}</td><td><span class="status-pill status-${a.status}">${a.status}</span></td></tr>`
+        ).join("");
+    }
+
+    async function loadDeptAnalytics() {
+        const [sRes, aRes, fRes] = await Promise.all([fetch(`${API_URL}/students`), fetch(`${API_URL}/achievements`), fetch(`${API_URL}/faculty`)]);
+        const allS = await sRes.json(), allA = await aRes.json(), allF = await fRes.json();
+        const managedDepts = Array.isArray(facultyData.dept) ? facultyData.dept : [facultyData.dept];
+
+        const deptStudents = allS.filter(s => managedDepts.includes(s.dept));
+        const approvedAchs = allA.filter(a => {
+            const s = allS.find(st => st.rollNo === a.studentRoll);
+            return s && managedDepts.includes(s.dept) && a.status === 'Approved';
+        });
+
+        document.getElementById('deptCount').innerText = managedDepts.length;
+        document.getElementById('deptTotalStudents').innerText = deptStudents.length;
+        const ready = deptStudents.filter(s => approvedAchs.filter(a => a.studentRoll === s.rollNo).length >= 3).length;
+        document.getElementById('readinessScore').innerText = ((ready/deptStudents.length)*100 || 0).toFixed(1) + "%";
+
+        // Proctor Performance Breakdown
+        const proctors = allF.filter(f => f.roles.proctor && f.dept.some(d => managedDepts.includes(d)));
+        document.getElementById('deptProctorStats').innerHTML = proctors.map(p => {
+            const pending = allA.filter(a => (a.proctorId?.toString() === p._id.toString()) && a.status === 'Pending').length;
+            return `<tr><td><b>${p.name}</b></td><td>${p.dept.join(", ")}</td><td>${allS.filter(s => s.proctorId === p._id).length}</td><td style="color:var(--danger)">${pending}</td></tr>`;
+        }).join("");
+
+        // Achievers Logic
+        const sorted = deptStudents.map(s => ({ name: s.name, dept: s.dept, count: approvedAchs.filter(a => a.studentRoll === s.rollNo).length }))
+            .sort((a,b) => b.count - a.count);
+        document.getElementById('topStudentsList').innerHTML = sorted.slice(0,10).map((s,i) => `<div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #eee;"><span>${i+1}. ${s.name}</span><span class="status-pill status-Approved">${s.count} Items</span></div>`).join("");
+
+        updateDeptChart(managedDepts, approvedAchs, allS);
+    }
+
+    async function notifyAllProctors() {
+        try {
+            const [fRes, aRes] = await Promise.all([fetch(`${API_URL}/faculty`), fetch(`${API_URL}/achievements`)]);
+            const facultyList = await fRes.json(), achievements = await aRes.json();
+            const managedDepts = Array.isArray(facultyData.dept) ? facultyData.dept : [facultyData.dept];
+
+            const pendingProctors = facultyList.filter(f => {
+                const depts = Array.isArray(f.dept) ? f.dept : [f.dept];
+                const hasPending = achievements.some(a => a.proctorId?.toString() === f._id.toString() && a.status === 'Pending');
+                return depts.some(d => managedDepts.includes(d)) && f.roles.proctor && hasPending;
+            });
+
+            if (!pendingProctors.length) return alert("No pending items found!");
+            if (!confirm(`Notify ${pendingProctors.length} proctors?`)) return;
+
+            const notifyData = pendingProctors.map(p => ({ email: p.email, name: p.name, pendingCount: achievements.filter(a => a.proctorId?.toString() === p._id.toString() && a.status === 'Pending').length }));
+            await fetch(`${API_URL}/notify-proctors`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ hodName: facultyData.name, proctors: notifyData }) });
+            Toastify({ text: "Reminders Sent!", background: "#10b981" }).showToast();
+        } catch(e) { console.error(e); }
+    }
+
+    // Proctor Helpers
+    function renderMyClass() {
+        document.getElementById('myStudentList').innerHTML = myStudents.map(s => `<tr><td>${s.rollNo}</td><td>${s.name}</td><td>${s.dept}</td><td>Sem ${s.sem}</td><td><button class="btn" onclick="generateReport('${s.rollNo}', '${s.name}')">Report</button></td></tr>`).join("");
+        updateSemChart();
+    }
+
+    function renderVerification() {
+        document.getElementById('verificationList').innerHTML = allAchievements.map(a => `<tr><td><b>${a.studentName}</b></td><td>${a.title}</td><td><button class="btn" onclick="openProofModal('${a._id}')">View</button></td><td><span class="status-pill status-${a.status}">${a.status}</span></td><td>${a.status === 'Pending' ? `<button class="btn btn-approve" onclick="updateStatus('${a._id}','Approved')">✔</button> <button class="btn btn-reject" onclick="updateStatus('${a._id}','Rejected')">✖</button>` : '-'}</td></tr>`).join("");
+    }
+
+    function updateDeptChart(depts, achs, students) {
+        const ctx = document.getElementById('deptComparisonChart').getContext('2d');
+        const data = depts.map(d => achs.filter(a => students.find(s => s.rollNo === a.studentRoll)?.dept === d).length);
+        if(deptChart) deptChart.destroy();
+        deptChart = new Chart(ctx, { type: 'bar', data: { labels: depts, datasets: [{ label: 'Approved Achievements', data: data, backgroundColor: '#4f46e5' }] }, options: { maintainAspectRatio: false } });
+    }
+
+    function updateSemChart() {
+        const ctx = document.getElementById('semChart').getContext('2d');
+        const counts = {};
+        allAchievements.forEach(a => { const s = myStudents.find(st => st.rollNo === a.studentRoll); if(s) counts[`Sem ${s.sem}`] = (counts[`Sem ${s.sem}`] || 0) + 1; });
+        if(semChart) semChart.destroy();
+        semChart = new Chart(ctx, { type: 'line', data: { labels: Object.keys(counts), datasets: [{ label: 'Submissions', data: Object.values(counts), borderColor: '#4f46e5', tension: 0.4 }] }, options: { maintainAspectRatio: false } });
+    }
+
+    async function updateStatus(id, status) {
+        let feedback = status === 'Rejected' ? prompt("Reason:") : "";
+        if(status === 'Rejected' && feedback === null) return;
+        await fetch(`${API_URL}/achievements/verify`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id, status, feedback }) });
+        loadData();
+    }
+
+    function openProofModal(id) {
+        const a = allAchievements.find(i => i._id === id);
+        const b = document.getElementById('proofBody');
+        b.innerHTML = a.fileData.includes("pdf") ? `<iframe src="${a.fileData}" width="100%" height="100%"></iframe>` : `<img src="${a.fileData}" style="max-width:100%; display:block; margin:auto;">`;
+        document.getElementById('proofModal').style.display = 'flex';
+    }
+
+    function generateReport(rollNo, name) {
+        const achs = allAchievements.filter(a => a.studentRoll === rollNo && a.status === 'Approved');
+        if(!achs.length) return alert("No approved items!");
+        const win = window.open('', '', 'width=800,height=600');
+        let html = `<html><body><h1>Report for ${name}</h1><table border="1" width="100%"><tr><th>Title</th><th>Category</th><th>Date</th></tr>`;
+        achs.forEach(a => html += `<tr><td>${a.title}</td><td>${a.category}</td><td>${a.date}</td></tr>`);
+        html += "</table></body></html>";
+        win.document.write(html); win.print();
+    }
+
+    function closeProofModal() { document.getElementById('proofModal').style.display = 'none'; }
+    function logout() { localStorage.clear(); window.location.href = "login.html"; }
+    window.onload = loadData;
+</script>
+</body>
+</html-->
+
+
+
+<!--DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>EduAchieve | Command Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    
+    <style>
+        :root { --primary: #4f46e5; --bg: #f8fafc; --sidebar: #0f172a; --text: #334155; --success: #10b981; --danger: #ef4444; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); margin: 0; display: flex; color: var(--text); }
+
+        /* SIDEBAR */
+        .sidebar { width: 260px; height: 100vh; background: var(--sidebar); color: white; position: fixed; display: flex; flex-direction: column; }
+        .sidebar-header { padding: 25px; font-size: 20px; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; gap: 10px; align-items: center; }
+        .sidebar-menu { flex: 1; padding: 20px 0; }
+        .menu-item { width: 100%; padding: 15px 25px; background: none; border: none; color: #e2e8f0; text-align: left; cursor: pointer; font-size: 14px; display: flex; gap: 12px; align-items: center; opacity: 0.8; transition: 0.2s; }
+        .menu-item:hover, .menu-item.active { background: rgba(255,255,255,0.1); border-left: 4px solid var(--primary); opacity: 1; }
+        .nav-label { padding: 10px 25px; font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: 700; margin-top: 15px; }
+
+        /* MAIN CONTENT */
+        .main-content { margin-left: 260px; padding: 30px; width: calc(100% - 260px); }
+        .section { display: none; animation: fadeIn 0.3s ease; }
+        .active-section { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* CARDS */
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px; }
+        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; }
+        .card h2 { margin: 5px 0 0; color: var(--primary); font-size: 32px; }
+        .card p { margin: 0; color: #64748b; font-size: 13px; font-weight: 600; text-transform: uppercase; }
+
+        /* TABLES */
+        .table-container { background: white; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; margin-bottom: 30px; }
+        .table-header { padding: 20px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 15px 20px; background: #f8fafc; color: #64748b; font-size: 12px; text-transform: uppercase; font-weight: 600; border-bottom: 1px solid #e2e8f0; }
+        td { padding: 15px 20px; border-bottom: 1px solid #e2e8f0; font-size: 14px; }
+
+        .btn { padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; }
+        .status-pill { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+        .status-Approved { background: #dcfce7; color: #166534; }
+        .status-Pending { background: #fef3c7; color: #92400e; }
+        .hidden { display: none !important; }
+        
+        .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; }
+        .modal-content { background: white; width: 80%; height: 85%; border-radius: 12px; display: flex; flex-direction: column; }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="sidebar-header"> <i class="fas fa-university"></i> EduAchieve </div>
+    <div class="sidebar-menu">
+        <div id="proctorNav">
+            <button class="menu-item active" onclick="switchTab('dashboard', this)"> <i class="fas fa-th-large"></i> Dashboard </button>
+            <button class="menu-item" onclick="switchTab('my-class', this)"> <i class="fas fa-users"></i> My Class </button>
+            <button class="menu-item" onclick="switchTab('verification', this)"> <i class="fas fa-check-circle"></i> Verification </button>
+        </div>
+        
+        <div id="hodNav" class="hidden">
+            <div class="nav-label">Command Center</div>
+            <button class="menu-item" onclick="switchTab('hod-strategic', this)"> <i class="fas fa-chart-pie"></i> Strategic Overview </button>
+            <button class="menu-item" onclick="switchTab('hod-proctors', this)"> <i class="fas fa-chalkboard-teacher"></i> Proctor Performance </button>
+            <button class="menu-item" onclick="switchTab('hod-achievers', this)"> <i class="fas fa-trophy"></i> Achiever Rankings </button>
+        </div>
+    </div>
+    
+    <div style="padding: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
+        <div id="navFacultyName" style="font-weight: bold;">Loading...</div>
+        <div id="facultyRoleLabel" style="font-size: 11px; opacity: 0.7;">Faculty</div>
+    </div>
+    <button class="menu-item" onclick="logout()" style="color:#f87171;"> <i class="fas fa-sign-out-alt"></i> Logout </button>
+</div>
+
+<div class="main-content">
+
+    <div id="dashboard" class="section active-section">
+        <h1>Faculty Overview</h1>
+        <div class="stats-grid">
+            <div class="card"><p>My Students</p><h2 id="totalStudents">0</h2></div>
+            <div class="card"><p>To Verify</p><h2 id="pendingCount">0</h2></div>
+            <div class="card"><p>Department</p><h2 id="myDept" style="font-size: 18px;">-</h2></div>
+        </div>
+        <div class="table-container">
+            <div class="table-header"><h3>Recent Activity</h3></div>
+            <table>
+                <thead><tr><th>Student</th><th>Title</th><th>Date</th><th>Status</th></tr></thead>
+                <tbody id="recentList"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="my-class" class="section">
+        <h1>My Proctor Class</h1>
+        <div class="card" style="margin-bottom: 20px; height: 250px;"><canvas id="semChart"></canvas></div>
+        <div class="table-container">
+            <div class="table-header">
+                <input id="classSearch" placeholder="Search roll or name..." onkeyup="applyClassFilters()" style="padding:8px; border-radius:6px; border:1px solid #ddd; width:250px;">
+            </div>
+            <table>
+                <thead><tr><th>Roll No</th><th>Name</th><th>Dept</th><th>Sem</th><th>Actions</th></tr></thead>
+                <tbody id="myStudentList"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="verification" class="section">
+        <h1>Verify Achievements</h1>
+        <div class="table-container">
+            <table>
+                <thead><tr><th>Student</th><th>Achievement</th><th>Proof</th><th>Status</th><th>Action</th></tr></thead>
+                <tbody id="verificationList"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="hod-strategic" class="section">
+        <h1>Departmental Strategic Analytics</h1>
+        <div class="stats-grid">
+            <div class="card"><p>Total Managed Students</p><h2 id="hodTotalStudents">0</h2></div>
+            <div class="card"><p>Placement Readiness</p><h2 id="readinessScore">0%</h2><small>Students with 3+ items</small></div>
+            <div class="card"><p>Global Approved</p><h2 id="hodTotalApproved">0</h2></div>
+        </div>
+        <div class="card" style="height: 350px; margin-bottom: 20px;"><canvas id="deptComparisonChart"></canvas></div>
+    </div>
+
+    <div id="hod-proctors" class="section">
+        <div class="table-header">
+            <h1>Proctor Breakdown</h1>
+            <button class="btn" style="background:var(--primary); color:white" onclick="notifyAllProctors()"><i class="fas fa-bell"></i> Notify Pending Proctors</button>
+        </div>
+        <div class="table-container">
+            <table>
+                <thead><tr><th>Proctor Name</th><th>Managed Depts</th><th>Students</th><th>Approved</th><th style="color:var(--danger)">Pending Work</th></tr></thead>
+                <tbody id="deptProctorStats"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="hod-achievers" class="section">
+        <h1>Student Achiever Rankings</h1>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div class="card">
+                <h3>🏆 Overall Top Achievers</h3>
+                <div id="topStudentsList"></div>
+            </div>
+            <div class="card">
+                <h3>📍 Department-wise Leaders</h3>
+                <div id="deptLeadersList"></div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div id="proofModal" class="modal">
+    <div class="modal-content">
+        <div style="padding:15px; border-bottom:1px solid #eee; display:flex; justify-content:space-between;">
+            <h3>Document Preview</h3>
+            <button onclick="closeProofModal()" style="border:none; background:none; font-size:20px; cursor:pointer;">&times;</button>
+        </div>
+        <div id="proofBody" style="flex:1; background:#525659; overflow:auto;"></div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const API_URL = "http://localhost:5000";
+    const myUsername = localStorage.getItem('username');
+    let facultyData, myFacultyId, allAchievements = [], myStudents = [], deptChart, semChart;
+
+    function switchTab(id, btn) {
+        document.querySelectorAll(".section").forEach(s => s.classList.remove("active-section"));
+        document.querySelectorAll(".menu-item").forEach(b => b.classList.remove("active"));
+        document.getElementById(id).classList.add("active-section");
+        if(btn) btn.classList.add("active");
+    }
+
+    async function loadData() {
+        try {
+            const fRes = await fetch(`${API_URL}/faculty`);
+            const facultyList = await fRes.json();
+            facultyData = facultyList.find(f => f.name.toLowerCase().replace(/\s/g,'') === myUsername.toLowerCase().replace(/\s/g,''));
+
+            if (facultyData) {
+                myFacultyId = facultyData._id;
+                document.getElementById('navFacultyName').innerText = facultyData.name;
+                document.getElementById('myDept').innerText = Array.isArray(facultyData.dept) ? facultyData.dept.join(", ") : facultyData.dept;
+                
+                // --- ROLE BASED UI ---
+                if(facultyData.roles.hod || facultyData.roles.coordinator) {
+                    document.getElementById('proctorNav').classList.add('hidden');
+                    document.getElementById('hodNav').classList.remove('hidden');
+                    document.getElementById('facultyRoleLabel').innerText = facultyData.roles.hod ? "Head of Department" : "Coordinator";
+                    switchTab('hod-strategic', document.querySelector('#hodNav .menu-item'));
+                    loadHODConsole();
+                } else {
+                    document.getElementById('facultyRoleLabel').innerText = "Faculty Proctor";
+                    loadProctorData();
+                }
+            }
+        } catch(e) { console.error(e); }
+    }
+
+    async function loadProctorData() {
+        const [sRes, aRes] = await Promise.all([fetch(`${API_URL}/students`), fetch(`${API_URL}/achievements?proctorId=${myFacultyId}`)]);
+        const allS = await sRes.json();
+        myStudents = allS.filter(s => s.proctorId === myFacultyId);
+        allAchievements = await aRes.json();
+        
+        document.getElementById('totalStudents').innerText = myStudents.length;
+        document.getElementById('pendingCount').innerText = allAchievements.filter(a => a.status === 'Pending').length;
+        
+        document.getElementById('myStudentList').innerHTML = myStudents.map(s => `<tr><td>${s.rollNo}</td><td>${s.name}</td><td>${s.dept}</td><td>Sem ${s.sem}</td><td><button class="btn" onclick="generateReport('${s.rollNo}', '${s.name}')">Report</button></td></tr>`).join("");
+        
+        document.getElementById('verificationList').innerHTML = allAchievements.map(a => `<tr><td><b>${a.studentName}</b></td><td>${a.title}</td><td><button class="btn" onclick="openProofModal('${a._id}')">View</button></td><td><span class="status-pill status-${a.status}">${a.status}</span></td><td>${a.status === 'Pending' ? `<button class="btn btn-approve" onclick="updateStatus('${a._id}','Approved')">✔</button>` : '-'}</td></tr>`).join("");
+
+        document.getElementById('recentList').innerHTML = allAchievements.slice(0,5).map(a => `<tr><td>${a.studentName}</td><td>${a.title}</td><td>${a.date}</td><td><span class="status-pill status-${a.status}">${a.status}</span></td></tr>`).join("");
+        updateSemChart();
+    }
+
+    async function loadHODConsole() {
+        const [sRes, aRes, fRes] = await Promise.all([fetch(`${API_URL}/students`), fetch(`${API_URL}/achievements`), fetch(`${API_URL}/faculty`)]);
+        const students = await sRes.json(), achievements = await aRes.json(), facultyList = await fRes.json();
+        const managedDepts = Array.isArray(facultyData.dept) ? facultyData.dept : [facultyData.dept];
+
+        const deptStudents = students.filter(s => managedDepts.includes(s.dept));
+        const approvedAchs = achievements.filter(a => {
+            const s = students.find(st => st.rollNo === a.studentRoll);
+            return s && managedDepts.includes(s.dept) && a.status === 'Approved';
+        });
+
+        // Metrics
+        document.getElementById('hodTotalStudents').innerText = deptStudents.length;
+        document.getElementById('hodTotalApproved').innerText = approvedAchs.length;
+        const ready = deptStudents.filter(s => approvedAchs.filter(a => a.studentRoll === s.rollNo).length >= 3).length;
+        document.getElementById('readinessScore').innerText = ((ready/deptStudents.length)*100 || 0).toFixed(1) + "%";
+
+        // Proctor Table (Corrected Matching)
+        document.getElementById('deptProctorStats').innerHTML = facultyList.filter(f => f.roles.proctor && f.dept.some(d => managedDepts.includes(d))).map(p => {
+            const pending = achievements.filter(a => a.proctorId?.toString() === p._id.toString() && a.status === 'Pending').length;
+            return `<tr><td><b>${p.name}</b></td><td>${p.dept.join(", ")}</td><td>${students.filter(s => s.proctorId === p._id).length}</td><td>${achievements.filter(a => a.proctorId === p._id && a.status === 'Approved').length}</td><td style="color:var(--danger); font-weight:bold">${pending}</td></tr>`;
+        }).join("");
+
+        // Leaderboards
+        const sorted = deptStudents.map(s => ({ name: s.name, dept: s.dept, count: approvedAchs.filter(a => a.studentRoll === s.rollNo).length })).sort((a,b) => b.count - a.count);
+        document.getElementById('topStudentsList').innerHTML = sorted.slice(0,5).map(s => `<div style="padding:10px; border-bottom:1px solid #eee"><b>${s.name}</b> <span style="float:right">${s.count} Items</span></div>`).join("");
+        
+        const deptL = managedDepts.map(d => sorted.find(s => s.dept === d)).filter(l => l);
+        document.getElementById('deptLeadersList').innerHTML = deptL.map(l => `<div style="padding:10px; border-bottom:1px solid #eee"><b>${l.dept}:</b> ${l.name} (${l.count})</div>`).join("");
+
+        updateDeptChart(managedDepts, approvedAchs, students);
+    }
+
+    async function notifyAllProctors() {
+        const [fRes, aRes] = await Promise.all([fetch(`${API_URL}/faculty`), fetch(`${API_URL}/achievements`)]);
+        const allF = await fRes.json(), allA = await aRes.json();
+        const managedDepts = Array.isArray(facultyData.dept) ? facultyData.dept : [facultyData.dept];
+
+        const pendingProctors = allF.filter(f => {
+            const hasPending = allA.some(a => a.proctorId?.toString() === f._id.toString() && a.status === 'Pending');
+            return f.roles.proctor && f.dept.some(d => managedDepts.includes(d)) && hasPending;
+        });
+
+        if(!pendingProctors.length) return alert("No proctors with pending items!");
+        const notifyData = pendingProctors.map(p => ({ email: p.email, name: p.name, pendingCount: allA.filter(a => a.proctorId?.toString() === p._id.toString() && a.status === 'Pending').length }));
+        
+        const res = await fetch(`${API_URL}/notify-proctors`, { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({ hodName: facultyData.name, proctors: notifyData }) });
+        if(res.ok) Toastify({text: "Notifications Sent!", background: "var(--success)"}).showToast();
+    }
+
+    function generateReport(rollNo, name) {
+        // Corrected: Uses studentRoll to find achievements even if proctorId is null
+        const achs = allAchievements.filter(a => a.studentRoll === rollNo && a.status === 'Approved');
+        if(!achs.length) return alert("No approved items found!");
+        const win = window.open('', '', 'width=800,height=600');
+        let html = `<html><body><h1>Report for ${name}</h1><table border="1" width="100%"><tr><th>Title</th><th>Category</th><th>Date</th></tr>`;
+        achs.forEach(a => html += `<tr><td>${a.title}</td><td>${a.category}</td><td>${a.date}</td></tr>`);
+        html += "</table></body></html>";
+        win.document.write(html); win.print();
+    }
+
+    function applyClassFilters() {
+        const query = document.getElementById('classSearch').value.toLowerCase();
+        const rows = document.querySelectorAll("#myStudentList tr");
+        rows.forEach(r => r.style.display = r.innerText.toLowerCase().includes(query) ? "" : "none");
+    }
+
+    function updateDeptChart(depts, achs, students) {
+        const ctx = document.getElementById('deptComparisonChart').getContext('2d');
+        const data = depts.map(d => achs.filter(a => students.find(s => s.rollNo === a.studentRoll)?.dept === d).length);
+        if(deptChart) deptChart.destroy();
+        deptChart = new Chart(ctx, { type: 'bar', data: { labels: depts, datasets: [{ label: 'Approved Achievements', data: data, backgroundColor: '#4f46e5' }] }, options: { maintainAspectRatio: false } });
+    }
+
+    function updateSemChart() {
+        const ctx = document.getElementById('semChart').getContext('2d');
+        const counts = {};
+        allAchievements.forEach(a => { const s = myStudents.find(st => st.rollNo === a.studentRoll); if(s) counts[`Sem ${s.sem}`] = (counts[`Sem ${s.sem}`] || 0) + 1; });
+        if(semChart) semChart.destroy();
+        semChart = new Chart(ctx, { type: 'line', data: { labels: Object.keys(counts), datasets: [{ label: 'Submissions', data: Object.values(counts), borderColor: '#4f46e5', tension: 0.4 }] }, options: { maintainAspectRatio: false } });
+    }
+
+    function openProofModal(id) {
+        const a = allAchievements.find(i => i._id === id);
+        const b = document.getElementById('proofBody');
+        b.innerHTML = a.fileData.includes("pdf") ? `<iframe src="${a.fileData}" width="100%" height="100%"></iframe>` : `<img src="${a.fileData}" style="max-width:100%; display:block; margin:auto;">`;
+        document.getElementById('proofModal').style.display = 'flex';
+    }
+
+    function closeProofModal() { document.getElementById('proofModal').style.display = 'none'; }
+    function logout() { localStorage.clear(); window.location.href = "login.html"; }
+    window.onload = loadData;
+</script>
+</body>
+</html-->
+
+
+
+<!--DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>EduAchieve | Command Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    
+    <style>
+        :root { --primary: #4f46e5; --bg: #f8fafc; --sidebar: #0f172a; --text: #334155; --success: #10b981; --danger: #ef4444; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); margin: 0; display: flex; color: var(--text); }
+
+        /* SIDEBAR */
+        .sidebar { width: 260px; height: 100vh; background: var(--sidebar); color: white; position: fixed; display: flex; flex-direction: column; }
+        .sidebar-header { padding: 25px; font-size: 20px; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; gap: 10px; align-items: center; }
+        .sidebar-menu { flex: 1; padding: 20px 0; }
+        .menu-item { width: 100%; padding: 15px 25px; background: none; border: none; color: #e2e8f0; text-align: left; cursor: pointer; font-size: 14px; display: flex; gap: 12px; align-items: center; opacity: 0.8; transition: 0.2s; }
+        .menu-item:hover, .menu-item.active { background: rgba(255,255,255,0.1); border-left: 4px solid var(--primary); opacity: 1; }
+        .nav-label { padding: 10px 25px; font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: 700; margin-top: 15px; }
+
+        /* MAIN CONTENT */
+        .main-content { margin-left: 260px; padding: 30px; width: calc(100% - 260px); }
+        .section { display: none; animation: fadeIn 0.3s ease; }
+        .active-section { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* CARDS */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; }
+        .card h2 { margin: 5px 0 0; color: var(--primary); font-size: 32px; }
+        .card p { margin: 0; color: #64748b; font-size: 13px; font-weight: 600; text-transform: uppercase; }
+
+        /* TABLES */
+        .table-container { background: white; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; margin-bottom: 30px; }
+        .table-header { padding: 20px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 15px 20px; background: #f8fafc; color: #64748b; font-size: 12px; text-transform: uppercase; font-weight: 600; border-bottom: 1px solid #e2e8f0; }
+        td { padding: 15px 20px; border-bottom: 1px solid #e2e8f0; font-size: 14px; }
+
+        .btn { padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; }
+        .status-pill { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+        .status-Approved { background: #dcfce7; color: #166534; }
+        .status-Pending { background: #fef3c7; color: #92400e; }
+        .status-Rejected { background: #fee2e2; color: #991b1b; }
+        .hidden { display: none !important; }
+
+        /* MODAL */
+        .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; }
+        .modal-content { background: white; width: 80%; height: 85%; border-radius: 12px; display: flex; flex-direction: column; }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="sidebar-header">EduAchieve</div>
+    <div class="sidebar-menu" id="sideNav">
+        <div id="proctorNav">
+            <button class="menu-item active" onclick="switchTab('dashboard', this)"><i class="fas fa-th-large"></i> Dashboard</button>
+            <button class="menu-item" onclick="switchTab('my-class', this)"><i class="fas fa-users"></i> My Class</button>
+            <button class="menu-item" onclick="switchTab('verification', this)"><i class="fas fa-check-circle"></i> Verification</button>
+        </div>
+        <div id="hodNav" class="hidden">
+            <div class="nav-label">HOD Console</div>
+            <button class="menu-item" onclick="switchTab('hod-strategic', this)"><i class="fas fa-chart-pie"></i> Strategic Overview</button>
+            <button class="menu-item" onclick="switchTab('hod-proctors', this)"><i class="fas fa-chalkboard-teacher"></i> Proctor Breakdown</button>
+            <button class="menu-item" onclick="switchTab('hod-achievers', this)"><i class="fas fa-trophy"></i> Achiever Rankings</button>
+        </div>
+    </div>
+    <div style="padding: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
+        <div id="navFacultyName" style="font-weight: bold;">Loading...</div>
+        <div id="facultyRoleLabel" style="font-size: 11px; opacity: 0.7;">Faculty</div>
+    </div>
+    <button class="menu-item" onclick="logout()" style="color:#f87171;"><i class="fas fa-sign-out-alt"></i> Logout</button>
+</div>
+
+<div class="main-content">
+    <div id="dashboard" class="section active-section">
+        <h1>Faculty Overview</h1>
+        <div class="stats-grid">
+            <div class="card"><p>My Students</p><h2 id="totalStudents">0</h2></div>
+            <div class="card"><p>Pending Verification</p><h2 id="pendingCount">0</h2></div>
+            <div class="card"><p>Department</p><h2 id="myDept" style="font-size: 18px;">-</h2></div>
+        </div>
+        <div class="table-container">
+            <div class="table-header"><h3>Recent Activity</h3></div>
+            <table>
+                <thead><tr><th>Student</th><th>Title</th><th>Date</th><th>Status</th></tr></thead>
+                <tbody id="recentList"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="my-class" class="section">
+        <h1>My Proctor Class</h1>
+        <div class="card" style="margin-bottom: 20px; height: 250px;"><canvas id="semChart"></canvas></div>
+        <div class="table-container">
+            <div class="table-header">
+                <h3>Student List</h3>
+                <input id="classSearch" placeholder="Search roll or name..." onkeyup="applyClassFilters()" style="padding:8px; border-radius:6px; border:1px solid #ddd; width: 250px;">
+            </div>
+            <table>
+                <thead><tr><th>Roll No</th><th>Name</th><th>Dept</th><th>Sem</th><th>Action</th></tr></thead>
+                <tbody id="myStudentList"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="verification" class="section">
+        <h1>Verify Achievements</h1>
+        <div class="table-container">
+            <table>
+                <thead><tr><th>Student</th><th>Achievement</th><th>Proof</th><th>Status</th><th>Action</th></tr></thead>
+                <tbody id="verificationList"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="hod-strategic" class="section">
+        <h1>Strategic Departmental Overview</h1>
+        <div class="stats-grid">
+            <div class="card"><p>Placement Readiness</p><h2 id="readinessScore">0%</h2><small>Students with 3+ items</small></div>
+            <div class="card"><p>Total Students</p><h2 id="hodTotalStudents">0</h2></div>
+            <div class="card"><p>Total Approved</p><h2 id="hodTotalApproved">0</h2></div>
+        </div>
+        <div class="card" style="height: 350px; margin-bottom: 30px;"><canvas id="deptComparisonChart"></canvas></div>
+    </div>
+
+    <div id="hod-proctors" class="section">
+        <div class="table-header">
+            <h3>Proctor Performance Breakdown</h3>
+            <button class="btn" style="background:var(--primary); color:white" onclick="notifyAllProctors()"><i class="fas fa-bell"></i> Notify Pending</button>
+        </div>
+        <div class="table-container">
+            <table>
+                <thead><tr><th>Proctor Name</th><th>Depts</th><th>Students</th><th>Approved</th><th>Pending Items</th></tr></thead>
+                <tbody id="deptProctorStats"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="hod-achievers" class="section">
+        <h1>Achiever Rankings</h1>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div class="card" style="height: 450px; overflow-y: auto;">
+                <p style="font-weight: bold; color: var(--primary); margin-bottom: 15px;">🏆 Overall Top 10</p>
+                <div id="topStudentsList"></div>
+            </div>
+            <div class="card" style="height: 450px; overflow-y: auto;">
+                <p style="font-weight: bold; color: var(--primary); margin-bottom: 15px;">📍 Dept-wise Leaders</p>
+                <div id="deptLeadersList"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="proofModal" class="modal">
+    <div class="modal-content">
+        <div style="padding:15px; border-bottom:1px solid #eee; display:flex; justify-content:space-between;">
+            <h3>Document Preview</h3>
+            <button onclick="closeProofModal()" style="border:none; background:none; font-size:20px; cursor:pointer;">&times;</button>
+        </div>
+        <div id="proofBody" style="flex:1; background:#525659;"></div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const API_URL = "http://localhost:5000";
+    const myUsername = localStorage.getItem('username');
+    let facultyData, myFacultyId, allAchievements = [], myStudents = [], deptChart, semChart;
+
+    function switchTab(id, btn) {
+        document.querySelectorAll(".section").forEach(s => s.classList.remove("active-section"));
+        document.querySelectorAll(".menu-item").forEach(b => b.classList.remove("active"));
+        const target = document.getElementById(id);
+        if(target) target.classList.add("active-section");
+        if(btn) btn.classList.add("active");
+    }
+
+    async function loadData() {
+        try {
+            const fRes = await fetch(`${API_URL}/faculty`);
+            const facultyList = await fRes.json();
+            facultyData = facultyList.find(f => f.name.toLowerCase().replace(/\s/g,'') === myUsername.toLowerCase().replace(/\s/g,''));
+
+            if (facultyData) {
+                myFacultyId = facultyData._id;
+                document.getElementById('navFacultyName').innerText = facultyData.name;
+                document.getElementById('myDept').innerText = Array.isArray(facultyData.dept) ? facultyData.dept.join(", ") : facultyData.dept;
+                
+                if(facultyData.roles.hod) {
+                    document.getElementById('proctorNav').classList.add('hidden');
+                    document.getElementById('hodNav').classList.remove('hidden');
+                    document.getElementById('facultyRoleLabel').innerText = "Head of Department";
+                    switchTab('hod-strategic', document.querySelector('#hodNav .menu-item'));
+                    loadHODConsole();
+                } else {
+                    document.getElementById('facultyRoleLabel').innerText = "Faculty Proctor";
+                    loadProctorDashboard();
+                }
+            }
+        } catch(e) { console.error(e); }
+    }
+
+    async function loadProctorDashboard() {
+        const [sRes, aRes] = await Promise.all([fetch(`${API_URL}/students`), fetch(`${API_URL}/achievements?proctorId=${myFacultyId}`)]);
+        const allS = await sRes.json();
+        myStudents = allS.filter(s => s.proctorId === myFacultyId);
+        allAchievements = await aRes.json();
+        
+        document.getElementById('totalStudents').innerText = myStudents.length;
+        document.getElementById('pendingCount').innerText = allAchievements.filter(a => a.status === 'Pending').length;
+        
+        renderVerificationList();
+        renderMyClassList();
+        document.getElementById('recentList').innerHTML = allAchievements.slice(0,5).map(a => 
+            `<tr><td>${a.studentName}</td><td>${a.title}</td><td>${a.date}</td><td><span class="status-pill status-${a.status}">${a.status}</span></td></tr>`
+        ).join("");
+    }
+
+    // --- DEADLINE ALERTS (48h) ---
+    function renderVerificationList() {
+        const now = new Date();
+        document.getElementById('verificationList').innerHTML = allAchievements.map(a => {
+            const submissionDate = new Date(a.date);
+            const hoursDiff = Math.abs(now - submissionDate) / 36e5;
+            const isUrgent = a.status === 'Pending' && hoursDiff > 48;
+
+            return `<tr style="${isUrgent ? 'background-color: #fff1f2; border-left: 4px solid var(--danger);' : ''}">
+                <td><b>${a.studentName}</b>${isUrgent ? '<br><small style="color:var(--danger); font-weight:bold;"><i class="fas fa-clock"></i> OVERDUE (48h+)</small>' : ''}</td>
+                <td>${a.title}</td>
+                <td><button class="btn" onclick="openProofModal('${a._id}')">View</button></td>
+                <td><span class="status-pill status-${a.status}">${a.status}</span></td>
+                <td>${a.status === 'Pending' ? `<button class="btn btn-approve" onclick="updateStatus('${a._id}','Approved')">✔</button>` : '-'}</td>
+            </tr>`;
+        }).join("");
+    }
+
+    async function loadHODConsole() {
+        const [sRes, aRes, fRes] = await Promise.all([fetch(`${API_URL}/students`), fetch(`${API_URL}/achievements`), fetch(`${API_URL}/faculty`)]);
+        const students = await sRes.json(), achievements = await aRes.json(), facultyList = await fRes.json();
+        const managedDepts = Array.isArray(facultyData.dept) ? facultyData.dept : [facultyData.dept];
+
+        const deptStudents = students.filter(s => managedDepts.includes(s.dept));
+        const approvedAchs = achievements.filter(a => {
+            const s = students.find(st => st.rollNo === a.studentRoll);
+            return s && managedDepts.includes(s.dept) && a.status === 'Approved';
+        });
+
+        document.getElementById('hodTotalStudents').innerText = deptStudents.length;
+        document.getElementById('hodTotalApproved').innerText = approvedAchs.length;
+        const ready = deptStudents.filter(s => approvedAchs.filter(a => a.studentRoll === s.rollNo).length >= 3).length;
+        document.getElementById('readinessScore').innerText = ((ready/deptStudents.length)*100 || 0).toFixed(1) + "%";
+
+        // Proctor Performance + KUDOS
+        document.getElementById('deptProctorStats').innerHTML = facultyList.filter(f => f.roles.proctor && f.dept.some(d => managedDepts.includes(d))).map(p => {
+            const pending = achievements.filter(a => a.proctorId?.toString() === p._id.toString() && a.status === 'Pending').length;
+            const isStar = pending === 0;
+            return `<tr><td><b>${p.name}</b></td><td>${p.dept.join(", ")}</td><td>${students.filter(s => s.proctorId === p._id).length}</td><td>${achievements.filter(a => a.proctorId === p._id && a.status === 'Approved').length}</td>
+            <td><b style="${pending > 0 ? 'color:var(--danger)' : 'color:var(--success)'}">${pending}</b>
+            ${isStar ? `<button class="btn" style="padding:4px 8px; margin-left:10px; background:#fef9c3; color:#854d0e; font-size:11px;" onclick="sendKudos('${p.email}', '${p.name}')"><i class="fas fa-certificate"></i> Kudos</button>` : ''}</td></tr>`;
+        }).join("");
+
+        // Leaderboards
+        const sorted = deptStudents.map(s => ({ name: s.name, dept: s.dept, count: approvedAchs.filter(a => a.studentRoll === s.rollNo).length })).sort((a,b) => b.count - a.count);
+        document.getElementById('topStudentsList').innerHTML = sorted.slice(0,10).map((s,i) => `<div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #eee;"><span>${i+1}. ${s.name}</span><span class="status-pill status-Approved">${s.count} Items</span></div>`).join("");
+        
+        const dLeaders = managedDepts.map(d => sorted.find(s => s.dept === d)).filter(l => l);
+        document.getElementById('deptLeadersList').innerHTML = dLeaders.map(l => `<div style="padding:10px; border-bottom:1px solid #eee"><b>${l.dept}:</b> ${l.name} (${l.count} Items)</div>`).join("");
+
+        updateDeptChart(managedDepts, approvedAchs, students);
+    }
+
+    async function sendKudos(email, name) {
+        if(!confirm(`Send appreciation to ${name}?`)) return;
+        await fetch(`${API_URL}/notify-proctors`, { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({ hodName: facultyData.name, proctors: [{ email, name, isKudos: true }] }) });
+        Toastify({ text: "Kudos Sent!", background: "#10b981" }).showToast();
+    }
+
+    async function notifyAllProctors() {
+        const [fRes, aRes] = await Promise.all([fetch(`${API_URL}/faculty`), fetch(`${API_URL}/achievements`)]);
+        const facultyList = await fRes.json(), achievements = await aRes.json();
+        const managedDepts = Array.isArray(facultyData.dept) ? facultyData.dept : [facultyData.dept];
+        const pendingProctors = facultyList.filter(f => {
+            const hasPending = achievements.some(a => a.proctorId?.toString() === f._id.toString() && a.status === 'Pending');
+            return f.roles.proctor && f.dept.some(d => managedDepts.includes(d)) && hasPending;
+        });
+        if (!pendingProctors.length) return alert("No pending found!");
+        const notifyData = pendingProctors.map(p => ({ email: p.email, name: p.name, pendingCount: achievements.filter(a => a.proctorId?.toString() === p._id.toString() && a.status === 'Pending').length }));
+        await fetch(`${API_URL}/notify-proctors`, { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({ hodName: facultyData.name, proctors: notifyData }) });
+        Toastify({ text: "Reminders Sent!", background: "#10b981" }).showToast();
+    }
+
+    function renderMyClassList() {
+        document.getElementById('myStudentList').innerHTML = myStudents.map(s => `<tr><td>${s.rollNo}</td><td>${s.name}</td><td>${s.dept}</td><td>Sem ${s.sem}</td><td><button class="btn" onclick="generateReport('${s.rollNo}', '${s.name}')">Report</button></td></tr>`).join("");
+        updateSemChart();
+    }
+
+    function generateReport(rollNo, name) {
+        const achs = allAchievements.filter(a => a.studentRoll === rollNo && a.status === 'Approved');
+        if(!achs.length) return alert("No approved items!");
+        const win = window.open('', '', 'width=800,height=600');
+        let html = `<html><body><h1>Report for ${name}</h1><table border="1" width="100%"><tr><th>Title</th><th>Category</th><th>Date</th></tr>`;
+        achs.forEach(a => html += `<tr><td>${a.title}</td><td>${a.category}</td><td>${a.date}</td></tr>`);
+        html += "</table></body></html>";
+        win.document.write(html); win.print();
+    }
+
+    function applyClassFilters() {
+        const query = document.getElementById('classSearch').value.toLowerCase();
+        const rows = document.querySelectorAll("#myStudentList tr");
+        rows.forEach(r => r.style.display = r.innerText.toLowerCase().includes(query) ? "" : "none");
+    }
+
+    function updateDeptChart(depts, achs, students) {
+        const ctx = document.getElementById('deptComparisonChart').getContext('2d');
+        const data = depts.map(d => achs.filter(a => students.find(s => s.rollNo === a.studentRoll)?.dept === d).length);
+        if(deptChart) deptChart.destroy();
+        deptChart = new Chart(ctx, { type: 'bar', data: { labels: depts, datasets: [{ label: 'Approved Achievements', data: data, backgroundColor: '#4f46e5' }] }, options: { maintainAspectRatio: false } });
+    }
+
+    function updateSemChart() {
+        const ctx = document.getElementById('semChart').getContext('2d');
+        const counts = {};
+        allAchievements.forEach(a => { const s = myStudents.find(st => st.rollNo === a.studentRoll); if(s) counts[`Sem ${s.sem}`] = (counts[`Sem ${s.sem}`] || 0) + 1; });
+        if(semChart) semChart.destroy();
+        semChart = new Chart(ctx, { type: 'line', data: { labels: Object.keys(counts), datasets: [{ label: 'Submissions', data: Object.values(counts), borderColor: '#4f46e5', tension: 0.4 }] }, options: { maintainAspectRatio: false } });
+    }
+
+    async function updateStatus(id, status) {
+        let feedback = status === 'Rejected' ? prompt("Reason:") : "";
+        if(status === 'Rejected' && feedback === null) return;
+        await fetch(`${API_URL}/achievements/verify`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id, status, feedback }) });
+        loadData();
+    }
+
+    function openProofModal(id) {
+        const a = allAchievements.find(i => i._id === id);
+        const b = document.getElementById('proofBody');
+        b.innerHTML = a.fileData.includes("pdf") ? `<iframe src="${a.fileData}" width="100%" height="100%"></iframe>` : `<img src="${a.fileData}" style="max-width:100%; display:block; margin:auto;">`;
+        document.getElementById('proofModal').style.display = 'flex';
+    }
+
+    function closeProofModal() { document.getElementById('proofModal').style.display = 'none'; }
+    function logout() { localStorage.clear(); window.location.href = "login.html"; }
+    window.onload = loadData;
+</script>
+</body>
+</html-->
+
+
+
+ <!-- 2 upar wala real hai--> 
+<!--DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>EduAchieve | Command Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    
+    <style>
+        :root { --primary: #4f46e5; --bg: #f8fafc; --sidebar: #0f172a; --text: #334155; --success: #10b981; --danger: #ef4444; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); margin: 0; display: flex; color: var(--text); }
+
+        /* SIDEBAR */
+        .sidebar { width: 260px; height: 100vh; background: var(--sidebar); color: white; position: fixed; display: flex; flex-direction: column; }
+        .sidebar-header { padding: 25px; font-size: 20px; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; gap: 10px; align-items: center; }
+        .sidebar-menu { flex: 1; padding: 20px 0; }
+        .menu-item { width: 100%; padding: 15px 25px; background: none; border: none; color: #e2e8f0; text-align: left; cursor: pointer; font-size: 14px; display: flex; gap: 12px; align-items: center; opacity: 0.8; transition: 0.2s; }
+        .menu-item:hover, .menu-item.active { background: rgba(255,255,255,0.1); border-left: 4px solid var(--primary); opacity: 1; }
+        .nav-label { padding: 10px 25px; font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: 700; margin-top: 15px; }
+
+        /* MAIN CONTENT */
+        .main-content { margin-left: 260px; padding: 30px; width: calc(100% - 260px); }
+        .section { display: none; animation: fadeIn 0.3s ease; }
+        .active-section { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* CARDS */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; }
+        .card h2 { margin: 5px 0 0; color: var(--primary); font-size: 32px; }
+        .card p { margin: 0; color: #64748b; font-size: 13px; font-weight: 600; text-transform: uppercase; }
+
+        /* TABLES */
+        .table-container { background: white; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; margin-bottom: 30px; }
+        .table-header { padding: 20px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 15px 20px; background: #f8fafc; color: #64748b; font-size: 12px; text-transform: uppercase; font-weight: 600; border-bottom: 1px solid #e2e8f0; }
+        td { padding: 15px 20px; border-bottom: 1px solid #e2e8f0; font-size: 14px; }
+
+        .btn { padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; transition: 0.2s; }
+        .btn-approve { background: #dcfce7; color: #166534; }
+        .btn-reject { background: #fee2e2; color: #991b1b; }
+        .status-pill { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+        .status-Approved { background: #dcfce7; color: #166534; }
+        .status-Pending { background: #fef3c7; color: #92400e; }
+        .hidden { display: none !important; }
+        
+        .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; }
+        .modal-content { background: white; width: 80%; height: 85%; border-radius: 12px; display: flex; flex-direction: column; }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="sidebar-header"> <i class="fas fa-university"></i> EduAchieve </div>
+    <div class="sidebar-menu">
+        <div id="proctorNav" class="hidden">
+            <div class="nav-label">Proctor Tools</div>
+            <button class="menu-item active" onclick="switchTab('dashboard', this)"> <i class="fas fa-th-large"></i> My Dashboard </button>
+            <button class="menu-item" onclick="switchTab('my-class', this)"> <i class="fas fa-users"></i> My Class </button>
+            <button class="menu-item" onclick="switchTab('verification', this)"> <i class="fas fa-check-circle"></i> Verification </button>
+        </div>
+        
+        <div id="coordNav" class="hidden">
+            <div class="nav-label">Coordination Console</div>
+            <button class="menu-item" onclick="switchTab('coord-overview', this)"> <i class="fas fa-chart-line"></i> Global Analytics </button>
+            <button class="menu-item" onclick="switchTab('coord-faculty', this)"> <i class="fas fa-users-cog"></i> Faculty Monitor </button>
+            <button class="menu-item" onclick="switchTab('hod-achievers', this)"> <i class="fas fa-trophy"></i> Achiever Rankings </button>
+        </div>
+    </div>
+    
+    <div style="padding: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
+        <div id="navFacultyName" style="font-weight: bold;">Loading...</div>
+        <div id="facultyRoleLabel" style="font-size: 11px; opacity: 0.7;">Faculty</div>
+    </div>
+    <button class="menu-item" onclick="logout()" style="color:#f87171;"> <i class="fas fa-sign-out-alt"></i> Logout </button>
+</div>
+
+<div class="main-content">
+
+    <div id="dashboard" class="section active-section">
+        <h1>Faculty Overview</h1>
+        <div class="stats-grid">
+            <div class="card"><p>My Students</p><h2 id="totalStudents">0</h2></div>
+            <div class="card"><p>To Verify</p><h2 id="pendingCount">0</h2></div>
+            <div class="card"><p>Department</p><h2 id="myDept" style="font-size: 18px;">-</h2></div>
+        </div>
+        <div class="table-container">
+            <div class="table-header"><h3>Recent Activity</h3></div>
+            <table>
+                <thead><tr><th>Student</th><th>Title</th><th>Date</th><th>Status</th></tr></thead>
+                <tbody id="recentList"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="my-class" class="section">
+        <h1>My Proctor Class</h1>
+        <div class="card" style="margin-bottom: 20px; height: 250px;"><canvas id="semChart"></canvas></div>
+        <div class="table-container">
+            <div class="table-header">
+                <input id="classSearch" placeholder="Search roll or name..." onkeyup="applyClassFilters()" style="padding:8px; border-radius:6px; border:1px solid #ddd; width:250px;">
+            </div>
+            <table>
+                <thead><tr><th>Roll No</th><th>Name</th><th>Dept</th><th>Sem</th><th>Actions</th></tr></thead>
+                <tbody id="myStudentList"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="verification" class="section">
+        <h1>Verify Achievements</h1>
+        <div class="table-container">
+            <table>
+                <thead><tr><th>Student</th><th>Achievement</th><th>Proof</th><th>Status</th><th>Action</th></tr></thead>
+                <tbody id="verificationList"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="coord-overview" class="section">
+        <h1>Global Coordination Analytics</h1>
+        <div class="stats-grid">
+            <div class="card"><p>Total Managed Students</p><h2 id="cTotalStudents">0</h2></div>
+            <div class="card"><p>Global Approved Items</p><h2 id="cTotalApproved">0</h2></div>
+            <div class="card"><p>Total Pending Verifications</p><h2 id="cTotalPending" style="color:var(--danger)">0</h2></div>
+        </div>
+        <div class="card" style="height: 350px; margin-bottom: 20px;"><canvas id="deptComparisonChart"></canvas></div>
+    </div>
+
+    <div id="coord-faculty" class="section">
+        <div class="table-header">
+            <h3>Faculty Workload & Efficiency</h3>
+            <button class="btn" style="background:var(--primary); color:white" onclick="notifyAllProctors()"><i class="fas fa-bell"></i> Remind Backlogged Proctors</button>
+        </div>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Faculty Name</th>
+                        <th>Students</th>
+                        <th>Pending Load</th>
+                        <th>Efficiency Score</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="coordFacultyTable"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="hod-achievers" class="section">
+        <h1>Achiever Rankings</h1>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div class="card" style="height: 450px; overflow-y: auto;">
+                <p style="font-weight: bold; color: var(--primary); margin-bottom: 15px;">🏆 Overall Top 10</p>
+                <div id="topStudentsList"></div>
+            </div>
+            <div class="card" style="height: 450px; overflow-y: auto;">
+                <p style="font-weight: bold; color: var(--primary); margin-bottom: 15px;">📍 Dept-wise Leaders</p>
+                <div id="deptLeadersList"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="proofModal" class="modal">
+    <div class="modal-content">
+        <div style="padding:15px; border-bottom:1px solid #eee; display:flex; justify-content:space-between;">
+            <h3>Document Preview</h3>
+            <button onclick="closeProofModal()" style="border:none; background:none; font-size:20px; cursor:pointer;">&times;</button>
+        </div>
+        <div id="proofBody" style="flex:1; background:#525659; overflow:auto;"></div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const API_URL = "http://localhost:5000";
+    const myUsername = localStorage.getItem('username');
+    let facultyData, myFacultyId, allAchievements = [], myStudents = [], deptChart, semChart;
+
+    function switchTab(id, btn) {
+        document.querySelectorAll(".section").forEach(s => s.classList.remove("active-section"));
+        document.querySelectorAll(".menu-item").forEach(b => b.classList.remove("active"));
+        const target = document.getElementById(id);
+        if(target) target.classList.add("active-section");
+        if(btn) btn.classList.add("active");
+    }
+
+    async function loadData() {
+        try {
+            const fRes = await fetch(`${API_URL}/faculty`);
+            const facultyList = await fRes.json();
+            facultyData = facultyList.find(f => f.name.toLowerCase().replace(/\s/g,'') === myUsername.toLowerCase().replace(/\s/g,''));
+
+            if (facultyData) {
+                myFacultyId = facultyData._id;
+                document.getElementById('navFacultyName').innerText = facultyData.name;
+                document.getElementById('myDept').innerText = Array.isArray(facultyData.dept) ? facultyData.dept.join(", ") : facultyData.dept;
+
+                // --- DUAL ROLE LOGIC ---
+                if(facultyData.roles.proctor) {
+                    document.getElementById('proctorNav').classList.remove('hidden');
+                    loadProctorDashboard();
+                }
+
+                if(facultyData.roles.coordinator || facultyData.roles.hod) {
+                    document.getElementById('coordNav').classList.remove('hidden');
+                    document.getElementById('facultyRoleLabel').innerText = facultyData.roles.hod ? "HOD" : "Achievement Coordinator";
+                    
+                    // Default to coordinator view if not primarily a proctor
+                    if(!facultyData.roles.proctor) switchTab('coord-overview', document.querySelector('#coordNav .menu-item'));
+                    loadCoordinatorConsole();
+                }
+            }
+        } catch(e) { console.error(e); }
+    }
+
+    async function loadProctorDashboard() {
+        const [sRes, aRes] = await Promise.all([fetch(`${API_URL}/students`), fetch(`${API_URL}/achievements?proctorId=${myFacultyId}`)]);
+        const allS = await sRes.json();
+        myStudents = allS.filter(s => s.proctorId === myFacultyId);
+        allAchievements = await aRes.json();
+        
+        document.getElementById('totalStudents').innerText = myStudents.length;
+        document.getElementById('pendingCount').innerText = allAchievements.filter(a => a.status === 'Pending').length;
+        
+        renderVerificationList();
+        renderMyClassList();
+        document.getElementById('recentList').innerHTML = allAchievements.slice(0,5).map(a => 
+            `<tr><td>${a.studentName}</td><td>${a.title}</td><td>${a.date}</td><td><span class="status-pill status-${a.status}">${a.status}</span></td></tr>`
+        ).join("");
+    }
+
+    // --- DEADLINE ALERTS (48h) ---
+    function renderVerificationList() {
+        const now = new Date();
+        document.getElementById('verificationList').innerHTML = allAchievements.map(a => {
+            const subDate = new Date(a.date);
+            const isUrgent = a.status === 'Pending' && (Math.abs(now - subDate) / 36e5) > 48;
+            return `<tr style="${isUrgent ? 'background:#fff1f2; border-left: 4px solid var(--danger);' : ''}">
+                <td><b>${a.studentName}</b>${isUrgent ? '<br><small style="color:var(--danger); font-weight:bold;"><i class="fas fa-clock"></i> OVERDUE (48h+)</small>' : ''}</td>
+                <td>${a.title}</td>
+                <td><button class="btn" onclick="openProofModal('${a._id}')">View</button></td>
+                <td><span class="status-pill status-${a.status}">${a.status}</span></td>
+                <td>${a.status === 'Pending' ? `<button class="btn btn-approve" onclick="updateStatus('${a._id}','Approved')">✔</button> <button class="btn btn-reject" onclick="updateStatus('${a._id}','Rejected')">✖</button>` : '-'}</td>
+            </tr>`;
+        }).join("");
+    }
+
+    async function loadCoordinatorConsole() {
+        const [sRes, aRes, fRes] = await Promise.all([fetch(`${API_URL}/students`), fetch(`${API_URL}/achievements`), fetch(`${API_URL}/faculty`)]);
+        const students = await sRes.json(), achs = await aRes.json(), faculty = await fRes.json();
+        const managedDepts = Array.isArray(facultyData.dept) ? facultyData.dept : [facultyData.dept];
+
+        const deptStudents = students.filter(s => managedDepts.includes(s.dept));
+        const deptAchs = achs.filter(a => {
+            const s = students.find(st => st.rollNo === a.studentRoll);
+            return s && managedDepts.includes(s.dept);
+        });
+
+        document.getElementById('cTotalStudents').innerText = deptStudents.length;
+        document.getElementById('cTotalApproved').innerText = deptAchs.filter(a => a.status === 'Approved').length;
+        document.getElementById('cTotalPending').innerText = deptAchs.filter(a => a.status === 'Pending').length;
+
+        // --- POPULATE FACULTY MONITORING ---
+        const deptProctors = faculty.filter(f => f.roles.proctor && f.dept.some(d => managedDepts.includes(d)));
+        document.getElementById('coordFacultyTable').innerHTML = deptProctors.map(p => {
+            const pending = achs.filter(a => a.proctorId?.toString() === p._id.toString() && a.status === 'Pending').length;
+            const approved = achs.filter(a => a.proctorId?.toString() === p._id.toString() && a.status === 'Approved').length;
+            const efficiency = approved > 0 ? Math.round((approved / (approved + pending)) * 100) : 0;
+
+            return `<tr>
+                <td><b>${p.name}</b></td>
+                <td>${students.filter(s => s.proctorId === p._id).length}</td>
+                <td style="color:${pending > 0 ? 'var(--danger)' : 'var(--success)'}; font-weight:bold">${pending}</td>
+                <td>
+                    <div style="width:100px; height:8px; background:#eee; border-radius:4px; overflow:hidden;"><div style="width:${efficiency}%; height:100%; background:var(--primary);"></div></div>
+                    <small>${efficiency}% clear</small>
+                </td>
+                <td>
+                    ${pending === 0 ? `<button class="btn" style="background:#fef9c3; color:#854d0e; font-size:11px;" onclick="sendKudos('${p.email}','${p.name}', true)"><i class="fas fa-certificate"></i> Kudos</button>` : 
+                    `<button class="btn" style="font-size:11px; padding:4px 8px;" onclick="sendKudos('${p.email}','${p.name}', false)">Remind</button>`}
+                </td>
+            </tr>`;
+        }).join("");
+
+        // LEADERBOARDS
+        const sorted = deptStudents.map(s => ({ name: s.name, dept: s.dept, count: deptAchs.filter(a => a.studentRoll === s.rollNo && a.status === 'Approved').length })).sort((a,b) => b.count - a.count);
+        document.getElementById('topStudentsList').innerHTML = sorted.slice(0,10).map((s,i) => `<div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #eee;"><span>${i+1}. ${s.name}</span><span class="status-pill status-Approved">${s.count} Items</span></div>`).join("");
+        
+        const dLeaders = managedDepts.map(d => sorted.find(s => s.dept === d)).filter(l => l);
+        document.getElementById('deptLeadersList').innerHTML = dLeaders.map(l => `<div style="padding:10px; border-bottom:1px solid #eee"><b>${l.dept}:</b> ${l.name} (${l.count} Items)</div>`).join("");
+
+        updateDeptChart(managedDepts, deptAchs, students);
+    }
+
+    async function sendKudos(email, name, isKudos) {
+        const action = isKudos ? "appreciation" : "a nudge";
+        if(!confirm(`Send ${action} to ${name}?`)) return;
+        await fetch(`${API_URL}/notify-proctors`, { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({ hodName: facultyData.name, proctors: [{ email, name, isKudos }] }) });
+        Toastify({ text: "Message Sent!", background: "#10b981" }).showToast();
+    }
+
+    async function notifyAllProctors() {
+        const [fRes, aRes] = await Promise.all([fetch(`${API_URL}/faculty`), fetch(`${API_URL}/achievements`)]);
+        const facultyList = await fRes.json(), achievements = await aRes.json();
+        const managedDepts = Array.isArray(facultyData.dept) ? facultyData.dept : [facultyData.dept];
+        const pendingProctors = facultyList.filter(f => {
+            const hasPending = achievements.some(a => a.proctorId?.toString() === f._id.toString() && a.status === 'Pending');
+            return f.roles.proctor && f.dept.some(d => managedDepts.includes(d)) && hasPending;
+        });
+        if (!pendingProctors.length) return alert("No pending found!");
+        const notifyData = pendingProctors.map(p => ({ email: p.email, name: p.name, pendingCount: achievements.filter(a => a.proctorId?.toString() === p._id.toString() && a.status === 'Pending').length }));
+        await fetch(`${API_URL}/notify-proctors`, { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({ hodName: facultyData.name, proctors: notifyData }) });
+        Toastify({ text: "Reminders Sent!", background: "#10b981" }).showToast();
+    }
+
+    function renderMyClassList() {
+        document.getElementById('myStudentList').innerHTML = myStudents.map(s => `<tr><td>${s.rollNo}</td><td>${s.name}</td><td>${s.dept}</td><td>Sem ${s.sem}</td><td><button class="btn" onclick="generateReport('${s.rollNo}', '${s.name}')">Report</button></td></tr>`).join("");
+        updateSemChart();
+    }
+
+    function generateReport(rollNo, name) {
+        const achs = allAchievements.filter(a => a.studentRoll === rollNo && a.status === 'Approved');
+        if(!achs.length) return alert("No approved items found!");
+        const win = window.open('', '', 'width=800,height=600');
+        let html = `<html><body><h1>Achievement Report: ${name}</h1><table border="1" width="100%"><tr><th>Title</th><th>Category</th><th>Date</th></tr>`;
+        achs.forEach(a => html += `<tr><td>${a.title}</td><td>${a.category}</td><td>${a.date}</td></tr>`);
+        html += "</table></body></html>";
+        win.document.write(html); win.print();
+    }
+
+    function applyClassFilters() {
+        const q = document.getElementById('classSearch').value.toLowerCase();
+        const rows = document.querySelectorAll("#myStudentList tr");
+        rows.forEach(r => r.style.display = r.innerText.toLowerCase().includes(q) ? "" : "none");
+    }
+
+    function updateDeptChart(depts, achs, students) {
+        const ctx = document.getElementById('deptComparisonChart').getContext('2d');
+        const data = depts.map(d => achs.filter(a => students.find(s => s.rollNo === a.studentRoll)?.dept === d).length);
+        if(deptChart) deptChart.destroy();
+        deptChart = new Chart(ctx, { type: 'bar', data: { labels: depts, datasets: [{ label: 'Approved Achievements', data: data, backgroundColor: '#4f46e5' }] }, options: { maintainAspectRatio: false } });
+    }
+
+    function updateSemChart() {
+        const ctx = document.getElementById('semChart').getContext('2d');
+        const counts = {};
+        allAchievements.forEach(a => { const s = myStudents.find(st => st.rollNo === a.studentRoll); if(s) counts[`Sem ${s.sem}`] = (counts[`Sem ${s.sem}`] || 0) + 1; });
+        if(semChart) semChart.destroy();
+        semChart = new Chart(ctx, { type: 'line', data: { labels: Object.keys(counts), datasets: [{ label: 'Submissions', data: Object.values(counts), borderColor: '#4f46e5', tension: 0.4 }] }, options: { maintainAspectRatio: false } });
+    }
+
+    async function updateStatus(id, status) {
+        let feedback = status === 'Rejected' ? prompt("Reason:") : "";
+        if(status === 'Rejected' && feedback === null) return;
+        await fetch(`${API_URL}/achievements/verify`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id, status, feedback }) });
+        loadData();
+    }
+
+    function openProofModal(id) {
+        const a = allAchievements.find(i => i._id === id);
+        const b = document.getElementById('proofBody');
+        b.innerHTML = a.fileData.includes("pdf") ? `<iframe src="${a.fileData}" width="100%" height="100%"></iframe>` : `<img src="${a.fileData}" style="max-width:100%; display:block; margin:auto;">`;
+        document.getElementById('proofModal').style.display = 'flex';
+    }
+
+    function closeProofModal() { document.getElementById('proofModal').style.display = 'none'; }
+    function logout() { localStorage.clear(); window.location.href = "login.html"; }
+    window.onload = loadData;
+</script>
+</body>
+</html-->
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>EduAchieve | Command Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    
+    <style>
+        :root { --primary: #4f46e5; --bg: #f8fafc; --sidebar: #0f172a; --text: #334155; --success: #10b981; --danger: #ef4444; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); margin: 0; display: flex; color: var(--text); }
+
+        /* SIDEBAR */
+        .sidebar { width: 260px; height: 100vh; background: var(--sidebar); color: white; position: fixed; display: flex; flex-direction: column; }
+        .sidebar-header { padding: 25px; font-size: 20px; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; gap: 10px; align-items: center; }
+        .sidebar-menu { flex: 1; padding: 20px 0; }
+        .menu-item { width: 100%; padding: 15px 25px; background: none; border: none; color: #e2e8f0; text-align: left; cursor: pointer; font-size: 14px; display: flex; gap: 12px; align-items: center; opacity: 0.8; transition: 0.2s; }
+        .menu-item:hover, .menu-item.active { background: rgba(255,255,255,0.1); border-left: 4px solid var(--primary); opacity: 1; }
+        .nav-label { padding: 10px 25px; font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: 700; margin-top: 15px; }
+
+        /* MAIN CONTENT */
+        .main-content { margin-left: 260px; padding: 30px; width: calc(100% - 260px); }
+        .section { display: none; animation: fadeIn 0.3s ease; }
+        .active-section { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* CARDS */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; }
+        .card h2 { margin: 5px 0 0; color: var(--primary); font-size: 32px; }
+        .card p { margin: 0; color: #64748b; font-size: 13px; font-weight: 600; text-transform: uppercase; }
+
+        /* TABLES */
+        .table-container { background: white; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; margin-bottom: 30px; }
+        .table-header { padding: 20px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 15px 20px; background: #f8fafc; color: #64748b; font-size: 12px; text-transform: uppercase; font-weight: 600; border-bottom: 1px solid #e2e8f0; }
+        td { padding: 15px 20px; border-bottom: 1px solid #e2e8f0; font-size: 14px; }
+
+        .btn { padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; transition: 0.2s; }
+        .btn-approve { background: #dcfce7; color: #166534; }
+        .btn-reject { background: #fee2e2; color: #991b1b; }
+        .status-pill { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+        .status-Approved { background: #dcfce7; color: #166534; }
+        .status-Pending { background: #fef3c7; color: #92400e; }
+        .hidden { display: none !important; }
+        
+        /* NEW STYLES FOR INTEREST ANALYTICS */
+        .interest-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #f1f5f9; }
+        .interest-tag { background: #e0e7ff; color: #4338ca; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 700; }
+
+        .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; }
+        .modal-content { background: white; width: 80%; height: 85%; border-radius: 12px; display: flex; flex-direction: column; }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="sidebar-header"> <i class="fas fa-university"></i> EduAchieve </div>
+    <div class="sidebar-menu">
+        <div id="proctorNav" class="hidden">
+            <div class="nav-label">Proctor Tools</div>
+            <button class="menu-item active" onclick="switchTab('dashboard', this)"> <i class="fas fa-th-large"></i> My Dashboard </button>
+            <button class="menu-item" onclick="switchTab('my-class', this)"> <i class="fas fa-users"></i> My Class </button>
+            <button class="menu-item" onclick="switchTab('verification', this)"> <i class="fas fa-check-circle"></i> Verification </button>
+            <button class="menu-item" onclick="switchTab('all-rounders', this)"> <i class="fas fa-star"></i> All Rounder Insights </button>
+        </div>
+        
+        <div id="coordNav" class="hidden">
+            <div class="nav-label">Coordination Console</div>
+            <button class="menu-item" onclick="switchTab('coord-overview', this)"> <i class="fas fa-chart-line"></i> Global Analytics </button>
+            <button class="menu-item" onclick="switchTab('coord-faculty', this)"> <i class="fas fa-users-cog"></i> Faculty Monitor </button>
+            <button class="menu-item" onclick="switchTab('hod-achievers', this)"> <i class="fas fa-trophy"></i> Achiever Rankings </button>
+            <button class="menu-item" onclick="switchTab('all-rounders', this)"> <i class="fas fa-brain"></i> Student Interests </button>
+        </div>
+    </div>
+    
+    <div style="padding: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
+        <div id="navFacultyName" style="font-weight: bold;">Loading...</div>
+        <div id="facultyRoleLabel" style="font-size: 11px; opacity: 0.7;">Faculty</div>
+    </div>
+    <button class="menu-item" onclick="logout()" style="color:#f87171;"> <i class="fas fa-sign-out-alt"></i> Logout </button>
+</div>
+
+<div class="main-content">
+
+    <div id="dashboard" class="section active-section">
+        <h1>Faculty Overview</h1>
+        <div class="stats-grid">
+            <div class="card"><p>My Students</p><h2 id="totalStudents">0</h2></div>
+            <div class="card"><p>To Verify</p><h2 id="pendingCount">0</h2></div>
+            <div class="card"><p>Department</p><h2 id="myDept" style="font-size: 18px;">-</h2></div>
+        </div>
+        <div class="table-container">
+            <div class="table-header"><h3>Recent Activity</h3></div>
+            <table>
+                <thead><tr><th>Student</th><th>Title</th><th>Date</th><th>Status</th></tr></thead>
+                <tbody id="recentList"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="my-class" class="section">
+        <h1>My Proctor Class</h1>
+        <div class="card" style="margin-bottom: 20px; height: 250px;"><canvas id="semChart"></canvas></div>
+        <div class="table-container">
+            <div class="table-header">
+                <input id="classSearch" placeholder="Search roll or name..." onkeyup="applyClassFilters()" style="padding:8px; border-radius:6px; border:1px solid #ddd; width:250px;">
+            </div>
+            <table>
+                <thead><tr><th>Roll No</th><th>Name</th><th>Dept</th><th>Sem</th><th>Actions</th></tr></thead>
+                <tbody id="myStudentList"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="verification" class="section">
+        <h1>Verify Achievements</h1>
+        <div class="table-container">
+            <table>
+                <thead><tr><th>Student</th><th>Achievement</th><th>Proof</th><th>Status</th><th>Action</th></tr></thead>
+                <tbody id="verificationList"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="all-rounders" class="section">
+        <h1>Strategic Student Insights</h1>
+        <div class="stats-grid">
+            <div class="card"><p>Verified Interests</p><h2 id="interestCount">0</h2><small>Unique Categories Found</small></div>
+            <div class="card"><p>Potential All-Rounders</p><h2 id="rounderCount">0</h2><small>Excel in 3+ Domains</small></div>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div class="card">
+                <h3>Interest Distribution</h3>
+                <p style="font-size: 12px; color: #64748b; margin-bottom: 15px;">Number of students interested in specific domains</p>
+                <div id="interestDistributionList"></div>
+            </div>
+            <div class="card">
+                <h3>Detected All-Rounders</h3>
+                <p style="font-size: 12px; color: #64748b; margin-bottom: 15px;">Students with achievements in multiple categories</p>
+                <div id="allRounderList"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="coord-overview" class="section">
+        <h1>Institute Coordination Analytics</h1>
+        <div class="stats-grid">
+            <div class="card"><p>Total Managed Students</p><h2 id="cTotalStudents">0</h2></div>
+            <div class="card"><p>Global Approved Items</p><h2 id="cTotalApproved">0</h2></div>
+            <div class="card"><p>Total Pending Verifications</p><h2 id="cTotalPending" style="color:var(--danger)">0</h2></div>
+        </div>
+        <div class="card" style="height: 350px; margin-bottom: 20px;"><canvas id="deptComparisonChart"></canvas></div>
+    </div>
+
+    <div id="coord-faculty" class="section">
+        <div class="table-header">
+            <h3>Faculty Workload & Efficiency</h3>
+            <button class="btn" style="background:var(--primary); color:white" onclick="notifyAllProctors()"><i class="fas fa-bell"></i> Remind Backlogged Proctors</button>
+        </div>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Faculty Name</th>
+                        <th>Students</th>
+                        <th>Pending Load</th>
+                        <th>Efficiency Score</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="coordFacultyTable"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="hod-achievers" class="section">
+        <h1>Achiever Rankings</h1>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div class="card" style="height: 450px; overflow-y: auto;">
+                <p style="font-weight: bold; color: var(--primary); margin-bottom: 15px;">🏆 Overall Top 10</p>
+                <div id="topStudentsList"></div>
+            </div>
+            <div class="card" style="height: 450px; overflow-y: auto;">
+                <p style="font-weight: bold; color: var(--primary); margin-bottom: 15px;">📍 Dept-wise Leaders</p>
+                <div id="deptLeadersList"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="proofModal" class="modal">
+    <div class="modal-content">
+        <div style="padding:15px; border-bottom:1px solid #eee; display:flex; justify-content:space-between;">
+            <h3>Document Preview</h3>
+            <button onclick="closeProofModal()" style="border:none; background:none; font-size:20px; cursor:pointer;">&times;</button>
+        </div>
+        <div id="proofBody" style="flex:1; background:#525659; overflow:auto;"></div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const API_URL = "http://localhost:5000";
+    const myUsername = localStorage.getItem('username');
+    let facultyData, myFacultyId, allAchievements = [], myStudents = [], deptChart, semChart;
+
+    function switchTab(id, btn) {
+        document.querySelectorAll(".section").forEach(s => s.classList.remove("active-section"));
+        document.querySelectorAll(".menu-item").forEach(b => b.classList.remove("active"));
+        const target = document.getElementById(id);
+        if(target) target.classList.add("active-section");
+        if(btn) btn.classList.add("active");
+    }
+
+    async function loadData() {
+        try {
+            const fRes = await fetch(`${API_URL}/faculty`);
+            const facultyList = await fRes.json();
+            facultyData = facultyList.find(f => f.name.toLowerCase().replace(/\s/g,'') === myUsername.toLowerCase().replace(/\s/g,''));
+
+            if (facultyData) {
+                myFacultyId = facultyData._id;
+                document.getElementById('navFacultyName').innerText = facultyData.name;
+                document.getElementById('myDept').innerText = Array.isArray(facultyData.dept) ? facultyData.dept.join(", ") : facultyData.dept;
+
+                if(facultyData.roles.proctor) {
+                    document.getElementById('proctorNav').classList.remove('hidden');
+                    loadProctorDashboard();
+                }
+
+                if(facultyData.roles.coordinator || facultyData.roles.hod) {
+                    document.getElementById('coordNav').classList.remove('hidden');
+                    document.getElementById('facultyRoleLabel').innerText = facultyData.roles.hod ? "HOD" : "Achievement Coordinator";
+                    if(!facultyData.roles.proctor) switchTab('coord-overview', document.querySelector('#coordNav .menu-item'));
+                    loadCoordinatorConsole();
+                }
+            }
+        } catch(e) { console.error(e); }
+    }
+
+    async function loadProctorDashboard() {
+        const [sRes, aRes] = await Promise.all([fetch(`${API_URL}/students`), fetch(`${API_URL}/achievements?proctorId=${myFacultyId}`)]);
+        const allS = await sRes.json();
+        myStudents = allS.filter(s => s.proctorId === myFacultyId);
+        allAchievements = await aRes.json();
+        
+        document.getElementById('totalStudents').innerText = myStudents.length;
+        document.getElementById('pendingCount').innerText = allAchievements.filter(a => a.status === 'Pending').length;
+        
+        renderVerificationList();
+        renderMyClassList();
+        analyzeInterests(myStudents, allAchievements); // Analyze specific proctor batch
+
+        document.getElementById('recentList').innerHTML = allAchievements.slice(0,5).map(a => 
+            `<tr><td>${a.studentName}</td><td>${a.title}</td><td>${a.date}</td><td><span class="status-pill status-${a.status}">${a.status}</span></td></tr>`
+        ).join("");
+    }
+
+    // --- NEW: INTEREST & ALL-ROUNDER ANALYSIS LOGIC ---
+    function analyzeInterests(students, achievements) {
+        const approved = achievements.filter(a => a.status === 'Approved');
+        
+        // 1. Map Interests (Count students per category)
+        const interestMap = {};
+        approved.forEach(a => {
+            if (!interestMap[a.category]) interestMap[a.category] = new Set();
+            interestMap[a.category].add(a.studentRoll);
+        });
+
+        const interestArray = Object.entries(interestMap).map(([name, set]) => ({ name, count: set.size }));
+        interestArray.sort((a,b) => b.count - a.count);
+
+        document.getElementById('interestCount').innerText = interestArray.length;
+        document.getElementById('interestDistributionList').innerHTML = interestArray.map(item => `
+            <div class="interest-item">
+                <span><b>${item.name}</b></span>
+                <span class="interest-tag">${item.count} Students</span>
+            </div>
+        `).join("");
+
+        // 2. Identify All-Rounders (Diversity check)
+        const rounders = students.map(s => {
+            const studentAchs = approved.filter(a => a.studentRoll === s.rollNo);
+            const uniqueCats = new Set(studentAchs.map(a => a.category));
+            return { name: s.name, roll: s.rollNo, diversity: uniqueCats.size, total: studentAchs.length };
+        })
+        .filter(res => res.diversity >= 3)
+        .sort((a,b) => b.diversity - a.diversity);
+
+        document.getElementById('rounderCount').innerText = rounders.length;
+        document.getElementById('allRounderList').innerHTML = rounders.length > 0 ? rounders.map(r => `
+            <div style="padding:12px; border-bottom:1px solid #eee;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <b>${r.name}</b>
+                    <span class="status-pill status-Approved">${r.diversity} Categories</span>
+                </div>
+                <small style="color:#64748b;">Roll: ${r.roll} | Approved Items: ${r.total}</small>
+            </div>
+        `).join("") : "<p style='text-align:center; color:#94a3b8; padding:20px;'>No all-rounders identified in this group.</p>";
+    }
+
+    function renderVerificationList() {
+        const now = new Date();
+        document.getElementById('verificationList').innerHTML = allAchievements.map(a => {
+            const subDate = new Date(a.date);
+            const isUrgent = a.status === 'Pending' && (Math.abs(now - subDate) / 36e5) > 48;
+            return `<tr style="${isUrgent ? 'background:#fff1f2; border-left: 4px solid var(--danger);' : ''}">
+                <td><b>${a.studentName}</b>${isUrgent ? '<br><small style="color:var(--danger); font-weight:bold;"><i class="fas fa-clock"></i> OVERDUE (48h+)</small>' : ''}</td>
+                <td>${a.title}</td>
+                <td><button class="btn" onclick="openProofModal('${a._id}')">View</button></td>
+                <td><span class="status-pill status-${a.status}">${a.status}</span></td>
+                <td>${a.status === 'Pending' ? `<button class="btn btn-approve" onclick="updateStatus('${a._id}','Approved')">✔</button> <button class="btn btn-reject" onclick="updateStatus('${a._id}','Rejected')">✖</button>` : '-'}</td>
+            </tr>`;
+        }).join("");
+    }
+
+    async function loadCoordinatorConsole() {
+        const [sRes, aRes, fRes] = await Promise.all([fetch(`${API_URL}/students`), fetch(`${API_URL}/achievements`), fetch(`${API_URL}/faculty`)]);
+        const students = await sRes.json(), achs = await aRes.json(), faculty = await fRes.json();
+        const managedDepts = Array.isArray(facultyData.dept) ? facultyData.dept : [facultyData.dept];
+
+        const deptStudents = students.filter(s => managedDepts.includes(s.dept));
+        const deptAchs = achs.filter(a => {
+            const s = students.find(st => st.rollNo === a.studentRoll);
+            return s && managedDepts.includes(s.dept);
+        });
+
+        document.getElementById('cTotalStudents').innerText = deptStudents.length;
+        document.getElementById('cTotalApproved').innerText = deptAchs.filter(a => a.status === 'Approved').length;
+        document.getElementById('cTotalPending').innerText = deptAchs.filter(a => a.status === 'Pending').length;
+
+        // Interest analysis for whole department
+        analyzeInterests(deptStudents, deptAchs);
+
+        const deptProctors = faculty.filter(f => f.roles.proctor && f.dept.some(d => managedDepts.includes(d)));
+        document.getElementById('coordFacultyTable').innerHTML = deptProctors.map(p => {
+            const pending = achs.filter(a => a.proctorId?.toString() === p._id.toString() && a.status === 'Pending').length;
+            const approved = achs.filter(a => a.proctorId?.toString() === p._id.toString() && a.status === 'Approved').length;
+            const efficiency = approved > 0 ? Math.round((approved / (approved + pending)) * 100) : 0;
+            return `<tr><td><b>${p.name}</b></td><td>${students.filter(s => s.proctorId === p._id).length}</td><td style="color:${pending > 0 ? 'var(--danger)' : 'var(--success)'}; font-weight:bold">${pending}</td><td><div style="width:100px; height:8px; background:#eee; border-radius:4px; overflow:hidden;"><div style="width:${efficiency}%; height:100%; background:var(--primary);"></div></div><small>${efficiency}%</small></td><td><button class="btn" style="font-size:11px;" onclick="sendKudos('${p.email}','${p.name}', ${pending === 0})">${pending === 0 ? 'Kudos' : 'Remind'}</button></td></tr>`;
+        }).join("");
+
+        const sorted = deptStudents.map(s => ({ name: s.name, dept: s.dept, count: deptAchs.filter(a => a.studentRoll === s.rollNo && a.status === 'Approved').length })).sort((a,b) => b.count - a.count);
+        document.getElementById('topStudentsList').innerHTML = sorted.slice(0,10).map((s,i) => `<div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #eee;"><span>${i+1}. ${s.name}</span><span class="status-pill status-Approved">${s.count} Items</span></div>`).join("");
+        const dLeaders = managedDepts.map(d => sorted.find(s => s.dept === d)).filter(l => l);
+        document.getElementById('deptLeadersList').innerHTML = dLeaders.map(l => `<div style="padding:10px; border-bottom:1px solid #eee"><b>${l.dept}:</b> ${l.name} (${l.count} Items)</div>`).join("");
+
+        updateDeptChart(managedDepts, deptAchs, students);
+    }
+
+    async function sendKudos(email, name, isKudos) {
+        await fetch(`${API_URL}/notify-proctors`, { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({ hodName: facultyData.name, proctors: [{ email, name, isKudos }] }) });
+        Toastify({ text: "Message Sent!", background: "#10b981" }).showToast();
+    }
+
+    async function notifyAllProctors() {
+        const [fRes, aRes] = await Promise.all([fetch(`${API_URL}/faculty`), fetch(`${API_URL}/achievements`)]);
+        const facultyList = await fRes.json(), achievements = await aRes.json();
+        const managedDepts = Array.isArray(facultyData.dept) ? facultyData.dept : [facultyData.dept];
+        const pendingProctors = facultyList.filter(f => {
+            const hasPending = achievements.some(a => a.proctorId?.toString() === f._id.toString() && a.status === 'Pending');
+            return f.roles.proctor && f.dept.some(d => managedDepts.includes(d)) && hasPending;
+        });
+        if (!pendingProctors.length) return alert("No pending found!");
+        const notifyData = pendingProctors.map(p => ({ email: p.email, name: p.name, pendingCount: achievements.filter(a => a.proctorId?.toString() === p._id.toString() && a.status === 'Pending').length }));
+        await fetch(`${API_URL}/notify-proctors`, { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({ hodName: facultyData.name, proctors: notifyData }) });
+        Toastify({ text: "Reminders Sent!", background: "#10b981" }).showToast();
+    }
+
+    function renderMyClassList() {
+        document.getElementById('myStudentList').innerHTML = myStudents.map(s => `<tr><td>${s.rollNo}</td><td>${s.name}</td><td>${s.dept}</td><td>Sem ${s.sem}</td><td><button class="btn" onclick="generateReport('${s.rollNo}', '${s.name}')">Report</button></td></tr>`).join("");
+        updateSemChart();
+    }
+
+    function generateReport(rollNo, name) {
+        const achs = allAchievements.filter(a => a.studentRoll === rollNo && a.status === 'Approved');
+        if(!achs.length) return alert("No approved items!");
+        const win = window.open('', '', 'width=800,height=600');
+        let html = `<html><body><h1>Report: ${name}</h1><table border="1" width="100%"><tr><th>Title</th><th>Category</th><th>Date</th></tr>`;
+        achs.forEach(a => html += `<tr><td>${a.title}</td><td>${a.category}</td><td>${a.date}</td></tr>`);
+        html += "</table></body></html>";
+        win.document.write(html); win.print();
+    }
+
+    function applyClassFilters() {
+        const q = document.getElementById('classSearch').value.toLowerCase();
+        document.querySelectorAll("#myStudentList tr").forEach(r => r.style.display = r.innerText.toLowerCase().includes(q) ? "" : "none");
+    }
+
+    function updateDeptChart(depts, achs, students) {
+        const ctx = document.getElementById('deptComparisonChart').getContext('2d');
+        const data = depts.map(d => achs.filter(a => students.find(s => s.rollNo === a.studentRoll)?.dept === d).length);
+        if(deptChart) deptChart.destroy();
+        deptChart = new Chart(ctx, { type: 'bar', data: { labels: depts, datasets: [{ label: 'Approved Achievements', data: data, backgroundColor: '#4f46e5' }] }, options: { maintainAspectRatio: false } });
+    }
+
+    function updateSemChart() {
+        const ctx = document.getElementById('semChart').getContext('2d');
+        const counts = {};
+        allAchievements.forEach(a => { const s = myStudents.find(st => st.rollNo === a.studentRoll); if(s) counts[`Sem ${s.sem}`] = (counts[`Sem ${s.sem}`] || 0) + 1; });
+        if(semChart) semChart.destroy();
+        semChart = new Chart(ctx, { type: 'line', data: { labels: Object.keys(counts), datasets: [{ label: 'Submissions', data: Object.values(counts), borderColor: '#4f46e5', tension: 0.4 }] }, options: { maintainAspectRatio: false } });
+    }
+
+    async function updateStatus(id, status) {
+        let feedback = status === 'Rejected' ? prompt("Reason:") : "";
+        if(status === 'Rejected' && feedback === null) return;
+        await fetch(`${API_URL}/achievements/verify`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id, status, feedback }) });
+        loadData();
+    }
+
+    function openProofModal(id) {
+        const a = allAchievements.find(i => i._id === id);
+        const b = document.getElementById('proofBody');
+        b.innerHTML = a.fileData.includes("pdf") ? `<iframe src="${a.fileData}" width="100%" height="100%"></iframe>` : `<img src="${a.fileData}" style="max-width:100%; display:block; margin:auto;">`;
+        document.getElementById('proofModal').style.display = 'flex';
+    }
+
+    function closeProofModal() { document.getElementById('proofModal').style.display = 'none'; }
+    function logout() { localStorage.clear(); window.location.href = "login.html"; }
+    window.onload = loadData;
+</script>
+</body>
+</html>

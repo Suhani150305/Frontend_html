@@ -8531,6 +8531,10 @@ document.addEventListener("DOMContentLoaded", () => { loadDashboard(); });
 </html-->
 
 
+
+
+<!--my REfined-->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8720,8 +8724,58 @@ document.addEventListener("DOMContentLoaded", () => { loadDashboard(); });
     </div>
 </div>
 
-<div class="modal" id="facultyModal"><div class="modal-content"><h3><i class="fas fa-user-plus"></i> Add New Faculty</h3><div class="form-group"><label>Full Name</label><input id="fName"></div><div class="form-group"><label>Department</label><select id="fDept"><option value="CE">CE</option><option value="IT">IT</option><option value="CSBS">CSBS</option><option value="AI">AI</option></select></div><div class="form-group"><label>Email Address</label><input id="fEmail"></div><label>System Roles</label><div class="checkbox-grid"><div class="checkbox-row"><input type="checkbox" id="fRoleHOD"><label>HOD</label></div><div class="checkbox-row"><input type="checkbox" id="fRoleCoord"><label>Coordinator</label></div><div class="checkbox-row"><input type="checkbox" id="fRoleProctor"><label>Proctor</label></div></div><div class="modal-btns"><button class="btn btn-secondary" onclick="closeFacultyModal()">Cancel</button><button class="btn btn-primary" onclick="saveFaculty()">Save Faculty</button></div></div></div>
-<div class="modal" id="editFacultyModal"><div class="modal-content"><h3><i class="fas fa-edit"></i> Edit Faculty</h3><div class="form-group"><label>Name</label><input id="editFName"></div><div class="form-group"><label>Dept</label><select id="editFDept"><option value="CE">CE</option><option value="IT">IT</option><option value="CSBS">CSBS</option><option value="AI">AI</option></select></div><div class="form-group"><label>Email</label><input id="editFEmail"></div><div class="checkbox-grid"><div class="checkbox-row"><input type="checkbox" id="editFRoleHOD"><label>HOD</label></div><div class="checkbox-row"><input type="checkbox" id="editFRoleCoord"><label>Coordinator</label></div><div class="checkbox-row"><input type="checkbox" id="editFRoleProctor"><label>Proctor</label></div></div><div class="modal-btns"><button class="btn btn-secondary" onclick="closeEditFacultyModal()">Cancel</button><button class="btn btn-primary" onclick="updateFaculty()">Update Changes</button></div></div></div>
+<div class="modal" id="facultyModal">
+    <div class="modal-content">
+        <h3><i class="fas fa-user-plus"></i> Add New Faculty</h3>
+        <div class="form-group"><label>Full Name</label><input id="fName"></div>
+        <div class="form-group">
+            <label>Departments (Select multiple for HOD)</label>
+            <div class="checkbox-grid" id="fDeptsBox">
+                <div class="checkbox-row"><input type="checkbox" name="fDept" value="CE"><label>CE</label></div>
+                <div class="checkbox-row"><input type="checkbox" name="fDept" value="IT"><label>IT</label></div>
+                <div class="checkbox-row"><input type="checkbox" name="fDept" value="CSBS"><label>CSBS</label></div>
+                <div class="checkbox-row"><input type="checkbox" name="fDept" value="AI"><label>AI</label></div>
+            </div>
+        </div>
+        <div class="form-group"><label>Email Address</label><input id="fEmail"></div>
+        <label>System Roles</label>
+        <div class="checkbox-grid">
+            <div class="checkbox-row"><input type="checkbox" id="fRoleHOD"><label>HOD</label></div>
+            <div class="checkbox-row"><input type="checkbox" id="fRoleCoord"><label>Coordinator</label></div>
+            <div class="checkbox-row"><input type="checkbox" id="fRoleProctor"><label>Proctor</label></div>
+        </div>
+        <div class="modal-btns">
+            <button class="btn btn-secondary" onclick="closeFacultyModal()">Cancel</button>
+            <button class="btn btn-primary" onclick="saveFaculty()">Save Faculty</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="editFacultyModal">
+    <div class="modal-content">
+        <h3><i class="fas fa-edit"></i> Edit Faculty</h3>
+        <div class="form-group"><label>Name</label><input id="editFName"></div>
+        <div class="form-group">
+            <label>Departments</label>
+            <div class="checkbox-grid" id="editFDeptsBox">
+                <div class="checkbox-row"><input type="checkbox" name="editFDept" value="CE"><label>CE</label></div>
+                <div class="checkbox-row"><input type="checkbox" name="editFDept" value="IT"><label>IT</label></div>
+                <div class="checkbox-row"><input type="checkbox" name="editFDept" value="CSBS"><label>CSBS</label></div>
+                <div class="checkbox-row"><input type="checkbox" name="editFDept" value="AI"><label>AI</label></div>
+            </div>
+        </div>
+        <div class="form-group"><label>Email</label><input id="editFEmail"></div>
+        <div class="checkbox-grid">
+            <div class="checkbox-row"><input type="checkbox" id="editFRoleHOD"><label>HOD</label></div>
+            <div class="checkbox-row"><input type="checkbox" id="editFRoleCoord"><label>Coordinator</label></div>
+            <div class="checkbox-row"><input type="checkbox" id="editFRoleProctor"><label>Proctor</label></div>
+        </div>
+        <div class="modal-btns">
+            <button class="btn btn-secondary" onclick="closeEditFacultyModal()">Cancel</button>
+            <button class="btn btn-primary" onclick="updateFaculty()">Update Changes</button>
+        </div>
+    </div>
+</div>
 <div class="modal" id="studentModal"><div class="modal-content"><h3><i class="fas fa-user-plus"></i> Add Student</h3><div class="form-group"><label>Full Name</label><input id="sName"></div><div class="form-group"><label>Roll Number</label><input id="sRoll"></div><div class="form-group"><label>Email</label><input id="sEmail"></div><div class="form-group"><label>Semester</label><select id="sSem"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option></select></div><div class="form-group"><label>Department</label><select id="sDept"><option value="CE">CE</option><option value="IT">IT</option><option value="CSBS">CSBS</option><option value="AI">AI</option></select></div><div class="modal-btns"><button class="btn btn-secondary" onclick="closeStudentModal()">Cancel</button><button class="btn btn-primary" onclick="saveStudent()">Register Student</button></div></div></div>
 <div class="modal" id="csvModal"><div class="modal-content"><h3><i class="fas fa-file-csv"></i> Bulk Student Upload</h3><div class="form-group"><label>Department</label><select id="csvDept"><option value="" disabled selected>Select Dept</option><option value="CE">CE</option><option value="IT">IT</option><option value="CSBS">CSBS</option><option value="AI">AI</option></select></div><div class="form-group"><label>Semester</label><select id="csvSem"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option></select></div><div class="form-group"><label>Select CSV File</label><input type="file" id="csvFile" accept=".csv" style="border: 2px dashed var(--border-color); padding: 20px; background: var(--bg-color);"></div><div class="modal-btns"><button class="btn btn-secondary" onclick="closeCSVModal()">Cancel</button><button class="btn btn-primary" onclick="processCSVUpload()">Upload Students</button></div></div></div>
 <div class="modal" id="allocationModal"><div class="modal-content"><h3><i class="fas fa-link"></i> Assign Class to Proctor</h3><div class="form-group"><label>Department</label><select id="allocDept"><option value="CE">CE</option><option value="IT">IT</option><option value="CSBS">CSBS</option><option value="AI">AI</option></select></div><div class="form-group"><label>Semester</label><select id="allocSem"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option></select></div><div class="form-group"><label>Select Proctor</label><select id="allocFaculty"></select></div><div class="modal-btns"><button class="btn btn-secondary" onclick="closeAllocationModal()">Cancel</button><button class="btn btn-primary" onclick="saveClassAllocation()">Confirm Assignment</button></div></div></div>
@@ -8775,7 +8829,9 @@ function openActionModal() {
 function closeActionModal() { document.getElementById("actionModal").style.display = "none"; }
 
 // --- FACULTY ---
+//---change kiya ---
 let allFaculty = [], allStudents = [], currentEditFacultyId = null;
+
 async function loadFaculty() {
     const [f, s] = await Promise.all([fetch(`${API_URL}/faculty`), fetch(`${API_URL}/students`)]);
     allFaculty = await f.json(); allStudents = await s.json();
@@ -8784,48 +8840,97 @@ async function loadFaculty() {
 
 function renderFaculty() {
     const search = document.getElementById("facultySearch").value.toLowerCase();
-    const dept = document.getElementById("facultyFilterDept").value;
+    const filterDept = document.getElementById("facultyFilterDept").value;
     const list = document.getElementById("facultyList"); list.innerHTML = "";
     
-    allFaculty.filter(f => f.name.toLowerCase().includes(search) && (dept === "all" || f.dept === dept)).forEach(f => {
+    allFaculty.filter(f => {
+        const matchesName = f.name.toLowerCase().includes(search);
+        const depts = Array.isArray(f.dept) ? f.dept : [f.dept];
+        const matchesDept = filterDept === "all" || depts.includes(filterDept);
+        return matchesName && matchesDept;
+    }).forEach(f => {
         const myStudents = allStudents.filter(s => s.proctorId === f._id);
-        let listStr = ""; myStudents.forEach((s, i) => listStr += `${i+1}. ${s.name} (${s.rollNo})\n`);
-        const wa = `https://wa.me/?text=Hello ${f.name}, Students:%0A${encodeURIComponent(listStr)}`;
-        const mail = `mailto:?subject=Students&body=${encodeURIComponent(listStr)}`;
+        const deptDisplay = Array.isArray(f.dept) ? f.dept.join(", ") : f.dept;
         
         let roles = [];
         if(f.roles?.hod) roles.push('<span class="status-pill status-hod">HOD</span>');
         if(f.roles?.coordinator) roles.push('<span class="status-pill status-coord">Coord</span>');
         if(f.roles?.proctor) roles.push(`<span class="status-pill status-proctor">Proctor <span class="count-badge">${myStudents.length}</span></span>`);
-        if(roles.length === 0) roles.push('<span class="status-pill status-faculty">Faculty</span>');
 
-        list.innerHTML += `<tr><td><b>${f.name}</b></td><td>${f.dept}</td><td>${roles.join(" ")}</td>
-        <td><a href="${wa}" target="_blank"><i class="fab fa-whatsapp notify-icon" style="color:#25D366"></i></a><a href="${mail}"><i class="fas fa-envelope notify-icon" style="color:#4f46e5"></i></a></td>
-        <td><button class="btn btn-sm btn-primary" onclick="openEditFacultyModal('${f._id}')">Edit</button> <button class="btn btn-sm btn-secondary" onclick="deleteFaculty('${f._id}')"><i class="fas fa-trash"></i></button></td></tr>`;
+        list.innerHTML += `<tr>
+            <td><b>${f.name}</b></td>
+            <td>${deptDisplay}</td>
+            <td>${roles.join(" ")}</td>
+            <td>${f.email || '-'}</td>
+            <td>
+                <button class="btn btn-sm btn-primary" onclick="openEditFacultyModal('${f._id}')">Edit</button> 
+                <button class="btn btn-sm btn-secondary" onclick="deleteFaculty('${f._id}')"><i class="fas fa-trash"></i></button>
+            </td></tr>`;
     });
 }
 
 function openFacultyModal() { document.getElementById("facultyModal").style.display="flex"; }
-function closeFacultyModal() { document.getElementById("facultyModal").style.display="none"; }
+function closeFacultyModal() { 
+    document.getElementById("facultyModal").style.display="none"; 
+    document.querySelectorAll('input[name="fDept"]').forEach(cb => cb.checked = false);
+}
+
 async function saveFaculty() {
-    const n=document.getElementById("fName").value; const d=document.getElementById("fDept").value; const e=document.getElementById("fEmail").value;
-    const r = { hod: document.getElementById("fRoleHOD").checked, coordinator: document.getElementById("fRoleCoord").checked, proctor: document.getElementById("fRoleProctor").checked };
-    await fetch(`${API_URL}/faculty`, { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({name:n, dept:d, email:e, roles:r}) });
+    const n = document.getElementById("fName").value; 
+    const e = document.getElementById("fEmail").value;
+    const depts = Array.from(document.querySelectorAll('input[name="fDept"]:checked')).map(cb => cb.value);
+    
+    if(depts.length === 0) return alert("Select at least one department");
+
+    const r = { 
+        hod: document.getElementById("fRoleHOD").checked, 
+        coordinator: document.getElementById("fRoleCoord").checked, 
+        proctor: document.getElementById("fRoleProctor").checked 
+    };
+
+    await fetch(`${API_URL}/faculty`, { 
+        method: "POST", 
+        headers: {"Content-Type":"application/json"}, 
+        body: JSON.stringify({name:n, dept:depts, email:e, roles:r}) 
+    });
     closeFacultyModal(); loadFaculty();
 }
 
 function openEditFacultyModal(id) {
     const f = allFaculty.find(x => x._id === id); if(!f) return;
     currentEditFacultyId = id;
-    document.getElementById("editFName").value = f.name; document.getElementById("editFDept").value = f.dept; document.getElementById("editFEmail").value = f.email || "";
-    document.getElementById("editFRoleHOD").checked = f.roles?.hod; document.getElementById("editFRoleCoord").checked = f.roles?.coordinator; document.getElementById("editFRoleProctor").checked = f.roles?.proctor;
+    document.getElementById("editFName").value = f.name; 
+    document.getElementById("editFEmail").value = f.email || "";
+    
+    const facultyDepts = Array.isArray(f.dept) ? f.dept : [f.dept];
+    document.querySelectorAll('input[name="editFDept"]').forEach(cb => {
+        cb.checked = facultyDepts.includes(cb.value);
+    });
+
+    document.getElementById("editFRoleHOD").checked = f.roles?.hod; 
+    document.getElementById("editFRoleCoord").checked = f.roles?.coordinator; 
+    document.getElementById("editFRoleProctor").checked = f.roles?.proctor;
     document.getElementById("editFacultyModal").style.display = "flex";
 }
+
 function closeEditFacultyModal() { document.getElementById("editFacultyModal").style.display = "none"; }
+
 async function updateFaculty() {
-    const name = document.getElementById("editFName").value; const dept = document.getElementById("editFDept").value; const email = document.getElementById("editFEmail").value;
-    const roles = { hod: document.getElementById("editFRoleHOD").checked, coordinator: document.getElementById("editFRoleCoord").checked, proctor: document.getElementById("editFRoleProctor").checked };
-    await fetch(`${API_URL}/faculty/${currentEditFacultyId}`, { method: "PUT", headers: {"Content-Type":"application/json"}, body: JSON.stringify({name,dept,email,roles}) });
+    const name = document.getElementById("editFName").value; 
+    const email = document.getElementById("editFEmail").value;
+    const depts = Array.from(document.querySelectorAll('input[name="editFDept"]:checked')).map(cb => cb.value);
+    
+    const roles = { 
+        hod: document.getElementById("editFRoleHOD").checked, 
+        coordinator: document.getElementById("editFRoleCoord").checked, 
+        proctor: document.getElementById("editFRoleProctor").checked 
+    };
+
+    await fetch(`${API_URL}/faculty/${currentEditFacultyId}`, { 
+        method: "PUT", 
+        headers: {"Content-Type":"application/json"}, 
+        body: JSON.stringify({name, dept: depts, email, roles}) 
+    });
     closeEditFacultyModal(); loadFaculty();
 }
 
@@ -9027,4 +9132,4 @@ document.addEventListener("DOMContentLoaded", () => { loadDashboard(); });
 </script>
 
 </body>
-</html>
+</html-->
