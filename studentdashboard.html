@@ -584,7 +584,7 @@
 
 
 
-<!DOCTYPE html>
+<!--DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -1145,4 +1145,1223 @@
         window.onload = () => { document.getElementById('completionDate').setAttribute('max', todayStr); loadProfile(); loadAchievements(); };
     </script>
 </body>
+</html-->
+
+
+
+
+
+
+
+
+<!--DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>EduAchieve | Student Portal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
+    <style>
+        :root { --primary: #2563eb; --bg: #f0f2f5; --sidebar: #0f172a; --text: #1e293b; --danger: #ef4444; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; display: flex; }
+
+        /* SIDEBAR */
+        .sidebar { width: 260px; height: 100vh; background: var(--sidebar); color: white; position: fixed; display: flex; flex-direction: column; z-index: 100; }
+        .sidebar-header { padding: 30px 20px; font-size: 22px; font-weight: bold; border-bottom: 1px solid #1e293b; color: var(--primary); }
+        .sidebar-menu { flex-grow: 1; padding: 20px 0; overflow-y: auto; }
+        .menu-item { width: 100%; border: none; background: none; color: #94a3b8; padding: 15px 25px; display: flex; align-items: center; cursor: pointer; font-size: 15px; transition: 0.3s; }
+        .menu-item:hover, .menu-item.active { background: #1e293b; color: white; border-left: 4px solid var(--primary); }
+        .menu-item i { margin-right: 15px; width: 20px; text-align: center; }
+        .logout-item { border-top: 1px solid #1e293b; padding: 20px 25px; color: #f87171; text-decoration: none; display: flex; align-items: center; cursor: pointer; }
+
+        /* MAIN CONTENT */
+        .main-content { margin-left: 260px; width: calc(100% - 260px); padding: 40px; }
+        .profile-card { background: white; padding: 25px; border-radius: 12px; display: flex; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 30px; border-left: 5px solid var(--primary); }
+        .profile-pic { width: 90px; height: 90px; border-radius: 50%; border: 3px solid var(--primary); object-fit: cover; background: #eee; }
+        .profile-info { margin-left: 20px; flex-grow: 1; }
+        .profile-info h2 { margin: 0; color: var(--text); font-size: 24px; }
+
+        /* STATS */
+        .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; margin-bottom: 30px; }
+        .stat-box { background: white; padding: 20px 10px; border-radius: 12px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-bottom: 4px solid #e2e8f0; transition: 0.3s; }
+        .stat-box:hover { transform: translateY(-5px); border-bottom-color: var(--primary); }
+        .stat-box h3 { margin: 0; font-size: 26px; color: var(--primary); }
+        .stat-box p { margin: 5px 0 0; color: #64748b; font-weight: 600; font-size: 13px; }
+
+        /* TABLE */
+        .content-box { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 15px; border-bottom: 2px solid #f1f5f9; color: #64748b; font-size: 13px; text-transform: uppercase; }
+        td { padding: 15px; border-bottom: 1px solid #f1f5f9; font-size: 14px; vertical-align: top; }
+
+        /* STATUS BADGES & FEEDBACK */
+        .status-pill { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; display: inline-block; }
+        .status-pending { background: #fef3c7; color: #92400e; }
+        .status-approved { background: #dcfce7; color: #166534; }
+        .status-rejected { background: #fee2e2; color: #991b1b; }
+        .feedback-box { margin-top: 8px; font-size: 12px; color: var(--danger); background: #fef2f2; padding: 6px 10px; border-radius: 6px; border-left: 3px solid var(--danger); display: inline-block; max-width: 200px; }
+
+        /* SECURITY & RESUME BOXES */
+        .security-container, .resume-container { max-width: 800px; margin: 40px auto; background: white; padding: 40px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        .security-container h2, .resume-container h2 { color: var(--primary); margin-bottom: 25px; text-align: center; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #475569; }
+        .form-group input, .form-group textarea { width: 100%; padding: 12px; border: 1.5px solid #e2e8f0; border-radius: 8px; box-sizing: border-box; transition: 0.3s; font-family: inherit;}
+        .form-group input:focus, .form-group textarea:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+        .btn-update { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; transition: 0.2s;}
+        .btn-update:hover { filter: brightness(0.9); }
+
+        /* BUTTONS */
+        .btn { padding: 10px 20px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .btn-add { background: var(--primary); color: white; }
+        .action-btn { background: none; border: none; cursor: pointer; font-size: 16px; margin: 0 5px; }
+        .btn-view { color: #2563eb; }
+        .btn-download { color: #10b981; }
+        .btn-edit { color: #f59e0b; }
+        .btn-delete { color: #ef4444; }
+
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 1000; }
+        .modal-body { background: white; padding: 30px; border-radius: 12px; width: 450px; max-height: 90vh; overflow-y: auto; }
+        .hidden { display: none !important; }
+        
+        /* Checkbox styling */
+        .ach-checkbox-list { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; max-height: 250px; overflow-y: auto; margin-bottom: 20px; }
+        .ach-checkbox-list label { display: flex; align-items: center; gap: 10px; padding: 8px; border-bottom: 1px solid #e2e8f0; cursor: pointer; font-weight: 500; font-size: 14px; color: var(--text); }
+        .ach-checkbox-list label:last-child { border-bottom: none; }
+        .ach-checkbox-list input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="sidebar-header">EduAchieve</div>
+        <div class="sidebar-menu">
+            <button class="menu-item active" onclick="showCategory('All', this)"><i class="fas fa-th-large"></i> Dashboard</button>
+            <button class="menu-item" onclick="showCategory('Certificate', this)"><i class="fas fa-award"></i> Certificates</button>
+            <button class="menu-item" onclick="showCategory('Internship', this)"><i class="fas fa-user-tie"></i> Internships</button>
+            <button class="menu-item" onclick="showCategory('Competition', this)"><i class="fas fa-trophy"></i> Competitions</button>
+            <button class="menu-item" onclick="showCategory('Extracurricular', this)"><i class="fas fa-palette"></i> Extracurricular</button>
+            <button class="menu-item" onclick="showCategory('Sports', this)"><i class="fas fa-running"></i> Sports</button>
+            
+            <button class="menu-item" onclick="showResumeView(this)" style="color: #f59e0b; border-top: 1px solid #1e293b; margin-top: 10px; padding-top: 20px;"><i class="fas fa-file-contract"></i> Resume Builder</button>
+            <button class="menu-item" onclick="toggleSecurityView(this)"><i class="fas fa-lock"></i> Security</button>
+        </div>
+        <a class="logout-item" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    </div>
+
+    <div class="main-content">
+        <div id="dashboard-view">
+            <div class="profile-card">
+                <img src="" class="profile-pic" id="profilePic">
+                <div class="profile-info">
+                    <h2 id="studentName">Loading...</h2>
+                    <p id="studentDetails">Fetching details...</p>
+                    <div style="margin-top:10px;">
+                        <span id="proctorName" style="background:#e0e7ff; color:#3730a3; padding:5px 12px; border-radius:6px; font-size:12px; font-weight:bold;">Proctor: Loading...</span>
+                        <button class="btn" style="background:#64748b; color:white; padding:5px 12px; font-size:12px; margin-left:10px;" onclick="openProfileModal()">
+                            <i class="fas fa-user-edit"></i> Edit Profile
+                        </button>
+                    </div>
+                </div>
+                <div style="display:flex;">
+                    <button class="btn btn-add" style="margin-left:10px" onclick="openModal()">+ Add Achievement</button>
+                </div>
+            </div>
+
+            <div class="stats-row">
+                <div class="stat-box"><h3 id="cnt-all">0</h3><p>Total</p></div>
+                <div class="stat-box"><h3 id="cnt-cert">0</h3><p>Certificates</p></div>
+                <div class="stat-box"><h3 id="cnt-int">0</h3><p>Internships</p></div>
+                <div class="stat-box"><h3 id="cnt-comp">0</h3><p>Competitions</p></div>
+                <div class="stat-box"><h3 id="cnt-extra">0</h3><p>Extra-Curr.</p></div>
+                <div class="stat-box"><h3 id="cnt-sports">0</h3><p>Sports</p></div>
+            </div>
+
+            <div class="content-box">
+                <div class="table-header">
+                    <h3 id="currentCategoryTitle">All Records</h3>
+                    <input type="text" id="tableSearch" placeholder="Search..." onkeyup="render()" style="padding:10px; border:1px solid #ddd; border-radius:8px; width:250px;">
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Title & Description</th>
+                            <th>Category</th>
+                            <th>Dates</th>
+                            <th>Status & Remarks</th>
+                            <th>Proof</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dataTable"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="resume-view" class="hidden">
+            <div class="resume-container">
+                <h2><i class="fas fa-file-contract"></i> Professional Resume Builder</h2>
+                <p style="color:#64748b; margin-bottom:25px; text-align:center;">Fill out your details and select the achievements you want to highlight for this specific resume.</p>
+                
+                <div class="form-group">
+                    <label>Professional Summary (Bio)</label>
+                    <textarea id="resBio" rows="3" placeholder="I am a passionate CS student looking for great opportunities..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Education Details</label>
+                    <textarea id="resEdu" rows="2" placeholder="e.g. B.Tech Computer Science, University Name | CGPA: 8.5"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Technical Skills (Comma separated)</label>
+                    <input type="text" id="resSkills" placeholder="e.g. Python, Java, HTML, CSS, React">
+                </div>
+                <div style="display:flex; gap:20px;">
+                    <div class="form-group" style="flex:1;">
+                        <label>LinkedIn URL</label>
+                        <input type="text" id="resLinked" placeholder="linkedin.com/in/username">
+                    </div>
+                    <div class="form-group" style="flex:1;">
+                        <label>GitHub URL</label>
+                        <input type="text" id="resGithub" placeholder="github.com/username">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Select Achievements to Include <span style="color:#64748b; font-size:12px; font-weight:normal;">(Only Approved items shown)</span></label>
+                    <div class="ach-checkbox-list" id="resumeAchList">
+                        </div>
+                </div>
+                
+                <div style="display:flex; gap:10px; margin-top:30px;">
+                    <button class="btn btn-update" style="background:#64748b; flex: 1;" onclick="saveResumeDetails()"><i class="fas fa-save"></i> Save Details</button>
+                    <button class="btn btn-update" style="background:#2563eb; flex: 1;" onclick="generateResumeWord()"><i class="fas fa-file-word"></i> Download Word (.doc)</button>
+                    <button class="btn btn-update" style="background:#10b981; flex: 1;" onclick="generateResumePDF()"><i class="fas fa-file-pdf"></i> Download PDF</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="security-view" class="hidden">
+            <div class="security-container">
+                <h2><i class="fas fa-shield-alt"></i> Security Settings</h2>
+                <div class="form-group"><label>Current Password</label><input type="password" id="oldPass" placeholder="••••••••"></div>
+                <div class="form-group"><label>New Password</label><input type="password" id="newPass" placeholder="••••••••"></div>
+                <div class="form-group"><label>Confirm New Password</label><input type="password" id="confirmPass" placeholder="••••••••"></div>
+                <button class="btn-update" onclick="changePassword()">Update Password</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="achModal">
+        <div class="modal-body">
+            <h3 id="modalTitle">New Achievement</h3>
+            <form id="achForm">
+                <input type="hidden" id="editId">
+                <input type="text" id="title" placeholder="Achievement Title" required style="width:100%; padding:12px; margin:8px 0; border:1px solid #ddd; border-radius:6px; box-sizing:border-box;">
+                <select id="category" style="width:100%; padding:12px; margin:8px 0; border:1px solid #ddd; border-radius:6px;">
+                    <option value="Certificate">Certificate</option><option value="Internship">Internship</option><option value="Competition">Competition</option><option value="Sports">Sports</option><option value="Extracurricular">Extracurricular</option>
+                </select>
+                <textarea id="desc" rows="2" placeholder="Short Description" style="width:100%; padding:12px; margin:8px 0; border:1px solid #ddd; border-radius:6px; box-sizing:border-box;"></textarea>
+                <div style="margin: 8px 0;"><label style="font-size: 13px; font-weight: 600; color: #475569;">Date of Upload</label><input type="date" id="uploadDate" readonly style="width:100%; padding:12px; margin-top:4px; border:1px solid #ddd; border-radius:6px; box-sizing:border-box; background-color:#f1f5f9; color:#64748b; cursor:not-allowed;"></div>
+                <div style="margin: 8px 0;"><label style="font-size: 13px; font-weight: 600; color: #475569;">Date of Completion / Event</label><input type="date" id="completionDate" required style="width:100%; padding:12px; margin-top:4px; border:1px solid #ddd; border-radius:6px; box-sizing:border-box;"></div>
+                <div style="margin: 10px 0;"><label><input type="checkbox" id="hasFile" onchange="toggleFileField()"> I want to upload a document</label></div>
+                <div id="fileField" class="hidden"><input type="file" id="fileInput" accept="image/*,application/pdf"><small style="color: #64748b; display: block; margin-top: 4px;">Max file size: 2MB</small></div>
+                <div style="text-align: right; margin-top: 15px;"><button type="button" class="btn" onclick="closeModal()">Cancel</button><button type="submit" class="btn btn-add">Save Achievement</button></div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal" id="profileModal">
+        <div class="modal-body">
+            <h3>Edit Profile Info</h3>
+            <div class="form-group"><label>Contact Email</label><input type="email" id="editEmail"></div>
+            <div class="form-group"><label>Upload Profile Picture</label><input type="file" id="editPicFile" accept="image/*"></div>
+            <div style="text-align: right; margin-top: 15px;"><button type="button" class="btn" onclick="closeProfileModal()">Cancel</button><button class="btn btn-add" onclick="updateProfileData()">Save Changes</button></div>
+        </div>
+    </div>
+
+    <div id="resume-print-area" style="position: absolute; left: -9999px; top: 0; width: 8.5in; padding: 0.5in 0.8in; font-family: 'Times New Roman', Times, serif; color: #000; line-height: 1.5; background: white; box-sizing: border-box;">
+        
+        <div style="text-align: center; margin-bottom: 20px;">
+            <h1 id="rName" style="margin: 0 0 5px 0; padding: 0; font-size: 24pt; font-weight: bold; text-transform: uppercase;">STUDENT NAME</h1>
+            <p id="rContact" style="margin: 0; padding: 0; font-size: 11pt;">email@domain.com | LinkedIn | GitHub</p>
+        </div>
+
+        <h2 style="font-size: 12pt; font-weight: bold; text-transform: uppercase; border-bottom: 1pt solid #000; margin: 15px 0 8px 0; padding-bottom: 2px;">Professional Summary</h2>
+        <p id="rBio" style="font-size: 11pt; margin: 0 0 15px 0; text-align: justify;"></p>
+
+        <h2 style="font-size: 12pt; font-weight: bold; text-transform: uppercase; border-bottom: 1pt solid #000; margin: 15px 0 8px 0; padding-bottom: 2px;">Education</h2>
+        <p id="rEdu" style="font-size: 11pt; margin: 0 0 15px 0;"></p>
+
+        <h2 style="font-size: 12pt; font-weight: bold; text-transform: uppercase; border-bottom: 1pt solid #000; margin: 15px 0 8px 0; padding-bottom: 2px;">Technical Skills</h2>
+        <p id="rSkills" style="font-size: 11pt; margin: 0 0 15px 0;"></p>
+
+        <div id="rAchContainer" style="display: none;">
+            <h2 style="font-size: 12pt; font-weight: bold; text-transform: uppercase; border-bottom: 1pt solid #000; margin: 15px 0 8px 0; padding-bottom: 2px;">Verified Projects & Achievements</h2>
+            <div id="rAchList" style="margin-bottom: 15px;"></div>
+        </div>
+        
+    </div>
+
+    <script>
+        const API_URL = "http://localhost:5000";
+        const myRollNo = localStorage.getItem('username');
+        let data = []; 
+        let myStudentProfile = null;
+        let currentView = 'All';
+        
+        const todayStr = new Date().toISOString().split('T')[0];
+
+        async function loadAchievements() {
+            try {
+                const res = await fetch(`${API_URL}/achievements?rollNo=${myRollNo}`);
+                if (res.ok) {
+                    data = await res.json();
+                    render();
+                    renderResumeChecklist(); 
+                }
+            } catch (e) { console.error("Fetch Error:", e); }
+        }
+
+        async function loadProfile() {
+            if (!myRollNo) return window.location.href = "login.html";
+            try {
+                const [sRes, fRes] = await Promise.all([fetch(`${API_URL}/students`), fetch(`${API_URL}/faculty`)]);
+                const students = await sRes.json();
+                const faculty = await fRes.json();
+                
+                myStudentProfile = students.find(s => String(s.rollNo) === String(myRollNo));
+                if (myStudentProfile) {
+                    document.getElementById('studentName').innerText = myStudentProfile.name;
+                    document.getElementById('studentDetails').innerText = `${myStudentProfile.dept} | Sem ${myStudentProfile.sem} | Roll: ${myStudentProfile.rollNo}`;
+                    document.getElementById('profilePic').src = myStudentProfile.profilePic || `https://ui-avatars.com/api/?name=${myStudentProfile.name}&background=2563eb&color=fff`;
+                    
+                    if(myStudentProfile.proctorId) localStorage.setItem('myProctorId', myStudentProfile.proctorId);
+                    const p = faculty.find(f => f._id === myStudentProfile.proctorId);
+                    document.getElementById('proctorName').innerText = p ? `Proctor: ${p.name}` : "No Proctor Assigned";
+
+                    if(myStudentProfile.resumeData) {
+                        document.getElementById('resBio').value = myStudentProfile.resumeData.bio || "";
+                        document.getElementById('resEdu').value = myStudentProfile.resumeData.education || "";
+                        document.getElementById('resSkills').value = myStudentProfile.resumeData.skills || "";
+                        document.getElementById('resLinked').value = myStudentProfile.resumeData.linkedin || "";
+                        document.getElementById('resGithub').value = myStudentProfile.resumeData.github || "";
+                    }
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        function render() {
+            const list = document.getElementById('dataTable');
+            const searchTerm = document.getElementById('tableSearch').value.toLowerCase();
+            const filtered = data.filter(i => {
+                const matchesCat = currentView === 'All' || i.category === currentView;
+                const matchesSearch = i.title.toLowerCase().includes(searchTerm);
+                return matchesCat && matchesSearch;
+            });
+
+            list.innerHTML = filtered.map(item => {
+                const status = item.status || 'Pending';
+                let feedbackHtml = status === 'Rejected' && item.feedback ? `<div class="feedback-box"><b>Reason:</b> ${item.feedback}</div>` : '';
+                const compDate = item.completionDate || item.date || '-';
+                const upDate = item.uploadDate || item.date || '-';
+                let actionButtonsHtml = status === 'Approved' ? `<span style="color:#10b981; font-size:12px; font-weight:bold;"><i class="fas fa-lock"></i> Locked</span>` : `<button class="action-btn btn-edit" onclick="editAchievement('${item._id}')"><i class="fas fa-edit"></i></button> <button class="action-btn btn-delete" onclick="deleteAchievement('${item._id}')"><i class="fas fa-trash-alt"></i></button>`;
+
+                return `<tr>
+                    <td><strong>${item.title}</strong><br><small style="color:#64748b">${item.description || ''}</small></td>
+                    <td>${item.category}</td>
+                    <td><span style="font-size:12px; color:#64748b;">Completed:</span> <b>${compDate}</b><br><span style="font-size:12px; color:#64748b;">Uploaded:</span> <b>${upDate}</b></td>
+                    <td><span class="status-pill status-${status.toLowerCase()}">${status}</span><br>${feedbackHtml}</td>
+                    <td>${item.fileData ? `<button class="action-btn btn-view" onclick="viewFile('${item._id}')"><i class="fas fa-eye"></i></button>` : '<span style="color:#94a3b8; font-size:12px;">No File</span>'}</td>
+                    <td>${actionButtonsHtml}</td>
+                </tr>`}).join('');
+            updateStats();
+        }
+
+        function renderResumeChecklist() {
+            const approved = data.filter(i => i.status === 'Approved');
+            const listDiv = document.getElementById('resumeAchList');
+            if (approved.length === 0) {
+                listDiv.innerHTML = "<p style='color:#ef4444; font-size:13px; margin:0;'>You don't have any approved achievements to add to your resume yet. (Note: Pending documents are not included).</p>";
+                return;
+            }
+            listDiv.innerHTML = approved.map(a => `
+                <label>
+                    <input type="checkbox" class="res-ach-cb" value="${a._id}" checked>
+                    <span><b>${a.title}</b> <span style="color:#64748b; font-size: 12px;">(${a.category})</span></span>
+                </label>
+            `).join('');
+        }
+
+        function updateStats() {
+            document.getElementById('cnt-all').innerText = data.length;
+            document.getElementById('cnt-cert').innerText = data.filter(i => i.category === 'Certificate').length;
+            document.getElementById('cnt-int').innerText = data.filter(i => i.category === 'Internship').length;
+            document.getElementById('cnt-comp').innerText = data.filter(i => i.category === 'Competition').length;
+            document.getElementById('cnt-extra').innerText = data.filter(i => i.category === 'Extracurricular').length;
+            document.getElementById('cnt-sports').innerText = data.filter(i => i.category === 'Sports').length;
+        }
+
+        document.getElementById('achForm').onsubmit = async function(e) {
+            e.preventDefault();
+            const editId = document.getElementById('editId').value;
+            const fileInput = document.getElementById('fileInput');
+            const submitBtn = document.querySelector('.btn-add[type="submit"]'); 
+            const originalBtnText = submitBtn.innerHTML;
+            let fileBase64 = null; let aiFlag = false; 
+
+            if (document.getElementById('hasFile').checked && fileInput.files[0]) {
+                const file = fileInput.files[0];
+                if (file.size > 2 * 1024 * 1024) return alert("File is too large! Max 2MB.");
+                fileBase64 = await new Promise(res => { const r = new FileReader(); r.onload = () => res(r.result); r.readAsDataURL(file); });
+                if (file.type.startsWith('image/')) {
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> AI Scanning...';
+                    submitBtn.disabled = true;
+                    try {
+                        const { data: { text } } = await Tesseract.recognize(file, 'eng');
+                        if (!text.toLowerCase().includes(myStudentProfile.name.split(' ')[0].toLowerCase())) aiFlag = true; 
+                    } catch(err) { console.error("OCR Failed", err); }
+                }
+            } else if (editId) {
+                const existing = data.find(i => i._id === editId);
+                if (existing) fileBase64 = existing.fileData;
+            }
+
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+            submitBtn.disabled = true;
+
+            const achievementObj = {
+                studentRoll: myRollNo, studentName: myStudentProfile.name, proctorId: localStorage.getItem('myProctorId'),
+                title: document.getElementById('title').value, category: document.getElementById('category').value,
+                description: document.getElementById('desc').value, completionDate: document.getElementById('completionDate').value, 
+                uploadDate: document.getElementById('uploadDate').value, fileData: fileBase64, status: 'Pending', feedback: '', ocrFlag: aiFlag 
+            };
+
+            if (!achievementObj.proctorId || achievementObj.proctorId === "null") {
+                submitBtn.innerHTML = originalBtnText; submitBtn.disabled = false;
+                return alert("No Proctor assigned.");
+            }
+
+            const endpoint = editId ? `${API_URL}/achievements/verify` : `${API_URL}/achievements/add`;
+            if(editId) achievementObj.id = editId;
+
+            try {
+                const response = await fetch(endpoint, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(achievementObj) });
+                if (response.ok) { alert("Saved Successfully!"); closeModal(); loadAchievements(); } 
+                else alert("Failed to save.");
+            } catch (error) { alert("Error saving."); } 
+            finally { submitBtn.innerHTML = originalBtnText; submitBtn.disabled = false; }
+        };
+
+        // 🚀 SAFE SAVE RESUME DETAILS
+        async function saveResumeDetails() {
+            const resumeData = {
+                bio: document.getElementById('resBio').value,
+                education: document.getElementById('resEdu').value,
+                skills: document.getElementById('resSkills').value,
+                linkedin: document.getElementById('resLinked').value,
+                github: document.getElementById('resGithub').value
+            };
+            
+            try {
+                const res = await fetch(`${API_URL}/students/update-profile`, {
+                    method: "POST", 
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ rollNo: myRollNo, resumeData: resumeData })
+                });
+                
+                if(res.ok) {
+                    alert("✅ Resume Details Saved Successfully!");
+                } else {
+                    const errTxt = await res.text();
+                    alert("❌ Error saving details to database: " + errTxt);
+                }
+            } catch(e) { 
+                alert("Server connection error."); 
+                console.error(e);
+            }
+        }
+
+        // 🚀 BUILD THE PERFECT HARVARD ATS TEMPLATE
+        function buildResumeTemplate() {
+            if(!myStudentProfile) return false;
+            
+            document.getElementById('rName').innerText = myStudentProfile.name;
+            const li = document.getElementById('resLinked').value ? `LinkedIn: ${document.getElementById('resLinked').value}` : '';
+            const gh = document.getElementById('resGithub').value ? `GitHub: ${document.getElementById('resGithub').value}` : '';
+            
+            let contactStr = myStudentProfile.email;
+            if(myStudentProfile.mobile) contactStr += ` | ${myStudentProfile.mobile}`;
+            if(li) contactStr += ` | ${li}`;
+            if(gh) contactStr += ` | ${gh}`;
+            document.getElementById('rContact').innerText = contactStr;
+            
+            document.getElementById('rBio').innerText = document.getElementById('resBio').value || "Professional summary not provided.";
+            document.getElementById('rEdu').innerText = document.getElementById('resEdu').value || `${myStudentProfile.dept} - Semester ${myStudentProfile.sem}`;
+            document.getElementById('rSkills').innerText = document.getElementById('resSkills').value || "No skills listed.";
+
+            // Gather ONLY the checked achievements
+            const selectedIds = Array.from(document.querySelectorAll('.res-ach-cb:checked')).map(cb => cb.value);
+            const selectedAchs = data.filter(a => selectedIds.includes(a._id));
+
+            const achDiv = document.getElementById('rAchList');
+            achDiv.innerHTML = "";
+
+            if (selectedAchs.length === 0) {
+                document.getElementById('rAchContainer').style.display = "none";
+            } else {
+                document.getElementById('rAchContainer').style.display = "block";
+                
+                // HTML Tables ensure flawless left/right alignment in Word and PDF
+                selectedAchs.forEach(a => {
+                    const dDate = new Date(a.completionDate || a.date).toLocaleDateString([], { month:'short', year:'numeric' });
+                    achDiv.innerHTML += `
+                        <div style="margin-bottom: 15px;">
+                            <table width="100%" cellpadding="0" cellspacing="0" style="border:none; margin-bottom: 2px;">
+                                <tr>
+                                    <td align="left" style="font-size: 11pt; font-weight: bold; border:none; padding:0;">${a.title} <span style="font-weight:normal; font-style:italic; color:#555;">(${a.category})</span></td>
+                                    <td align="right" style="font-size: 11pt; font-style: italic; border:none; padding:0;">${dDate}</td>
+                                </tr>
+                            </table>
+                            <div style="font-size: 11pt; text-align: justify; padding-left: 0px; margin-top: 4px;">
+                                ${a.description ? `• ${a.description}` : ''}
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            return true;
+        }
+
+        // 🚀 DOWNLOAD PDF
+        function generateResumePDF() {
+            if(!buildResumeTemplate()) return alert("Profile not loaded.");
+            
+            const element = document.getElementById('resume-print-area');
+            
+            const opt = {
+                margin:       0,
+                filename:     `${myStudentProfile.rollNo}_ATS_Resume.pdf`,
+                image:        { type: 'jpeg', quality: 1 },
+                html2canvas:  { scale: 2 },
+                jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+            };
+
+            html2pdf().set(opt).from(element).save();
+        }
+
+        // 🚀 DOWNLOAD WORD (.doc)
+        function generateResumeWord() {
+            if(!buildResumeTemplate()) return alert("Profile not loaded.");
+            
+            const element = document.getElementById('resume-print-area');
+            
+            // For Word, we clone it and remove absolute positioning so Word parses it correctly inline
+            const printClone = element.cloneNode(true);
+            printClone.style.position = 'static';
+            printClone.style.left = '0';
+            printClone.style.display = 'block';
+            
+            const header = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Resume</title><style>body { font-family: 'Times New Roman', serif; }</style></head><body>";
+            const footer = "</body></html>";
+            
+            const sourceHTML = header + printClone.outerHTML + footer;
+            const source = 'data:application/vnd.ms-word;charset=utf-8,' + encodeURIComponent(sourceHTML);
+            
+            const link = document.createElement("a");
+            link.href = source;
+            link.download = `${myStudentProfile.rollNo}_ATS_Resume.doc`;
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Standard helpers
+        async function updateProfileData() {
+            const email = document.getElementById('editEmail').value;
+            const picFile = document.getElementById('editPicFile').files[0];
+            let base64Pic = null;
+            if (picFile) {
+                if (picFile.size > 2 * 1024 * 1024) return alert("Image is too large! Max 2MB.");
+                base64Pic = await new Promise(res => { const r = new FileReader(); r.onload = () => res(r.result); r.readAsDataURL(picFile); });
+            }
+            await fetch(`${API_URL}/students/update-profile`, {
+                method: "POST", headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ rollNo: myRollNo, email: email, profilePic: base64Pic })
+            });
+            location.reload();
+        }
+
+        async function changePassword() {
+            const oldP = document.getElementById('oldPass').value; const newP = document.getElementById('newPass').value; const confP = document.getElementById('confirmPass').value;
+            if(!oldP || !newP) return alert("Please fill all fields"); if(newP !== confP) return alert("Passwords do not match!");
+            const v = await fetch(`${API_URL}/login`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ username: myRollNo, password: oldP, role: 'student' }) });
+            if(!v.ok) return alert("Incorrect current password!");
+            await fetch(`${API_URL}/admin/update-user`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ username: myRollNo, password: newP }) });
+            alert("Password Updated! Please login again."); logout();
+        }
+
+        function viewFile(id) { const item = data.find(i => i._id == id); const win = window.open(); win.document.write(`<iframe src="${item.fileData}" frameborder="0" style="width:100%; height:100%;"></iframe>`); }
+        async function deleteAchievement(id) { const item = data.find(i => i._id == id); if (item && item.status === 'Approved') return alert("Cannot delete an approved achievement."); if (confirm("Delete this?")) { await fetch(`${API_URL}/achievements/${id}`, { method: "DELETE" }); loadAchievements(); } }
+        
+        function editAchievement(id) {
+            const item = data.find(i => i._id == id);
+            if (item && item.status === 'Approved') return alert("Cannot edit an approved achievement.");
+            document.getElementById('editId').value = item._id; document.getElementById('title').value = item.title; document.getElementById('category').value = item.category; document.getElementById('desc').value = item.description || ""; document.getElementById('completionDate').value = item.completionDate || item.date || ""; document.getElementById('uploadDate').value = item.uploadDate || item.date || todayStr; document.getElementById('achModal').style.display = 'flex';
+        }
+
+        function toggleFileField() { document.getElementById('fileField').classList.toggle('hidden', !document.getElementById('hasFile').checked); }
+        function openModal() { document.getElementById('achModal').style.display = 'flex'; document.getElementById('uploadDate').value = todayStr; }
+        function closeModal() { document.getElementById('achModal').style.display = 'none'; document.getElementById('achForm').reset(); document.getElementById('editId').value = ""; }
+        function openProfileModal() { document.getElementById('profileModal').style.display = 'flex'; }
+        function closeProfileModal() { document.getElementById('profileModal').style.display = 'none'; }
+        
+        function toggleSecurityView(btn) { hideAllViews(btn); document.getElementById('security-view').classList.remove('hidden'); }
+        function showResumeView(btn) { hideAllViews(btn); document.getElementById('resume-view').classList.remove('hidden'); }
+        function showCategory(cat, btn) { currentView = cat; hideAllViews(btn); document.getElementById('dashboard-view').classList.remove('hidden'); document.getElementById('currentCategoryTitle').innerText = cat === 'All' ? 'All Records' : cat + 's'; render(); }
+
+        function hideAllViews(btn) {
+            document.querySelectorAll('.menu-item').forEach(b => b.classList.remove('active'));
+            if(btn) btn.classList.add('active');
+            document.getElementById('dashboard-view').classList.add('hidden');
+            document.getElementById('security-view').classList.add('hidden');
+            document.getElementById('resume-view').classList.add('hidden');
+        }
+        
+        function logout() { localStorage.clear(); window.location.href = "login.html"; }
+        window.onload = () => { document.getElementById('completionDate').setAttribute('max', todayStr); loadProfile(); loadAchievements(); };
+    </script>
+</body>
+</html-->
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>EduAchieve | Student Portal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
+    <style>
+        :root { --primary: #2563eb; --bg: #f0f2f5; --sidebar: #0f172a; --text: #1e293b; --danger: #ef4444; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; display: flex; }
+
+        /* SIDEBAR */
+        .sidebar { width: 260px; height: 100vh; background: var(--sidebar); color: white; position: fixed; display: flex; flex-direction: column; z-index: 100; }
+        .sidebar-header { padding: 30px 20px; font-size: 22px; font-weight: bold; border-bottom: 1px solid #1e293b; color: var(--primary); }
+        .sidebar-menu { flex-grow: 1; padding: 20px 0; overflow-y: auto; }
+        .menu-item { width: 100%; border: none; background: none; color: #94a3b8; padding: 15px 25px; display: flex; align-items: center; cursor: pointer; font-size: 15px; transition: 0.3s; }
+        .menu-item:hover, .menu-item.active { background: #1e293b; color: white; border-left: 4px solid var(--primary); }
+        .menu-item i { margin-right: 15px; width: 20px; text-align: center; }
+        .logout-item { border-top: 1px solid #1e293b; padding: 20px 25px; color: #f87171; text-decoration: none; display: flex; align-items: center; cursor: pointer; }
+
+        /* MAIN CONTENT */
+        .main-content { margin-left: 260px; width: calc(100% - 260px); padding: 40px; }
+        .profile-card { background: white; padding: 25px; border-radius: 12px; display: flex; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 30px; border-left: 5px solid var(--primary); }
+        .profile-pic { width: 90px; height: 90px; border-radius: 50%; border: 3px solid var(--primary); object-fit: cover; background: #eee; }
+        .profile-info { margin-left: 20px; flex-grow: 1; }
+        .profile-info h2 { margin: 0; color: var(--text); font-size: 24px; }
+
+        /* STATS */
+        .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; margin-bottom: 30px; }
+        .stat-box { background: white; padding: 20px 10px; border-radius: 12px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-bottom: 4px solid #e2e8f0; transition: 0.3s; }
+        .stat-box:hover { transform: translateY(-5px); border-bottom-color: var(--primary); }
+        .stat-box h3 { margin: 0; font-size: 26px; color: var(--primary); }
+        .stat-box p { margin: 5px 0 0; color: #64748b; font-weight: 600; font-size: 13px; }
+
+        /* TABLE */
+        .content-box { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 15px; border-bottom: 2px solid #f1f5f9; color: #64748b; font-size: 13px; text-transform: uppercase; }
+        td { padding: 15px; border-bottom: 1px solid #f1f5f9; font-size: 14px; vertical-align: top; }
+
+        /* STATUS BADGES & FEEDBACK */
+        .status-pill { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; display: inline-block; }
+        .status-pending { background: #fef3c7; color: #92400e; }
+        .status-approved { background: #dcfce7; color: #166534; }
+        .status-rejected { background: #fee2e2; color: #991b1b; }
+        .feedback-box { margin-top: 8px; font-size: 12px; color: var(--danger); background: #fef2f2; padding: 6px 10px; border-radius: 6px; border-left: 3px solid var(--danger); display: inline-block; max-width: 200px; }
+
+        /* SECURITY & RESUME BOXES */
+        .security-container, .resume-container { max-width: 800px; margin: 40px auto; background: white; padding: 40px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        .security-container h2, .resume-container h2 { color: var(--primary); margin-bottom: 25px; text-align: center; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #475569; }
+        .form-group input, .form-group textarea { width: 100%; padding: 12px; border: 1.5px solid #e2e8f0; border-radius: 8px; box-sizing: border-box; transition: 0.3s; font-family: inherit;}
+        .form-group input:focus, .form-group textarea:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+        .btn-update { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; transition: 0.2s;}
+        .btn-update:hover { filter: brightness(0.9); }
+
+        /* BUTTONS */
+        .btn { padding: 10px 20px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .btn-add { background: var(--primary); color: white; }
+        .action-btn { background: none; border: none; cursor: pointer; font-size: 16px; margin: 0 5px; }
+        .btn-view { color: #2563eb; }
+        .btn-download { color: #10b981; }
+        .btn-edit { color: #f59e0b; }
+        .btn-delete { color: #ef4444; }
+
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 1000; }
+        .modal-body { background: white; padding: 30px; border-radius: 12px; width: 450px; max-height: 90vh; overflow-y: auto; }
+        .hidden { display: none !important; }
+        
+        /* Checkbox styling */
+        .ach-checkbox-list { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; max-height: 250px; overflow-y: auto; margin-bottom: 20px; }
+        .ach-checkbox-list label { display: flex; align-items: center; gap: 10px; padding: 8px; border-bottom: 1px solid #e2e8f0; cursor: pointer; font-weight: 500; font-size: 14px; color: var(--text); }
+        .ach-checkbox-list label:last-child { border-bottom: none; }
+        .ach-checkbox-list input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="sidebar-header">EduAchieve</div>
+        <div class="sidebar-menu">
+            <button class="menu-item active" onclick="showCategory('All', this)"><i class="fas fa-th-large"></i> Dashboard</button>
+            <button class="menu-item" onclick="showCategory('Certificate', this)"><i class="fas fa-award"></i> Certificates</button>
+            <button class="menu-item" onclick="showCategory('Internship', this)"><i class="fas fa-user-tie"></i> Internships</button>
+            <button class="menu-item" onclick="showCategory('Competition', this)"><i class="fas fa-trophy"></i> Competitions</button>
+            <button class="menu-item" onclick="showCategory('Extracurricular', this)"><i class="fas fa-palette"></i> Extracurricular</button>
+            <button class="menu-item" onclick="showCategory('Sports', this)"><i class="fas fa-running"></i> Sports</button>
+            
+            <button class="menu-item" onclick="showResumeView(this)" style="color: #f59e0b; border-top: 1px solid #1e293b; margin-top: 10px; padding-top: 20px;"><i class="fas fa-file-contract"></i> Resume Builder</button>
+            <button class="menu-item" onclick="toggleSecurityView(this)"><i class="fas fa-lock"></i> Security</button>
+        </div>
+        <a class="logout-item" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    </div>
+
+    <div class="main-content">
+        <div id="dashboard-view">
+            <div class="profile-card">
+                <img src="" class="profile-pic" id="profilePic">
+                <div class="profile-info">
+                    <h2 id="studentName">Loading...</h2>
+                    <p id="studentDetails">Fetching details...</p>
+                    <div style="margin-top:10px;">
+                        <span id="proctorName" style="background:#e0e7ff; color:#3730a3; padding:5px 12px; border-radius:6px; font-size:12px; font-weight:bold;">Proctor: Loading...</span>
+                        <button class="btn" style="background:#64748b; color:white; padding:5px 12px; font-size:12px; margin-left:10px;" onclick="openProfileModal()">
+                            <i class="fas fa-user-edit"></i> Edit Profile
+                        </button>
+                    </div>
+                </div>
+                <div style="display:flex;">
+                    <button class="btn btn-add" style="margin-left:10px" onclick="openModal()">+ Add Achievement</button>
+                </div>
+            </div>
+
+            <div class="stats-row">
+                <div class="stat-box"><h3 id="cnt-all">0</h3><p>Total</p></div>
+                <div class="stat-box"><h3 id="cnt-cert">0</h3><p>Certificates</p></div>
+                <div class="stat-box"><h3 id="cnt-int">0</h3><p>Internships</p></div>
+                <div class="stat-box"><h3 id="cnt-comp">0</h3><p>Competitions</p></div>
+                <div class="stat-box"><h3 id="cnt-extra">0</h3><p>Extra-Curr.</p></div>
+                <div class="stat-box"><h3 id="cnt-sports">0</h3><p>Sports</p></div>
+            </div>
+
+            <div class="content-box">
+                <div class="table-header">
+                    <h3 id="currentCategoryTitle">All Records</h3>
+                    <input type="text" id="tableSearch" placeholder="Search..." onkeyup="render()" style="padding:10px; border:1px solid #ddd; border-radius:8px; width:250px;">
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Title & Description</th>
+                            <th>Category</th>
+                            <th>Dates</th>
+                            <th>Status & Remarks</th>
+                            <th>Proof</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dataTable"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="resume-view" class="hidden">
+            <div class="resume-container">
+                <h2><i class="fas fa-file-contract"></i> Professional Resume Builder</h2>
+                <p style="color:#64748b; margin-bottom:25px; text-align:center;">Fill out your details and select the achievements you want to highlight for this specific resume.</p>
+                
+                <div class="form-group">
+                    <label>Professional Summary (Bio)</label>
+                    <textarea id="resBio" rows="3" placeholder="I am a passionate CS student looking for great opportunities..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Education Details</label>
+                    <textarea id="resEdu" rows="2" placeholder="e.g. B.Tech Computer Science, University Name | CGPA: 8.5"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Technical Skills (Comma separated)</label>
+                    <input type="text" id="resSkills" placeholder="e.g. Python, Java, HTML, CSS, React">
+                </div>
+                <div style="display:flex; gap:20px;">
+                    <div class="form-group" style="flex:1;">
+                        <label>LinkedIn URL</label>
+                        <input type="text" id="resLinked" placeholder="linkedin.com/in/username">
+                    </div>
+                    <div class="form-group" style="flex:1;">
+                        <label>GitHub URL</label>
+                        <input type="text" id="resGithub" placeholder="github.com/username">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Select Achievements to Include <span style="color:#64748b; font-size:12px; font-weight:normal;">(Only Approved items shown)</span></label>
+                    <div class="ach-checkbox-list" id="resumeAchList">
+                        </div>
+                </div>
+                
+                <div style="display:flex; gap:10px; margin-top:30px;">
+                    <button class="btn btn-update" style="background:#64748b; flex: 1;" onclick="saveResumeDetails()"><i class="fas fa-save"></i> Save Details</button>
+                    <button class="btn btn-update" style="background:#2563eb; flex: 1;" onclick="generateResumeWord()"><i class="fas fa-file-word"></i> Download Word (.doc)</button>
+                    <button class="btn btn-update" style="background:#10b981; flex: 1;" onclick="generateResumePDF()"><i class="fas fa-file-pdf"></i> Download PDF</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="security-view" class="hidden">
+            <div class="security-container">
+                <h2><i class="fas fa-shield-alt"></i> Security Settings</h2>
+                <div class="form-group"><label>Current Password</label><input type="password" id="oldPass" placeholder="••••••••"></div>
+                <div class="form-group"><label>New Password</label><input type="password" id="newPass" placeholder="••••••••"></div>
+                <div class="form-group"><label>Confirm New Password</label><input type="password" id="confirmPass" placeholder="••••••••"></div>
+                <button class="btn-update" onclick="changePassword()">Update Password</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="achModal">
+        <div class="modal-body">
+            <h3 id="modalTitle">New Achievement</h3>
+            <form id="achForm">
+                <input type="hidden" id="editId">
+                <input type="text" id="title" placeholder="Achievement Title" required style="width:100%; padding:12px; margin:8px 0; border:1px solid #ddd; border-radius:6px; box-sizing:border-box;">
+                <select id="category" style="width:100%; padding:12px; margin:8px 0; border:1px solid #ddd; border-radius:6px;">
+                    <option value="Certificate">Certificate</option><option value="Internship">Internship</option><option value="Competition">Competition</option><option value="Sports">Sports</option><option value="Extracurricular">Extracurricular</option>
+                </select>
+                <textarea id="desc" rows="2" placeholder="Short Description" style="width:100%; padding:12px; margin:8px 0; border:1px solid #ddd; border-radius:6px; box-sizing:border-box;"></textarea>
+                <div style="margin: 8px 0;"><label style="font-size: 13px; font-weight: 600; color: #475569;">Date of Upload</label><input type="date" id="uploadDate" readonly style="width:100%; padding:12px; margin-top:4px; border:1px solid #ddd; border-radius:6px; box-sizing:border-box; background-color:#f1f5f9; color:#64748b; cursor:not-allowed;"></div>
+                <div style="margin: 8px 0;"><label style="font-size: 13px; font-weight: 600; color: #475569;">Date of Completion / Event</label><input type="date" id="completionDate" required style="width:100%; padding:12px; margin-top:4px; border:1px solid #ddd; border-radius:6px; box-sizing:border-box;"></div>
+                <div style="margin: 10px 0;"><label><input type="checkbox" id="hasFile" onchange="toggleFileField()"> I want to upload a document</label></div>
+                <div id="fileField" class="hidden"><input type="file" id="fileInput" accept="image/*,application/pdf"><small style="color: #64748b; display: block; margin-top: 4px;">Max file size: 2MB</small></div>
+                <div style="text-align: right; margin-top: 15px;"><button type="button" class="btn" onclick="closeModal()">Cancel</button><button type="submit" class="btn btn-add">Save Achievement</button></div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal" id="profileModal">
+        <div class="modal-body">
+            <h3>Edit Profile Info</h3>
+            <div class="form-group"><label>Contact Email</label><input type="email" id="editEmail"></div>
+            <div class="form-group"><label>Upload Profile Picture</label><input type="file" id="editPicFile" accept="image/*"></div>
+            <div style="text-align: right; margin-top: 15px;"><button type="button" class="btn" onclick="closeProfileModal()">Cancel</button><button class="btn btn-add" onclick="updateProfileData()">Save Changes</button></div>
+        </div>
+    </div>
+
+    <div id="resume-print-area" style="display:none; width:8.5in; min-height:11in; padding:0.7in 0.8in; font-family:'Times New Roman', Times, serif; background:white; color:#000; line-height:1.5; box-sizing:border-box;">
+        
+        <div style="text-align: center; margin-bottom: 20px;">
+            <h1 id="rName" style="margin: 0 0 5px 0; padding: 0; font-size: 24pt; font-weight: bold; text-transform: uppercase;">STUDENT NAME</h1>
+            <p id="rContact" style="margin: 0; padding: 0; font-size: 11pt;">email@domain.com | LinkedIn | GitHub</p>
+        </div>
+
+        <h2 style="font-size: 12pt; font-weight: bold; text-transform: uppercase; border-bottom: 1pt solid #000; margin: 15px 0 8px 0; padding-bottom: 2px;">Professional Summary</h2>
+        <p id="rBio" style="font-size: 11pt; margin: 0 0 15px 0; text-align: justify;"></p>
+
+        <h2 style="font-size: 12pt; font-weight: bold; text-transform: uppercase; border-bottom: 1pt solid #000; margin: 15px 0 8px 0; padding-bottom: 2px;">Education</h2>
+        <p id="rEdu" style="font-size: 11pt; margin: 0 0 15px 0;"></p>
+
+        <h2 style="font-size: 12pt; font-weight: bold; text-transform: uppercase; border-bottom: 1pt solid #000; margin: 15px 0 8px 0; padding-bottom: 2px;">Technical Skills</h2>
+        <p id="rSkills" style="font-size: 11pt; margin: 0 0 15px 0;"></p>
+
+        <div id="rAchContainer" style="display: none;">
+            <h2 style="font-size: 12pt; font-weight: bold; text-transform: uppercase; border-bottom: 1pt solid #000; margin: 15px 0 8px 0; padding-bottom: 2px;">Verified Projects & Achievements</h2>
+            <div id="rAchList" style="margin-bottom: 15px;"></div>
+        </div>
+        
+    </div>
+
+    <script>
+        const API_URL = "http://localhost:5000";
+        const myRollNo = localStorage.getItem('username');
+        let data = []; 
+        let myStudentProfile = null;
+        let currentView = 'All';
+        
+        const todayStr = new Date().toISOString().split('T')[0];
+
+        async function loadAchievements() {
+            try {
+                const res = await fetch(`${API_URL}/achievements?rollNo=${myRollNo}`);
+                if (res.ok) {
+                    data = await res.json();
+                    render();
+                    renderResumeChecklist(); 
+                }
+            } catch (e) { console.error("Fetch Error:", e); }
+        }
+
+        async function loadProfile() {
+            if (!myRollNo) return window.location.href = "login.html";
+            try {
+                const [sRes, fRes] = await Promise.all([fetch(`${API_URL}/students`), fetch(`${API_URL}/faculty`)]);
+                const students = await sRes.json();
+                const faculty = await fRes.json();
+                
+                myStudentProfile = students.find(s => String(s.rollNo) === String(myRollNo));
+                if (myStudentProfile) {
+                    document.getElementById('studentName').innerText = myStudentProfile.name;
+                    document.getElementById('studentDetails').innerText = `${myStudentProfile.dept} | Sem ${myStudentProfile.sem} | Roll: ${myStudentProfile.rollNo}`;
+                    document.getElementById('profilePic').src = myStudentProfile.profilePic || `https://ui-avatars.com/api/?name=${myStudentProfile.name}&background=2563eb&color=fff`;
+                    
+                    if(myStudentProfile.proctorId) localStorage.setItem('myProctorId', myStudentProfile.proctorId);
+                    const p = faculty.find(f => f._id === myStudentProfile.proctorId);
+                    document.getElementById('proctorName').innerText = p ? `Proctor: ${p.name}` : "No Proctor Assigned";
+
+                    if(myStudentProfile.resumeData) {
+                        document.getElementById('resBio').value = myStudentProfile.resumeData.bio || "";
+                        document.getElementById('resEdu').value = myStudentProfile.resumeData.education || "";
+                        document.getElementById('resSkills').value = myStudentProfile.resumeData.skills || "";
+                        document.getElementById('resLinked').value = myStudentProfile.resumeData.linkedin || "";
+                        document.getElementById('resGithub').value = myStudentProfile.resumeData.github || "";
+                    }
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        function render() {
+            const list = document.getElementById('dataTable');
+            const searchTerm = document.getElementById('tableSearch').value.toLowerCase();
+            const filtered = data.filter(i => {
+                const matchesCat = currentView === 'All' || i.category === currentView;
+                const matchesSearch = i.title.toLowerCase().includes(searchTerm);
+                return matchesCat && matchesSearch;
+            });
+
+            list.innerHTML = filtered.map(item => {
+                const status = item.status || 'Pending';
+                let feedbackHtml = status === 'Rejected' && item.feedback ? `<div class="feedback-box"><b>Reason:</b> ${item.feedback}</div>` : '';
+                const compDate = item.completionDate || item.date || '-';
+                const upDate = item.uploadDate || item.date || '-';
+                let actionButtonsHtml = status === 'Approved' ? `<span style="color:#10b981; font-size:12px; font-weight:bold;"><i class="fas fa-lock"></i> Locked</span>` : `<button class="action-btn btn-edit" onclick="editAchievement('${item._id}')"><i class="fas fa-edit"></i></button> <button class="action-btn btn-delete" onclick="deleteAchievement('${item._id}')"><i class="fas fa-trash-alt"></i></button>`;
+
+                return `<tr>
+                    <td><strong>${item.title}</strong><br><small style="color:#64748b">${item.description || ''}</small></td>
+                    <td>${item.category}</td>
+                    <td><span style="font-size:12px; color:#64748b;">Completed:</span> <b>${compDate}</b><br><span style="font-size:12px; color:#64748b;">Uploaded:</span> <b>${upDate}</b></td>
+                    <td><span class="status-pill status-${status.toLowerCase()}">${status}</span><br>${feedbackHtml}</td>
+                    <td>${item.fileData ? `<button class="action-btn btn-view" onclick="viewFile('${item._id}')"><i class="fas fa-eye"></i></button>` : '<span style="color:#94a3b8; font-size:12px;">No File</span>'}</td>
+                    <td>${actionButtonsHtml}</td>
+                </tr>`}).join('');
+            updateStats();
+        }
+
+        function renderResumeChecklist() {
+            const approved = data.filter(i => i.status === 'Approved');
+            const listDiv = document.getElementById('resumeAchList');
+            if (approved.length === 0) {
+                listDiv.innerHTML = "<p style='color:#ef4444; font-size:13px; margin:0;'>You don't have any approved achievements to add to your resume yet. (Pending documents are not included).</p>";
+                return;
+            }
+            listDiv.innerHTML = approved.map(a => `
+                <label>
+                    <input type="checkbox" class="res-ach-cb" value="${a._id}" checked>
+                    <span><b>${a.title}</b> <span style="color:#64748b; font-size: 12px;">(${a.category})</span></span>
+                </label>
+            `).join('');
+        }
+
+        function updateStats() {
+            document.getElementById('cnt-all').innerText = data.length;
+            document.getElementById('cnt-cert').innerText = data.filter(i => i.category === 'Certificate').length;
+            document.getElementById('cnt-int').innerText = data.filter(i => i.category === 'Internship').length;
+            document.getElementById('cnt-comp').innerText = data.filter(i => i.category === 'Competition').length;
+            document.getElementById('cnt-extra').innerText = data.filter(i => i.category === 'Extracurricular').length;
+            document.getElementById('cnt-sports').innerText = data.filter(i => i.category === 'Sports').length;
+        }
+
+        document.getElementById('achForm').onsubmit = async function(e) {
+            e.preventDefault();
+            const editId = document.getElementById('editId').value;
+            const fileInput = document.getElementById('fileInput');
+            const submitBtn = document.querySelector('.btn-add[type="submit"]'); 
+            const originalBtnText = submitBtn.innerHTML;
+            let fileBase64 = null; let aiFlag = false; 
+
+            if (document.getElementById('hasFile').checked && fileInput.files[0]) {
+                const file = fileInput.files[0];
+                if (file.size > 2 * 1024 * 1024) return alert("File is too large! Max 2MB.");
+                fileBase64 = await new Promise(res => { const r = new FileReader(); r.onload = () => res(r.result); r.readAsDataURL(file); });
+                if (file.type.startsWith('image/')) {
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> AI Scanning...';
+                    submitBtn.disabled = true;
+                    try {
+                        const { data: { text } } = await Tesseract.recognize(file, 'eng');
+                        if (!text.toLowerCase().includes(myStudentProfile.name.split(' ')[0].toLowerCase())) aiFlag = true; 
+                    } catch(err) { console.error("OCR Failed", err); }
+                }
+            } else if (editId) {
+                const existing = data.find(i => i._id === editId);
+                if (existing) fileBase64 = existing.fileData;
+            }
+
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+            submitBtn.disabled = true;
+
+            const achievementObj = {
+                studentRoll: myRollNo, studentName: myStudentProfile.name, proctorId: localStorage.getItem('myProctorId'),
+                title: document.getElementById('title').value, category: document.getElementById('category').value,
+                description: document.getElementById('desc').value, completionDate: document.getElementById('completionDate').value, 
+                uploadDate: document.getElementById('uploadDate').value, fileData: fileBase64, status: 'Pending', feedback: '', ocrFlag: aiFlag 
+            };
+
+            if (!achievementObj.proctorId || achievementObj.proctorId === "null") {
+                submitBtn.innerHTML = originalBtnText; submitBtn.disabled = false;
+                return alert("No Proctor assigned.");
+            }
+
+            const endpoint = editId ? `${API_URL}/achievements/verify` : `${API_URL}/achievements/add`;
+            if(editId) achievementObj.id = editId;
+
+            try {
+                const response = await fetch(endpoint, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(achievementObj) });
+                if (response.ok) { alert("Saved Successfully!"); closeModal(); loadAchievements(); } 
+                else alert("Failed to save.");
+            } catch (error) { alert("Error saving."); } 
+            finally { submitBtn.innerHTML = originalBtnText; submitBtn.disabled = false; }
+        };
+
+        // 🚀 SAFE SAVE RESUME DETAILS (Handles Error properly)
+        async function saveResumeDetails() {
+            try {
+                const resumeData = {
+                    bio: document.getElementById('resBio').value,
+                    education: document.getElementById('resEdu').value,
+                    skills: document.getElementById('resSkills').value,
+                    linkedin: document.getElementById('resLinked').value,
+                    github: document.getElementById('resGithub').value
+                };
+                
+                const res = await fetch(`${API_URL}/students/update-profile`, {
+                    method: "POST", 
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ rollNo: myRollNo, resumeData: resumeData })
+                });
+                
+                if(res.ok) {
+                    alert("✅ Resume Details Saved Successfully!");
+                } else {
+                    const errTxt = await res.text();
+                    alert("❌ Error saving details. Server says: " + errTxt);
+                }
+            } catch(e) { 
+                alert("Error saving resume details. (Server disconnected or restarted)"); 
+                console.error(e);
+            }
+        }
+
+        // 🚀 BUILD THE PERFECT HARVARD ATS TEMPLATE
+        function buildResumeTemplate() {
+            if(!myStudentProfile) return false;
+            
+            document.getElementById('rName').innerText = myStudentProfile.name;
+            const li = document.getElementById('resLinked').value ? `LinkedIn: ${document.getElementById('resLinked').value}` : '';
+            const gh = document.getElementById('resGithub').value ? `GitHub: ${document.getElementById('resGithub').value}` : '';
+            
+            let contactStr = myStudentProfile.email;
+            if(myStudentProfile.mobile) contactStr += ` | ${myStudentProfile.mobile}`;
+            if(li) contactStr += ` | ${li}`;
+            if(gh) contactStr += ` | ${gh}`;
+            document.getElementById('rContact').innerText = contactStr;
+            
+            document.getElementById('rBio').innerText = document.getElementById('resBio').value || "Professional summary not provided.";
+            document.getElementById('rEdu').innerText = document.getElementById('resEdu').value || `${myStudentProfile.dept} - Semester ${myStudentProfile.sem}`;
+            document.getElementById('rSkills').innerText = document.getElementById('resSkills').value || "No skills listed.";
+
+            // Gather ONLY the checked achievements
+            const selectedIds = Array.from(document.querySelectorAll('.res-ach-cb:checked')).map(cb => cb.value);
+            const selectedAchs = data.filter(a => selectedIds.includes(a._id));
+
+            const achDiv = document.getElementById('rAchList');
+            achDiv.innerHTML = "";
+
+            if (selectedAchs.length === 0) {
+                document.getElementById('rAchContainer').style.display = "none";
+            } else {
+                document.getElementById('rAchContainer').style.display = "block";
+                
+                selectedAchs.forEach(a => {
+                    // 🔥 FIX 3: Safe Date Formatting to prevent "Invalid Date"
+                    let dDate = "";
+                    if(a.completionDate || a.date){
+                        const tempDate = new Date(a.completionDate || a.date);
+                        if(!isNaN(tempDate)) {
+                            dDate = tempDate.toLocaleDateString([], { month:'short', year:'numeric' });
+                        }
+                    }
+                    
+                    achDiv.innerHTML += `
+                        <div style="margin-bottom: 15px;">
+                            <table width="100%" cellpadding="0" cellspacing="0" style="border:none; margin-bottom: 2px;">
+                                <tr>
+                                    <td align="left" style="font-size: 11pt; font-weight: bold; border:none; padding:0;">${a.title} <span style="font-weight:normal; font-style:italic; color:#555;">(${a.category})</span></td>
+                                    <td align="right" style="font-size: 11pt; font-style: italic; border:none; padding:0;">${dDate}</td>
+                                </tr>
+                            </table>
+                            <div style="font-size: 11pt; text-align: justify; padding-left: 0px; margin-top: 4px;">
+                                ${a.description ? `• ${a.description}` : ''}
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            return true;
+        }
+
+        // 🔥 FIX 2: PERFECT PDF GENERATION
+        function generateResumePDF() {
+            if(!buildResumeTemplate()) return alert("Profile not loaded.");
+
+            const element = document.getElementById('resume-print-area');
+
+            // Temporarily show for correct rendering
+            element.style.display = "block";
+
+            const opt = {
+                margin: 0,
+                filename: `${myStudentProfile.rollNo}_ATS_Resume.pdf`,
+                image: { type: 'jpeg', quality: 1 },
+                html2canvas: {
+                    scale: 3,
+                    useCORS: true,
+                    scrollY: 0
+                },
+                jsPDF: {
+                    unit: 'in',
+                    format: 'letter',
+                    orientation: 'portrait'
+                }
+            };
+
+            html2pdf()
+                .set(opt)
+                .from(element)
+                .save()
+                .then(() => {
+                    element.style.display = "none";
+                });
+        }
+
+        // 🚀 DOWNLOAD WORD (.doc)
+        function generateResumeWord() {
+            if(!buildResumeTemplate()) return alert("Profile not loaded.");
+            
+            const element = document.getElementById('resume-print-area');
+            element.style.display = "block";
+            
+            // For Word, we clone it and ensure it renders properly inline
+            const printClone = element.cloneNode(true);
+            printClone.style.display = 'block';
+            
+            const header = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Resume</title><style>body { font-family: 'Times New Roman', serif; }</style></head><body>";
+            const footer = "</body></html>";
+            
+            const sourceHTML = header + printClone.outerHTML + footer;
+            const source = 'data:application/vnd.ms-word;charset=utf-8,' + encodeURIComponent(sourceHTML);
+            
+            const link = document.createElement("a");
+            link.href = source;
+            link.download = `${myStudentProfile.rollNo}_ATS_Resume.doc`;
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            element.style.display = "none";
+        }
+
+        // Standard helpers
+        async function updateProfileData() {
+            const email = document.getElementById('editEmail').value;
+            const picFile = document.getElementById('editPicFile').files[0];
+            let base64Pic = null;
+            if (picFile) {
+                if (picFile.size > 2 * 1024 * 1024) return alert("Image is too large! Max 2MB.");
+                base64Pic = await new Promise(res => { const r = new FileReader(); r.onload = () => res(r.result); r.readAsDataURL(picFile); });
+            }
+            await fetch(`${API_URL}/students/update-profile`, {
+                method: "POST", headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ rollNo: myRollNo, email: email, profilePic: base64Pic })
+            });
+            location.reload();
+        }
+
+        async function changePassword() {
+            const oldP = document.getElementById('oldPass').value; const newP = document.getElementById('newPass').value; const confP = document.getElementById('confirmPass').value;
+            if(!oldP || !newP) return alert("Please fill all fields"); if(newP !== confP) return alert("Passwords do not match!");
+            const v = await fetch(`${API_URL}/login`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ username: myRollNo, password: oldP, role: 'student' }) });
+            if(!v.ok) return alert("Incorrect current password!");
+            await fetch(`${API_URL}/admin/update-user`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ username: myRollNo, password: newP }) });
+            alert("Password Updated! Please login again."); logout();
+        }
+
+        function viewFile(id) { const item = data.find(i => i._id == id); const win = window.open(); win.document.write(`<iframe src="${item.fileData}" frameborder="0" style="width:100%; height:100%;"></iframe>`); }
+        async function deleteAchievement(id) { const item = data.find(i => i._id == id); if (item && item.status === 'Approved') return alert("Cannot delete an approved achievement."); if (confirm("Delete this?")) { await fetch(`${API_URL}/achievements/${id}`, { method: "DELETE" }); loadAchievements(); } }
+        
+        function editAchievement(id) {
+            const item = data.find(i => i._id == id);
+            if (item && item.status === 'Approved') return alert("Cannot edit an approved achievement.");
+            document.getElementById('editId').value = item._id; document.getElementById('title').value = item.title; document.getElementById('category').value = item.category; document.getElementById('desc').value = item.description || ""; document.getElementById('completionDate').value = item.completionDate || item.date || ""; document.getElementById('uploadDate').value = item.uploadDate || item.date || todayStr; document.getElementById('achModal').style.display = 'flex';
+        }
+
+        function toggleFileField() { document.getElementById('fileField').classList.toggle('hidden', !document.getElementById('hasFile').checked); }
+        function openModal() { document.getElementById('achModal').style.display = 'flex'; document.getElementById('uploadDate').value = todayStr; }
+        function closeModal() { document.getElementById('achModal').style.display = 'none'; document.getElementById('achForm').reset(); document.getElementById('editId').value = ""; }
+        function openProfileModal() { document.getElementById('profileModal').style.display = 'flex'; }
+        function closeProfileModal() { document.getElementById('profileModal').style.display = 'none'; }
+        
+        function toggleSecurityView(btn) { hideAllViews(btn); document.getElementById('security-view').classList.remove('hidden'); }
+        function showResumeView(btn) { hideAllViews(btn); document.getElementById('resume-view').classList.remove('hidden'); }
+        function showCategory(cat, btn) { currentView = cat; hideAllViews(btn); document.getElementById('dashboard-view').classList.remove('hidden'); document.getElementById('currentCategoryTitle').innerText = cat === 'All' ? 'All Records' : cat + 's'; render(); }
+
+        function hideAllViews(btn) {
+            document.querySelectorAll('.menu-item').forEach(b => b.classList.remove('active'));
+            if(btn) btn.classList.add('active');
+            document.getElementById('dashboard-view').classList.add('hidden');
+            document.getElementById('security-view').classList.add('hidden');
+            document.getElementById('resume-view').classList.add('hidden');
+        }
+        
+        function logout() { localStorage.clear(); window.location.href = "login.html"; }
+        window.onload = () => { document.getElementById('completionDate').setAttribute('max', todayStr); loadProfile(); loadAchievements(); };
+    </script>
+</body>
 </html>
+
+
+
+
+
+
+
