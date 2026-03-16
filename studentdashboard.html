@@ -2883,6 +2883,31 @@ window.addEventListener('load', () => {
         .msg-action-btn { background: transparent; border: none; cursor: pointer; font-size: 12px; color: #94a3b8; transition: 0.2s; padding: 0; }
         .msg-action-btn:hover { color: var(--primary); transform: scale(1.1); }
         .msg-action-btn.delete:hover { color: #ef4444; }
+
+        /* ⭐ HOVER CHAT ACTIONS (EDIT/DELETE) FOR DISPUTES ⭐ */
+        .chat-msg-box { position: relative; display: flex; flex-direction: column; margin-bottom: 5px; }
+        
+        /* Hidden by default using opacity */
+        .msg-actions-hover {
+            display: inline-flex; 
+            align-items: center; 
+            gap: 8px; 
+            margin-bottom: 4px;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s ease, visibility 0.2s ease;
+            align-self: flex-end;
+        }
+        
+        /* Show actions ONLY when hovering over the message box */
+        .chat-msg-box:hover .msg-actions-hover {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .msg-action-btn { background: white; border: 1px solid #e2e8f0; border-radius: 4px; cursor: pointer; font-size: 11px; color: #64748b; padding: 4px 8px; transition: 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        .msg-action-btn:hover { color: var(--primary); border-color: var(--primary); transform: scale(1.05); }
+        .msg-action-btn.delete:hover { color: #ef4444; border-color: #ef4444; }
     </style>
 </head>
 <body>
@@ -3380,7 +3405,7 @@ window.addEventListener('load', () => {
 
         function closeDisputeModal() { document.getElementById('disputeModal').style.display = 'none'; currentDisputeId = null; }
 
-        function renderChat(ach) {
+       /* function renderChat(ach) {
             const history = ach.disputeHistory || [];
             let html = '';
             
@@ -3398,6 +3423,86 @@ window.addEventListener('load', () => {
             const chatBox = document.getElementById('chatHistory');
             chatBox.innerHTML = html;
             chatBox.scrollTop = chatBox.scrollHeight;
+        }*/
+
+        function renderChat(ach) {
+            const history = ach.disputeHistory || [];
+            let html = '';
+            
+// ⭐ ANTI-FLICKER MAGIC: Save exact scroll position before changing HTML
+            const prevScrollTop = chatBox.scrollTop;
+            const isAtBottom = (chatBox.scrollHeight - prevScrollTop) <= (chatBox.clientHeight + 50);
+
+            if(ach.feedback && ach.status === 'Rejected') {
+                html += `<div class="chat-bubble chat-other"><b>Proctor's Reason:</b><br>${ach.feedback}</div>`;
+            } else if (history.length === 0) {
+                html = `<p style="text-align:center; color:#94a3b8; font-size:12px; margin-top:20px;">Explain to your proctor why this document should be approved.</p>`;
+            }
+
+            history.forEach(msg => {
+                const isMe = msg.sender === 'Student';
+                const editedTag = msg.isEdited ? '<span style="font-size:10px; font-style:italic; opacity:0.8; margin-left:4px;">(edited)</span>' : '';
+                const safeMsg = msg.message.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                const targetId = msg.timestamp;
+
+                html += `
+                    <div class="chat-msg-box" style="align-self: ${isMe ? 'flex-end' : 'flex-start'}; max-width: 80%;">
+                        ${isMe ? `
+                        <div class="msg-actions-hover">
+                            <button class="msg-action-btn" onclick="editDisputeChat('${targetId}', '${safeMsg}')" title="Edit"><i class="fas fa-pen"></i></button>
+                            <button class="msg-action-btn delete" onclick="deleteDisputeChat('${targetId}')" title="Delete"><i class="fas fa-trash"></i></button>
+                        </div>` : ''}
+                        <div class="chat-bubble ${isMe ? 'chat-me' : 'chat-other'}" style="max-width: 100%;">
+                            <b>${isMe ? 'You' : 'Proctor'}:</b><br>${msg.message} ${editedTag}
+                        </div>
+                    </div>
+                `;
+            });
+            
+
+            const chatBox = document.getElementById('chatHistory');
+            chatBox.innerHTML = html;
+// ⭐ ANTI-FLICKER MAGIC: Smartly restore the scroll position
+            if (isAtBottom) {
+                chatBox.scrollTop = chatBox.scrollHeight; // Snap to bottom ONLY if a brand new message arrives
+            } else {
+                chatBox.scrollTop = prevScrollTop; // Keep scroll perfectly still when editing/deleting!
+            }
+
+           // chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        async function editDisputeChat(timestamp, oldMsg) {
+            const newMsg = prompt("Edit your message:", oldMsg);
+            if (!newMsg || newMsg.trim() === "" || newMsg === oldMsg) return;
+            try {
+                const res = await fetch(`${API_URL}/achievements/dispute/edit`, {
+                    method: "PUT", headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ id: currentDisputeId, timestamp: timestamp, newMsg: newMsg.trim() })
+                });
+                if(res.ok) {
+                    const resData = await res.json();
+                    const index = data.findIndex(a => a._id === currentDisputeId);
+                    if(index !== -1) data[index] = resData.achievement; 
+                    renderChat(resData.achievement);
+                }
+            } catch(e) { alert("Failed to edit message"); }
+        }
+
+        async function deleteDisputeChat(timestamp) {
+            if (!confirm("Are you sure you want to delete this message?")) return;
+            try {
+                const res = await fetch(`${API_URL}/achievements/dispute/delete`, {
+                    method: "DELETE", headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ id: currentDisputeId, timestamp: timestamp })
+                });
+                if(res.ok) {
+                    const resData = await res.json();
+                    const index = data.findIndex(a => a._id === currentDisputeId);
+                    if(index !== -1) data[index] = resData.achievement; 
+                    renderChat(resData.achievement);
+                }
+            } catch(e) { alert("Failed to delete message"); }
         }
 
         async function sendDisputeMsg() {
@@ -3661,6 +3766,7 @@ window.addEventListener('load', () => {
         // --- ⭐ REAL TIME STUDENT CHAT LOGIC ⭐ ---
         let generalChatInterval = null;
         let lastChatCount = 0; 
+        let lastChatJson = ""; // ⭐ THIS IS THE MISSING PIECE! ⭐
 
         function showProctorChatView(btn) {
             if(!btn) btn = document.getElementById('nav-chat-btn');
@@ -3711,7 +3817,7 @@ window.addEventListener('load', () => {
             }
         }*/
 
-function renderGeneralChat(chatArray) {
+/*function renderGeneralChat(chatArray) {
         window.currentChatArray = chatArray; 
         const box = document.getElementById('generalChatHistory');
         
@@ -3750,8 +3856,52 @@ function renderGeneralChat(chatArray) {
             lastChatCount = chatArray.length;
         }
     }
+*/
 
 
+
+
+/*
+function renderGeneralChat(chatArray) {
+        const currentJson = JSON.stringify(chatArray);
+        if (lastChatJson === currentJson) return; 
+        lastChatJson = currentJson;
+
+        window.currentChatArray = chatArray; 
+        const box = document.getElementById('generalChatHistory');
+        
+        if(!chatArray || chatArray.length === 0) {
+            box.innerHTML = `<div style="text-align:center; margin-top:40px;"><div style="background:white; padding:10px 20px; border-radius:20px; display:inline-block; font-size:13px; box-shadow:0 1px 2px rgba(0,0,0,0.05); color:#64748b;">Say hello to your Proctor!</div></div>`;
+            return;
+        }
+        
+        let html = '';
+        chatArray.forEach(msg => {
+            const isMe = msg.sender === 'Student';
+            const time = new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            const editedTag = msg.isEdited ? '<span style="font-size:10px; font-style:italic; opacity:0.7; margin-left:4px;">(edited)</span>' : '';
+            const safeMsg = msg.message.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+            const targetId = msg.id || msg.timestamp; 
+            
+            html += `
+                <div class="chat-msg-box ${isMe ? 'msg-me' : 'msg-them'}">
+                    <div class="chat-bubble-modern">${msg.message}</div>
+                    <div class="chat-timestamp">
+                        ${isMe ? 'You' : 'Proctor'} • ${time} ${editedTag} 
+                        ${isMe ? `
+                        <span class="msg-actions-hover">
+                            <button class="msg-action-btn" onclick="editChat('${targetId}', '${safeMsg}')" title="Edit"><i class="fas fa-pen"></i></button>
+                            <button class="msg-action-btn delete" onclick="deleteChat('${targetId}')" title="Delete"><i class="fas fa-trash"></i></button>
+                        </span>
+                        <i class="fas fa-check-double" style="color:#3b82f6; margin-left:6px;"></i>` : ''}
+                    </div>
+                </div>
+            `;
+        });
+        
+        box.innerHTML = html;
+        box.scrollTop = box.scrollHeight;
+    }
 
 
      /*   async function editFacultyChatMessage(msgId) {
@@ -3790,7 +3940,7 @@ function renderGeneralChat(chatArray) {
         } catch(e) { alert("Failed to delete message"); }
     }
 */
-
+/*
 async function editChat(timestamp, oldMsg) {
             const newMsg = prompt("Edit your message:", oldMsg);
             if (!newMsg || newMsg.trim() === "" || newMsg === oldMsg) return;
@@ -3839,7 +3989,131 @@ async function editChat(timestamp, oldMsg) {
             } catch(e) { alert("Failed to send message"); input.value = msg;}
             finally { input.disabled = false; input.focus(); }
         }
+*/
 
+function renderGeneralChat(chatArray) {
+            const currentJson = JSON.stringify(chatArray);
+            if (lastChatJson === currentJson) return; 
+            lastChatJson = currentJson;
+
+            window.currentChatArray = chatArray; 
+            const box = document.getElementById('generalChatHistory');
+            
+            if(!chatArray || chatArray.length === 0) {
+                box.innerHTML = `<div style="text-align:center; margin-top:40px;"><div style="background:white; padding:10px 20px; border-radius:20px; display:inline-block; font-size:13px; box-shadow:0 1px 2px rgba(0,0,0,0.05); color:#64748b;">Say hello to your Proctor!</div></div>`;
+                return;
+            }
+
+            const prevScrollTop = box.scrollTop;
+            const isAtBottom = (box.scrollHeight - prevScrollTop) <= (box.clientHeight + 50);
+            
+            let html = '';
+            chatArray.forEach(msg => {
+                const isMe = msg.sender === 'Student';
+                const time = new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                const editedTag = msg.isEdited ? '<span style="font-size:10px; font-style:italic; opacity:0.7; margin-left:4px;">(edited)</span>' : '';
+                const safeMsg = msg.message.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                
+                // Use the precise timestamp as the unique ID for targeting
+                const targetId = msg.timestamp; 
+                
+                html += `
+                    <div class="chat-msg-box ${isMe ? 'msg-me' : 'msg-them'}">
+                        <div class="chat-bubble-modern">${msg.message}</div>
+                        <div class="chat-timestamp">
+                            ${isMe ? 'You' : 'Proctor'} • ${time} ${editedTag} 
+                            ${isMe ? `
+                            <span class="msg-actions-hover">
+                                <button class="msg-action-btn" onclick="editChat('${targetId}', '${safeMsg}')" title="Edit"><i class="fas fa-pen"></i></button>
+                                <button class="msg-action-btn delete" onclick="deleteChat('${targetId}')" title="Delete"><i class="fas fa-trash"></i></button>
+                            </span>
+                            <i class="fas fa-check-double" style="color:#3b82f6; margin-left:6px;"></i>` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            box.innerHTML = html;
+
+            if (isAtBottom || chatArray.length > lastChatCount) {
+                box.scrollTop = box.scrollHeight; 
+            } else {
+                box.scrollTop = prevScrollTop; 
+            }
+            
+            lastChatCount = chatArray.length;
+        }
+
+        async function editChat(timestamp, oldMsg) {
+            const newMsg = prompt("Edit your message:", oldMsg);
+            if (!newMsg || newMsg.trim() === "" || newMsg === oldMsg) return;
+            
+            try {
+                const res = await fetch(`${API_URL}/chat/general`, {
+                    method: "PUT", 
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ rollNo: myRollNo, timestamp: timestamp, newMsg: newMsg.trim() })
+                });
+                if(res.ok) { 
+                    const data = await res.json(); 
+                    renderGeneralChat(data.chat); 
+                } else {
+                    alert("Failed to edit message.");
+                }
+            } catch(e) { alert("Server connection error while editing."); }
+        }
+
+        async function deleteChat(timestamp) {
+            if (!confirm("Are you sure you want to delete this message?")) return;
+            
+            try {
+                const res = await fetch(`${API_URL}/chat/general`, {
+                    method: "DELETE", 
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ rollNo: myRollNo, timestamp: timestamp })
+                });
+                if(res.ok) { 
+                    const data = await res.json(); 
+                    renderGeneralChat(data.chat); 
+                } else {
+                    alert("Failed to delete message.");
+                }
+            } catch(e) { alert("Server connection error while deleting."); }
+        }
+
+        async function sendGeneralChat() {
+            const input = document.getElementById('generalChatInput');
+            const msg = input.value.trim();
+            if(!msg) return;
+            
+            input.disabled = true;
+            input.value = "Sending...";
+            
+            try {
+                const res = await fetch(`${API_URL}/chat/general`, {
+                    method: "POST", 
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ rollNo: myRollNo, sender: 'Student', message: msg })
+                });
+                
+                const data = await res.json();
+                
+                if(res.ok){
+                    input.value = "";
+                    renderGeneralChat(data.chat);
+                } else {
+                    alert("Server rejected message: " + data.message);
+                    input.value = msg; // Restore their typed text
+                }
+            } catch(e) { 
+                alert("Failed to send. Is the server running?"); 
+                input.value = msg; // Restore their typed text
+            }
+            finally { 
+                input.disabled = false; 
+                input.focus(); 
+            }
+        }
 
         
         function logout() { localStorage.clear(); window.location.href = "login.html"; }

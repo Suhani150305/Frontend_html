@@ -4799,6 +4799,8 @@ window.addEventListener('load', () => {
             font-size: 14px;
         }
         .calendar-clear-btn:hover { transform: scale(1.1); }
+
+        
     </style>
 </head>
 <body>
@@ -4921,31 +4923,32 @@ window.addEventListener('load', () => {
         <h2>Global Achievement Tracking</h2>
         <div class="header-actions" style="background: var(--bg-color); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color);">
             <input type="text" id="achSearch" placeholder="Search Title, Name, Roll No..." onkeyup="renderAdminAchievements()" style="width: 200px; margin-bottom: 0;">
-            <select id="achCat" onchange="renderAdminAchievements()" style="margin-bottom: 0;">
+            <select id="achCat" onchange="renderAdminAchievements()" style="padding: 8px 10px; border-radius: 6px; border: 1px solid #cbd5e1; outline: none; font-size: 12px; min-width: 80px;">
                 <option value="all">All Categories</option><option value="Certificate">Certificate</option><option value="Internship">Internship</option><option value="Competition">Competition</option><option value="Extracurricular">Extracurricular</option><option value="Sports">Sports</option>
             </select>
-            <select id="achDept" onchange="renderAdminAchievements()" style="margin-bottom: 0;">
+            <select id="achDept" onchange="renderAdminAchievements()" style="padding: 8px 10px; border-radius: 6px; border: 1px solid #cbd5e1; outline: none; font-size: 12px; min-width: 80px;">
                 <option value="all">All Depts</option><option value="CE">CE</option><option value="IT">IT</option><option value="CSBS">CSBS</option><option value="AI">AI</option>
             </select>
-            <select id="achSem" onchange="renderAdminAchievements()" style="margin-bottom: 0;">
+            <select id="achSem" onchange="renderAdminAchievements()" style="padding: 8px 10px; border-radius: 6px; border: 1px solid #cbd5e1; outline: none; font-size: 12px; min-width: 80px;">
                 <option value="all">All Sem</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option>
             </select>
           
-            <div class="calendar-input-wrapper">
+            <div class="calendar-input-wrapper" style="display: flex; align-items: center; gap: 4px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 2px 8px;">
                 <i class="fas fa-calendar-alt"></i>
                 <input type="text" id="achDateRange" placeholder="Select Date Span...">
                 <button id="clearDateBtn" class="calendar-clear-btn" onclick="clearFlatpickrDate()" title="Clear Dates"><i class="fas fa-times-circle"></i></button>
             </div>
 
-            <select id="achMonth" onchange="renderAdminAchievements()" style="margin-bottom: 0;">
+            <select id="achMonth" onchange="renderAdminAchievements()" style="padding: 8px 10px; border-radius: 6px; border: 1px solid #cbd5e1; outline: none; font-size: 12px; min-width: 80px;">
                 <option value="all">All Months</option>
                 <option value="1">Jan</option><option value="2">Feb</option><option value="3">Mar</option><option value="4">Apr</option><option value="5">May</option><option value="6">Jun</option>
                 <option value="7">Jul</option><option value="8">Aug</option><option value="9">Sep</option><option value="10">Oct</option><option value="11">Nov</option><option value="12">Dec</option>
             </select>
-            <select id="achYear" onchange="renderAdminAchievements()" style="margin-bottom: 0;">
+            <select id="achYear" onchange="renderAdminAchievements()" style="padding: 8px 10px; border-radius: 6px; border: 1px solid #cbd5e1; outline: none; font-size: 12px; min-width: 80px;">
                 <option value="all">All Years</option>
                 <option value="2024">2024</option><option value="2025">2025</option><option value="2026">2026</option><option value="2027">2027</option>
             </select>
+                   <button class="btn" style="background: #e2e8f0; color: #334155; padding: 8px 12px; font-size: 12px; white-space: nowrap;" onclick="clearAdminFilters()"><i class="fas fa-times"></i> Clear</button>
             <button class="btn" style="background-color: #10b981; color: white;" onclick="generateGlobalReport()"><i class="fas fa-file-excel"></i> Export Filtered</button>
         </div>
         <div id="achStats" style="margin-top: 15px; font-size: 14px; font-weight: 600; color: var(--primary);"></div>
@@ -5242,6 +5245,31 @@ function clearFlatpickrDate() {
     document.getElementById("clearDateBtn").style.display = "none";
     renderAdminAchievements();
 }
+
+// ⭐ ADMIN: CLEAR ALL FILTERS ⭐
+    function clearAdminFilters() {
+        // 1. Reset the text search
+        document.getElementById('achSearch').value = '';
+        
+        // 2. Reset all the dropdowns back to 'all'
+        document.getElementById('achCat').value = 'all';
+        document.getElementById('achDept').value = 'all';
+        document.getElementById('achSem').value = 'all';
+        document.getElementById('achMonth').value = 'all';
+        document.getElementById('achYear').value = 'all';
+        
+        // 3. Clear the Date Range Picker 
+        // (If you are using Flatpickr, the .clear() method wipes the selected dates)
+        if (typeof dateRangePicker !== 'undefined' && dateRangePicker.clear) {
+            dateRangePicker.clear();
+        }
+
+        // 4. Re-run your render function so the table updates!
+        // NOTE: Replace 'renderAchievements()' with whatever your actual filtering function is named (e.g., filterAchievements, renderData, etc.)
+        renderAdminAchievements(); 
+    }
+  
+
 
 function toggleTheme() {
     document.body.classList.toggle('dark-mode');
@@ -6018,6 +6046,7 @@ async function renderAdminAchievements() {
         return;
     }
 
+
     // =======================================
     // 🎨 CONDITIONAL RENDERING (The 2 Views)
     // =======================================
@@ -6101,6 +6130,7 @@ async function renderAdminAchievements() {
         }).join('');
     }
 }
+
 
 // 4. Excel Export Function
 function generateGlobalReport() {
@@ -6579,3 +6609,4 @@ window.addEventListener('load', () => {
 </script>
 </body>
 </html>
+
