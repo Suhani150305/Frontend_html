@@ -2955,6 +2955,25 @@ window.addEventListener('load', () => {
                     </button>
                     <button class="btn btn-add" onclick="openModal()">+ Add Achievement</button>
                 </div>
+               
+               <div onclick="openMeritModal()" style="cursor: pointer; flex: 1; min-width: 200px; background: linear-gradient(135deg, #1e293b, #0f172a); padding: 20px; border-radius: 12px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.2); border: 1px solid #fbbf24; position: relative; overflow: hidden; transition: transform 0.2s;">
+                
+                <div style="position: absolute; top: -30px; right: -30px; width: 100px; height: 100px; background: #fbbf24; filter: blur(40px); opacity: 0.15; z-index: 0;"></div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 1;">
+                    <h4 style="margin: 0; font-size: 14px; font-weight: 500; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px;">Golden Merit</h4>
+                    <i class="fas fa-crown" style="color: #fbbf24; font-size: 18px;"></i>
+                </div>
+                
+                <h2 id="displayMeritScore" style="margin: 10px 0 0 0; font-size: 38px; font-weight: 800; background: linear-gradient(to right, #fef08a, #f59e0b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; position: relative; z-index: 1;">
+                    <i class="fas fa-spinner fa-spin" style="font-size: 24px; color: #fbbf24; -webkit-text-fill-color: initial;"></i>
+                </h2>
+                
+                <p style="margin: 8px 0 0 0; font-size: 11px; color: #fbbf24; opacity: 0.8; position: relative; z-index: 1;">
+                    <i class="fas fa-hand-pointer"></i> Click for detailed breakdown
+                </p>
+            </div>
+            
             </div>
 
             <div class="stats-row">
@@ -3057,6 +3076,9 @@ window.addEventListener('load', () => {
                     <button class="btn" style="background:#64748b; color:white; flex: 1;" onclick="saveResumeDetails()"><i class="fas fa-save"></i> Save Details</button>
                     <button class="btn" style="background:#2563eb; color:white; flex: 1;" onclick="generateResumeWord()"><i class="fas fa-file-word"></i> Download Word (.doc)</button>
                     <button class="btn" style="background:#10b981; color:white; flex: 1;" onclick="generateResumePDF()"><i class="fas fa-file-pdf"></i> Download PDF</button>
+                    <button type="button" onclick="shareToLinkedIn()" id="linkedinShareBtn" style="background: #0a66c2; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 8px; margin-left: 10px; box-shadow: 0 4px 6px rgba(10, 102, 194, 0.2);">
+    <i class="fab fa-linkedin" style="font-size: 16px;"></i> Share on LinkedIn
+</button>
                 </div>
             </div>
         </div>
@@ -3108,6 +3130,24 @@ window.addEventListener('load', () => {
             </div>
         </div>
     </div>
+
+
+    <div class="modal" id="meritModal" style="z-index: 2000;">
+    <div class="modal-content" style="background: linear-gradient(135deg, #1e293b, #0f172a); border: 1px solid #fbbf24; width: 350px; text-align: center; box-shadow: 0 25px 50px -12px rgba(251, 191, 36, 0.25);">
+        
+        <h3 style="color: #fef08a; margin-top: 0; margin-bottom: 5px; font-size: 22px;">
+            <i class="fas fa-chart-pie"></i> Score Breakdown
+        </h3>
+        <p style="color: #94a3b8; font-size: 12px; margin-top: 0; margin-bottom: 20px;">Here is how your Golden Merit was calculated</p>
+        
+        <div id="meritModalBody" style="font-size: 15px; color: #cbd5e1; text-align: left;">
+            </div>
+        
+        <button class="btn" style="background: linear-gradient(to right, #f59e0b, #d97706); color: white; width: 100%; margin-top: 25px; font-weight: bold; border: none;" onclick="document.getElementById('meritModal').style.display='none'">
+            Awesome!
+        </button>
+    </div>
+</div>
 
     <div class="modal" id="achModal">
         <div class="modal-body">
@@ -3167,7 +3207,33 @@ window.addEventListener('load', () => {
             <div id="rAchList" style="margin-bottom: 15px;"></div>
         </div>
     </div>
+<div style="position: fixed; top: 25px; right: 90px; z-index: 9999;">
+    <button onclick="document.getElementById('badgeDropdown').classList.toggle('show')" style="background: white; border: 1px solid #e2e8f0; color: #d97706; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; position: relative; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: 0.2s; display: flex; align-items: center; justify-content: center; font-size: 18px;">
+        <i class="fas fa-medal"></i>
+        <span id="floatingBadgeCount" style="position: absolute; top: -2px; right: -2px; background: #10b981; color: white; font-size: 10px; font-weight: bold; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white;">0</span>
+    </button>
+    
+    <div id="badgeDropdown" style="position: absolute; top: 55px; right: 0; width: 320px; background: white; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); transform-origin: top right; transition: 0.2s; opacity: 0; pointer-events: none; transform: scale(0.95); display: flex; flex-direction: column;">
+        
+        <div style="padding: 15px 20px; border-bottom: 1px solid #e2e8f0; font-weight: 700; display: flex; justify-content: space-between; align-items: center; color: #1e293b; background: #f8fafc; border-radius: 12px 12px 0 0;">
+            <span>🏆 My Milestones</span>
+            <button onclick="document.getElementById('badgeDropdown').classList.remove('show')" style="background:none; border:none; cursor:pointer; color:#64748b;"><i class="fas fa-times"></i></button>
+        </div>
+        
+        <div id="badgeDropdownList" style="max-height: 400px; overflow-y: auto; padding: 15px;">
+            <p style="text-align:center; font-size:12px; color:#64748b;">Loading...</p>
+        </div>
+    </div>
+</div>
 
+<style>
+    /* The !important tag forces the dropdown to override the hidden inline styles */
+    #badgeDropdown.show { 
+        opacity: 1 !important; 
+        pointer-events: auto !important; 
+        transform: scale(1) !important; 
+    }
+</style>
     <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script>
         const API_URL = "http://localhost:5000";
@@ -3228,8 +3294,10 @@ window.addEventListener('load', () => {
                         document.getElementById('resLinked').value = myStudentProfile.resumeData.linkedin || "";
                         document.getElementById('resGithub').value = myStudentProfile.resumeData.github || "";
                     }
+                    updateGoldenMeritCard(myStudentProfile);
                 }
             } catch (e) { console.error(e); }
+            
         }
 
         // --- ⭐ CLAIM EVENT CODE LOGIC ⭐ ---
@@ -4114,7 +4182,296 @@ function renderGeneralChat(chatArray) {
                 input.focus(); 
             }
         }
+/*
+// --- ⭐ STUDENT MERIT SCORE CALCULATOR ⭐ ---
+async function updateGoldenMeritCard(studentData) {
+    try {
+        // 1. Fetch their achievements from the database
+        const res = await fetch(`${API_URL}/achievements?rollNo=${studentData.rollNo}`);
+        const allAchs = await res.json();
+        
+        // Filter only the Approved ones
+        const approvedAchs = allAchs.filter(a => a.status === 'Approved');
 
+        // --- A. ACADEMIC SCORE (Max 50) ---
+        let cgpa = 0;
+        if (studentData.academicRecords && studentData.academicRecords.length > 0) {
+            const sortedRecs = [...studentData.academicRecords].sort((a,b) => parseInt(a.semester) - parseInt(b.semester));
+            cgpa = parseFloat(sortedRecs[sortedRecs.length - 1].cgpa) || 0;
+        }
+        const academicScore = (cgpa / 10) * 50;
+
+        // --- B. STANDARD ACHIEVEMENT SCORE (Max 50) ---
+        const counts = {
+            certs: approvedAchs.filter(a => a.category === 'Certificate').length,
+            ints: approvedAchs.filter(a => a.category === 'Internship').length,
+            comps: approvedAchs.filter(a => a.category === 'Competition').length,
+            sports: approvedAchs.filter(a => a.category === 'Sports').length,
+            extras: approvedAchs.filter(a => a.category === 'Extracurricular').length
+        };
+
+        const certScore = Math.min(counts.certs * 5, 10);
+        const intScore = Math.min(counts.ints * 5, 10);
+        const compScore = Math.min(counts.comps * 5, 10);
+        const sportScore = Math.min(counts.sports * 5, 10);
+        const extraScore = Math.min(counts.extras * 5, 10);
+
+        const achievementScore = certScore + intScore + compScore + sportScore + extraScore;
+
+        // --- C. PROCTOR BONUS POINTS (Infinite) ---
+        let totalBonus = 0;
+        approvedAchs.forEach(ach => {
+            if (ach.bonusPoints) {
+                totalBonus += Number(ach.bonusPoints);
+            }
+        });
+
+        // --- D. GRAND TOTAL ---
+        const totalScore = academicScore + achievementScore + totalBonus;
+
+        // 2. Update the UI exactly!
+        document.getElementById('displayMeritScore').innerText = totalScore.toFixed(1);
+        
+        // Build the breakdown text
+        let breakdownText = `Academics: <b>${academicScore.toFixed(1)}</b> &nbsp;|&nbsp; Docs: <b>${achievementScore}</b>`;
+        
+        // If they got bonus points, highlight it heavily!
+        if (totalBonus > 0) {
+            breakdownText += `<br><span style="color: #fef3c7; font-weight: bold;">⭐ +${totalBonus} Proctor Bonus</span>`;
+        }
+
+        document.getElementById('displayMeritBreakdown').innerHTML = breakdownText;
+
+    } catch (error) {
+        console.error("Failed to calculate merit score:", error);
+        document.getElementById('displayMeritScore').innerText = "N/A";
+        document.getElementById('displayMeritBreakdown').innerText = "Error loading score breakdown";
+    }
+}*/
+// --- Function to open the detailed Merit Score Modal ---
+function openMeritModal() {
+    const modal = document.getElementById('meritModal');
+    if (modal) {
+        modal.style.display = 'flex';
+    } else {
+        console.error("The meritModal HTML is missing!");
+    }
+}
+
+// --- ⭐ BULLETPROOF & DETAILED STUDENT MERIT SCORE CALCULATOR ⭐ ---
+async function updateGoldenMeritCard(studentData) {
+    try {
+        if (!studentData || !studentData.rollNo) return;
+
+        // 1. Fetch ALL achievements 
+        const res = await fetch(`${API_URL}/achievements`);
+        const allAchs = await res.json();
+        
+        // 2. Filter ONLY Approved ones belonging to THIS student
+        const approvedAchs = allAchs.filter(a => a.status === 'Approved' && a.studentRoll === studentData.rollNo);
+
+         // ⭐ PASTE THIS EXACT LINE RIGHT HERE! ⭐
+        renderMilestoneBadges(approvedAchs);
+
+        // --- A. ACADEMIC SCORE (Max 50) ---
+        let cgpa = 0;
+        if (studentData.academicRecords && studentData.academicRecords.length > 0) {
+            const sortedRecs = [...studentData.academicRecords].sort((a,b) => parseInt(a.semester) - parseInt(b.semester));
+            cgpa = parseFloat(sortedRecs[sortedRecs.length - 1].cgpa) || 0;
+        }
+        const academicScore = (cgpa / 10) * 50;
+
+        // --- B. STANDARD ACHIEVEMENT SCORE (Max 50) ---
+        const counts = {
+            certs: approvedAchs.filter(a => a.category === 'Certificate').length,
+            ints: approvedAchs.filter(a => a.category === 'Internship').length,
+            comps: approvedAchs.filter(a => a.category === 'Competition').length,
+            sports: approvedAchs.filter(a => a.category === 'Sports').length,
+            extras: approvedAchs.filter(a => a.category === 'Extracurricular').length
+        };
+
+        const certScore = Math.min(counts.certs * 5, 10);
+        const intScore = Math.min(counts.ints * 5, 10);
+        const compScore = Math.min(counts.comps * 5, 10);
+        const sportScore = Math.min(counts.sports * 5, 10);
+        const extraScore = Math.min(counts.extras * 5, 10);
+
+        const achievementScore = certScore + intScore + compScore + sportScore + extraScore;
+
+        // --- C. PROCTOR BONUS POINTS (Infinite) ---
+        let totalBonus = 0;
+        let bonusDetailsHTML = ""; // We will build a list of exactly what gave them bonus points!
+        
+        approvedAchs.forEach(ach => {
+            if (ach.bonusPoints && Number(ach.bonusPoints) > 0) {
+                const pts = Number(ach.bonusPoints);
+                totalBonus += pts;
+                // Add this specific achievement to the breakdown list
+                bonusDetailsHTML += `
+                    <div style="display:flex; justify-content:space-between; font-size: 12px; color: #fde68a; margin-top: 6px; padding-left: 10px; border-left: 2px solid #fbbf24;">
+                        <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;" title="${ach.title}">↳ ${ach.title}</span> 
+                        <b>+${pts}</b>
+                    </div>
+                `;
+            }
+        });
+
+        // --- D. GRAND TOTAL ---
+        const totalScore = academicScore + achievementScore + totalBonus;
+
+        // 3. Update the UI Text on the Card
+        document.getElementById('displayMeritScore').innerText = totalScore.toFixed(1);
+        
+        // 4. Build the HIGHLY DETAILED Modal HTML
+        let modalHTML = `
+            <div style="margin-bottom: 15px;">
+                <div style="display:flex; justify-content:space-between; border-bottom: 1px solid #334155; padding-bottom: 8px; margin-bottom: 8px;">
+                    <span style="color: #94a3b8;">📚 Academics (CGPA: ${cgpa.toFixed(2)})</span> 
+                    <b style="color: white;">${academicScore.toFixed(1)} <span style="font-size:11px; color:#64748b;">/ 50</span></b>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <div style="display:flex; justify-content:space-between; border-bottom: 1px solid #334155; padding-bottom: 8px; margin-bottom: 8px;">
+                    <span style="color: #94a3b8;">📜 Verified Docs</span> 
+                    <b style="color: white;">${achievementScore} <span style="font-size:11px; color:#64748b;">/ 50</span></b>
+                </div>
+                
+                <div style="font-size: 13px; color: #cbd5e1; padding-left: 10px; display: flex; flex-direction: column; gap: 5px;">
+                    <div style="display:flex; justify-content:space-between;"><span>Certificates <small style="color:#64748b;">(${counts.certs} items)</small></span> <span>${certScore} pts</span></div>
+                    <div style="display:flex; justify-content:space-between;"><span>Internships <small style="color:#64748b;">(${counts.ints} items)</small></span> <span>${intScore} pts</span></div>
+                    <div style="display:flex; justify-content:space-between;"><span>Competitions <small style="color:#64748b;">(${counts.comps} items)</small></span> <span>${compScore} pts</span></div>
+                    <div style="display:flex; justify-content:space-between;"><span>Sports <small style="color:#64748b;">(${counts.sports} items)</small></span> <span>${sportScore} pts</span></div>
+                    <div style="display:flex; justify-content:space-between;"><span>Extracurricular <small style="color:#64748b;">(${counts.extras} items)</small></span> <span>${extraScore} pts</span></div>
+                </div>
+            </div>
+        `;
+        
+        // --- PROCTOR BONUS BREAKDOWN ---
+        if (totalBonus > 0) {
+            modalHTML += `
+            <div style="background: rgba(251, 191, 36, 0.05); padding: 12px; border-radius: 8px; border: 1px dashed #fbbf24; margin-top: 15px;">
+                <div style="display:flex; justify-content:space-between; margin-bottom: 8px;">
+                    <span style="color: #fbbf24; font-weight: bold;"><i class="fas fa-star"></i> Total Proctor Bonus</span> 
+                    <b style="color: #fbbf24; font-size: 16px;">+${totalBonus}</b>
+                </div>
+                <div style="border-top: 1px solid rgba(251, 191, 36, 0.2); padding-top: 6px;">
+                    ${bonusDetailsHTML} </div>
+            </div>`;
+        }
+
+        document.getElementById('meritModalBody').innerHTML = modalHTML;
+
+    } catch (error) {
+        console.error("Failed to calculate merit score:", error);
+        document.getElementById('displayMeritScore').innerText = "N/A";
+    }
+}
+// Place the open function OUTSIDE of updateGoldenMeritCard
+    function openMeritModal() {
+        document.getElementById('meritModal').style.display = 'flex';
+    }
+
+// --- ⭐ TIERED MILESTONE BADGE ENGINE (BRONZE/SILVER/GOLD) ⭐ ---
+function renderMilestoneBadges(approvedAchs) {
+    const list = document.getElementById('badgeDropdownList');
+    
+    // 1. Calculate how many documents they have in each category
+    const counts = {
+        certs: approvedAchs.filter(a => a.category === 'Certificate').length,
+        ints: approvedAchs.filter(a => a.category === 'Internship').length,
+        comps: approvedAchs.filter(a => a.category === 'Competition').length,
+        sports: approvedAchs.filter(a => a.category === 'Sports').length,
+        extras: approvedAchs.filter(a => a.category === 'Extracurricular').length
+    };
+    
+    // For the Proctor Elite badge, we count their total bonus points!
+    let totalBonus = 0;
+    approvedAchs.forEach(a => { if (Number(a.bonusPoints) > 0) totalBonus += Number(a.bonusPoints); });
+
+    // 2. The Auto-Tiering Calculator Engine
+    // It checks their count against [BronzeReq, SilverReq, GoldReq]
+    function getTierInfo(count, thresholds) {
+        if (count >= thresholds[2]) return { level: 'Gold', color: '#fbbf24', bg: '#fffbeb', text: 'Max Tier Achieved!', progress: 100 };
+        if (count >= thresholds[1]) return { level: 'Silver', color: '#94a3b8', bg: '#f8fafc', text: `${count} / ${thresholds[2]} to Gold`, progress: (count/thresholds[2])*100 };
+        if (count >= thresholds[0]) return { level: 'Bronze', color: '#d97706', bg: '#fff7ed', text: `${count} / ${thresholds[1]} to Silver`, progress: (count/thresholds[1])*100 };
+        
+        // If they haven't even hit Bronze yet, it stays locked
+        return { level: 'Locked', color: '#cbd5e1', bg: '#f8fafc', text: `${count} / ${thresholds[0]} to unlock Bronze`, progress: (count/thresholds[0])*100 };
+    }
+
+    // 3. Define the Badges & Their Upgrade Thresholds [Bronze, Silver, Gold]
+    const badges = [
+        { id: 'b1', title: 'Scholar', icon: 'fas fa-certificate', count: counts.certs, reqs: [3, 10, 25] },
+        { id: 'b2', title: 'Corporate Pro', icon: 'fas fa-briefcase', count: counts.ints, reqs: [1, 3, 5] },
+        { id: 'b3', title: 'Code Ninja', icon: 'fas fa-laptop-code', count: counts.comps, reqs: [2, 5, 10] },
+        { id: 'b4', title: 'Varsity Athlete', icon: 'fas fa-running', count: counts.sports, reqs: [1, 3, 5] },
+        { id: 'b5', title: 'Campus Star', icon: 'fas fa-star', count: counts.extras, reqs: [2, 5, 10] },
+        { id: 'b6', title: 'Proctor Elite', icon: 'fas fa-crown', count: totalBonus, reqs: [5, 15, 30] } // Points-based!
+    ];
+
+    let unlockedCount = 0;
+
+    // 4. Draw the dropdown items with Progress Bars!
+    list.innerHTML = badges.map(b => {
+        const tier = getTierInfo(b.count, b.reqs);
+        const isUnlocked = tier.level !== 'Locked';
+        if (isUnlocked) unlockedCount++;
+
+        const iconColor = isUnlocked ? 'white' : '#94a3b8';
+        const iconBg = isUnlocked ? tier.color : '#e2e8f0';
+        const titleColor = isUnlocked ? '#1e293b' : '#94a3b8';
+
+        // Show a colored pill for the Tier, or a Lock icon
+        const tierBadge = isUnlocked 
+            ? `<span style="font-size: 10px; background: ${tier.color}; color: white; padding: 2px 6px; border-radius: 4px; font-weight: bold; letter-spacing: 0.5px;">${tier.level.toUpperCase()}</span>` 
+            : `<i class="fas fa-lock" style="color:#cbd5e1;"></i>`;
+
+        return `
+            <div style="display:flex; align-items:center; gap:12px; padding:12px; border-radius:8px; margin-bottom:10px; background:${tier.bg}; border:1px solid ${isUnlocked ? tier.color+'40' : '#e2e8f0'}; transition: 0.2s;">
+                <div style="width: 40px; height: 40px; border-radius: 50%; background: ${iconBg}; color: ${iconColor}; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink:0; box-shadow: ${isUnlocked ? '0 4px 6px '+tier.color+'40' : 'none'};">
+                    <i class="${b.icon}"></i>
+                </div>
+                <div style="flex: 1;">
+                    <h4 style="margin: 0 0 4px 0; font-size: 13px; color: ${titleColor}; display:flex; justify-content:space-between; align-items:center;">
+                        ${b.title} ${tierBadge}
+                    </h4>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                        <span style="font-size: 10px; color: #64748b; font-weight: 500;">${tier.text}</span>
+                    </div>
+                    <div style="width: 100%; background: #e2e8f0; height: 4px; border-radius: 2px; overflow: hidden;">
+                        <div style="width: ${tier.progress}%; background: ${isUnlocked ? tier.color : '#cbd5e1'}; height: 100%; border-radius: 2px; transition: width 0.5s ease;"></div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    // 5. Update the little green number on the floating button!
+    document.getElementById('floatingBadgeCount').innerText = unlockedCount;
+}
+// --- ⭐ SHARE VERIFIED RESUME DIRECTLY TO LINKEDIN ⭐ ---
+function shareToLinkedIn() {
+    if (!myStudentProfile || !myStudentProfile.rollNo) {
+        alert("Please wait for your profile to finish loading.");
+        return;
+    }
+    
+    // 1. Generate the unique public resume link
+    const baseUrl = window.location.origin; 
+    const resumeLink = `${baseUrl}/public-resume.html?student=${myStudentProfile.rollNo}`;
+    
+    // 2. Encode the URL so LinkedIn can read it safely
+    const encodedUrl = encodeURIComponent(resumeLink);
+    
+    // 3. Create the official LinkedIn Share URL
+    const linkedInShareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`;
+    
+    // 4. Open LinkedIn in a sleek popup window!
+    // (A popup looks much more professional than forcing them to leave your site)
+    const windowFeatures = "width=600,height=600,left=200,top=200,menubar=no,toolbar=no,resizable=yes,scrollbars=yes";
+    window.open(linkedInShareUrl, "Share to LinkedIn", windowFeatures);
+}
         
         function logout() { localStorage.clear(); window.location.href = "login.html"; }
         window.onload = () => { document.getElementById('completionDate').setAttribute('max', todayStr); loadProfile(); loadAchievements(); };

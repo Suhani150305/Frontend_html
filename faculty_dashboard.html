@@ -5765,9 +5765,30 @@ window.addEventListener('load', () => {
             let actions = "";
             if (ach.status === "Pending") {
                 actions = `
-                    <div style="display:flex; gap:8px; flex-wrap:wrap; flex:1; justify-content: flex-end;">
-                        <button class="btn btn-approve" style="padding: 6px 12px; font-size:12px; flex:1;" onclick="verifyFromDetailView('${ach._id}', 'Approved', '${rollNo}', '${name.replace(/'/g, "\\'")}')"><i class="fas fa-check"></i> Approve</button>
-                        <button class="btn btn-reject" style="padding: 6px 12px; font-size:12px; flex:1;" onclick="verifyFromDetailView('${ach._id}', 'Rejected', '${rollNo}', '${name.replace(/'/g, "\\'")}')"><i class="fas fa-times"></i> Reject</button>
+                    <div style="width: 100%; margin-bottom: 12px; background: #fffbeb; padding: 10px; border-radius: 8px; border: 1px solid #fde68a;">
+                        <label style="color: #b45309; font-size: 11px; font-weight: bold; margin-bottom: 5px; display: block;"><i class="fas fa-star"></i> Exceptional Achievement Bonus</label>
+                        <select id="bonus_${ach._id}" style="width: 100%; padding: 6px; border-radius: 4px; border: 1px solid #fcd34d; font-size: 12px; background: white; outline: none; cursor: pointer;">
+                            <option value="0">Standard Approval (0 Bonus)</option>
+                            <optgroup label="🏆 Sports & Competitions">
+                                <option value="5">State / Regional Winner (+5 Points)</option>
+                                <option value="10">National Level Winner (+10 Points)</option>
+                                <option value="15">International Level Winner (+15 Points)</option>
+                            </optgroup>
+                            <optgroup label="💼 Internships & Work">
+                                <option value="5">Funded Startup / Mid-Level (+5 Points)</option>
+                                <option value="10">Top Tier / MNC (+10 Points)</option>
+                                <option value="15">Elite / Fortune 500 (+15 Points)</option>
+                            </optgroup>
+                            <optgroup label="📜 Certifications">
+                                <option value="5">Advanced Course (+5 Points)</option>
+                                <option value="10">Industry Recognized (+10 Points)</option>
+                                <option value="15">Elite Professional (+15 Points)</option>
+                            </optgroup>
+                        </select>
+                    </div>
+                    <div style="display:flex; gap:8px; flex-wrap:wrap; width: 100%;">
+                        <button class="btn btn-approve" style="padding: 8px 12px; font-size:12px; flex:1;" onclick="verifyFromDetailView('${ach._id}', 'Approved', '${rollNo}', '${name.replace(/'/g, "\\'")}')"><i class="fas fa-check"></i> Approve</button>
+                        <button class="btn btn-reject" style="padding: 8px 12px; font-size:12px; flex:1;" onclick="verifyFromDetailView('${ach._id}', 'Rejected', '${rollNo}', '${name.replace(/'/g, "\\'")}')"><i class="fas fa-times"></i> Reject</button>
                     </div>
                 `;
             } else {
@@ -5816,17 +5837,32 @@ window.addEventListener('load', () => {
 
     async function verifyFromDetailView(id, status, rollNo, name) {
         let feedback = "";
+          let bonusPoints = 0; // ⭐ NEW: Default to 0
         if (status === 'Rejected') {
             feedback = prompt("Rejection Reason (Required - Will be emailed to student):");
             if (feedback === null) return; 
             if (feedback.trim() === "") return alert("❌ You must provide a rejection reason to the student!");
         }
-        if (status === 'Pending' && !confirm("Are you sure you want to undo this verification?")) return;
 
+         // ⭐ NEW: If they are Approving, grab the bonus points from the dropdown!
+        if (status === 'Approved') {
+            const bonusDropdown = document.getElementById(`bonus_${id}`);
+            if (bonusDropdown) {
+                bonusPoints = Number(bonusDropdown.value);
+            }
+        }
+
+        if (status === 'Pending' && !confirm("Are you sure you want to undo this verification?")) return;
+//today 
+ // ⭐ NEW: We added bonusPoints to the JSON body being sent to server.js
         await fetch(`${API_URL}/achievements/verify`, { 
             method: "POST", headers: { "Content-Type": "application/json" }, 
-            body: JSON.stringify({ id, status, feedback }) 
+            body: JSON.stringify({ id, status, feedback, bonusPoints }) 
         });
+       /* await fetch(`${API_URL}/achievements/verify`, { 
+            method: "POST", headers: { "Content-Type": "application/json" }, 
+            body: JSON.stringify({ id, status, feedback }) 
+        });*/
         Toastify({ text: `Status updated to ${status}`, backgroundColor: status === "Approved" ? "#10b981" : (status === "Pending" ? "#f59e0b" : "#ef4444") }).showToast();
         const aRes = await fetch(`${API_URL}/achievements?proctorId=${myFacultyId}`);
         allAchievements = await aRes.json();
