@@ -3079,6 +3079,9 @@ window.addEventListener('load', () => {
                     <button type="button" onclick="shareToLinkedIn()" id="linkedinShareBtn" style="background: #0a66c2; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 8px; margin-left: 10px; box-shadow: 0 4px 6px rgba(10, 102, 194, 0.2);">
     <i class="fab fa-linkedin" style="font-size: 16px;"></i> Share on LinkedIn
 </button>
+<button type="button" onclick="previewResume()" style="background: #10b981; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 8px; margin-left: 10px; box-shadow: 0 4px 6px rgba(16, 185, 129, 0.2);">
+    <i class="fas fa-eye"></i> Preview My Resume
+</button>
                 </div>
             </div>
         </div>
@@ -4472,7 +4475,15 @@ function shareToLinkedIn() {
     const windowFeatures = "width=600,height=600,left=200,top=200,menubar=no,toolbar=no,resizable=yes,scrollbars=yes";
     window.open(linkedInShareUrl, "Share to LinkedIn", windowFeatures);
 }
-        
+     
+// --- ⭐ OPEN THE PUBLIC RESUME DIRECTLY ⭐ ---
+function previewResume() {
+    if (!myStudentProfile || !myStudentProfile.rollNo) {
+        return alert("Please wait for your profile to finish loading.");
+    }
+    // This will open the new page in a new tab automatically!
+    window.open(`public-resume.html?student=${myStudentProfile.rollNo}`, '_blank');
+}
         function logout() { localStorage.clear(); window.location.href = "login.html"; }
         window.onload = () => { document.getElementById('completionDate').setAttribute('max', todayStr); loadProfile(); loadAchievements(); };
     </script>

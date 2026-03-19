@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <meta property="og:title" content="Verified Digital Resume | EduAchieve">
+    <meta property="og:description" content="View my university-verified achievements, skills, and academic merit on EduAchieve.">
+    <meta property="og:image" content="https://images.unsplash.com/photo-1586281380349-632531a73305?q=80&w=1200&auto=format&fit=crop"> <meta property="og:type" content="profile">
+
+    <title>Verified Public Resume</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary: #2563eb;
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --text-dark: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --verified: #10b981;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-dark);
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .resume-container {
+            max-width: 900px;
+            width: 100%;
+            background: var(--surface);
+            border-radius: 16px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+            overflow: hidden;
+            display: none; /* Hidden until data loads */
+        }
+
+        /* Loading Spinner */
+        #loader {
+            text-align: center;
+            margin-top: 100px;
+            font-size: 24px;
+            color: var(--primary);
+        }
+
+        /* Header Section */
+        .resume-header {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            color: white;
+            padding: 40px;
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            position: relative;
+        }
+
+        .verified-badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(16, 185, 129, 0.15);
+            color: #34d399;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .profile-pic {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 4px solid rgba(255,255,255,0.2);
+            object-fit: cover;
+        }
+
+        .header-info h1 { margin: 0; font-size: 32px; font-weight: 800; }
+        .header-info h3 { margin: 5px 0 15px 0; font-size: 16px; color: #94a3b8; font-weight: 500; }
+        
+        .contact-links { display: flex; gap: 15px; }
+        .contact-links a {
+            color: white;
+            text-decoration: none;
+            background: rgba(255,255,255,0.1);
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            transition: 0.2s;
+        }
+        .contact-links a:hover { background: rgba(255,255,255,0.2); }
+
+        /* Main Content Grid */
+        .resume-body {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 40px;
+            padding: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .resume-body { grid-template-columns: 1fr; }
+            .resume-header { flex-direction: column; text-align: center; }
+            .contact-links { justify-content: center; }
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--primary);
+            margin-bottom: 15px;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 8px;
+        }
+
+        /* Left Column Items */
+        .bio-text { font-size: 14px; line-height: 1.6; color: var(--text-muted); }
+        .skills-container { display: flex; flex-wrap: wrap; gap: 8px; }
+        .skill-tag { background: #f1f5f9; color: var(--text-dark); padding: 5px 10px; border-radius: 4px; font-size: 13px; font-weight: 500; }
+        
+        /* Right Column Timeline (Achievements) */
+        .timeline-item {
+            margin-bottom: 25px;
+            position: relative;
+            padding-left: 20px;
+            border-left: 2px solid var(--border);
+        }
+        .timeline-dot {
+            position: absolute;
+            left: -6px;
+            top: 5px;
+            width: 10px;
+            height: 10px;
+            background: var(--verified);
+            border-radius: 50%;
+            box-shadow: 0 0 0 4px #dcfce7;
+        }
+        .timeline-title { font-size: 16px; font-weight: 700; margin: 0 0 5px 0; display: flex; align-items: center; gap: 8px;}
+        .timeline-category { font-size: 12px; color: var(--primary); font-weight: 600; background: #eff6ff; padding: 2px 8px; border-radius: 12px; }
+        .timeline-desc { font-size: 14px; color: var(--text-muted); margin: 5px 0 0 0; line-height: 1.5; }
+
+        /* Error Message */
+        #error-msg { display: none; text-align: center; padding: 50px; color: #ef4444; }
+    </style>
+</head>
+<body>
+
+    <div id="loader"><i class="fas fa-circle-notch fa-spin"></i> Loading Verified Profile...</div>
+    
+    <div id="error-msg">
+        <h2><i class="fas fa-exclamation-triangle"></i> Profile Not Found</h2>
+        <p>The link may be broken or the student does not exist.</p>
+    </div>
+
+    <div class="resume-container" id="resumeContent">
+        
+        <div class="resume-header">
+            <div class="verified-badge">
+                <i class="fas fa-shield-check"></i> Institution Verified
+            </div>
+            
+            <img id="resPic" class="profile-pic" src="" alt="Profile Picture">
+            
+            <div class="header-info">
+                <h1 id="resName">Student Name</h1>
+                <h3 id="resDetails">Department | Semester | Roll No</h3>
+                <div class="contact-links">
+                    <a id="resLinked" href="#" target="_blank" style="display: none;"><i class="fab fa-linkedin"></i> LinkedIn</a>
+                    <a id="resGithub" href="#" target="_blank" style="display: none;"><i class="fab fa-github"></i> GitHub</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="resume-body">
+            
+            <div>
+                <h2 class="section-title">About Me</h2>
+                <p class="bio-text" id="resBio">No bio provided.</p>
+
+                <h2 class="section-title" style="margin-top: 30px;">Education</h2>
+                <p class="bio-text" id="resEdu">No education details provided.</p>
+
+                <h2 class="section-title" style="margin-top: 30px;">Technical Skills</h2>
+                <div class="skills-container" id="resSkills">
+                    </div>
+                
+                <div style="margin-top: 30px; background: linear-gradient(135deg, #f59e0b, #d97706); padding: 15px; border-radius: 8px; color: white;">
+                    <h4 style="margin: 0 0 5px 0; font-size: 12px; text-transform: uppercase; opacity: 0.9;">Total Merit Score</h4>
+                    <h2 id="resScore" style="margin: 0; font-size: 28px; font-weight: 800;">Loading...</h2>
+                </div>
+            </div>
+
+            <div>
+                <h2 class="section-title">Verified Achievements & Certifications</h2>
+                <div id="achievementsList">
+                    </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // NOTE: Replace this with your actual API URL if different!
+        const API_URL = 'http://localhost:5000'; 
+
+        async function loadPublicResume() {
+            // 1. Get the Roll Number from the URL (?student=12345)
+            const urlParams = new URLSearchParams(window.location.search);
+            const studentRoll = urlParams.get('student');
+
+            if (!studentRoll) {
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('error-msg').style.display = 'block';
+                return;
+            }
+
+            try {
+                // 2. Fetch the data from your database
+                const [sRes, aRes] = await Promise.all([
+                    fetch(`${API_URL}/students`),
+                    fetch(`${API_URL}/achievements`)
+                ]);
+
+                const students = await sRes.json();
+                const allAchievements = await aRes.json();
+
+                // 3. Find this specific student
+                const profile = students.find(s => String(s.rollNo) === String(studentRoll));
+
+                if (!profile) {
+                    throw new Error("Student not found");
+                }
+
+                // 4. Filter for ONLY APPROVED achievements belonging to this student
+                const verifiedAchs = allAchievements.filter(a => a.status === 'Approved' && String(a.studentRoll) === String(studentRoll));
+
+                // --- POPULATE THE UI ---
+                
+                // Header Details
+                document.getElementById('resName').innerText = profile.name;
+                document.getElementById('resDetails').innerText = `${profile.dept} | Sem ${profile.sem} | Roll: ${profile.rollNo}`;
+                document.getElementById('resPic').src = profile.profilePic || `https://ui-avatars.com/api/?name=${profile.name}&background=1e293b&color=fff&size=150`;
+
+                // Resume Builder Data
+                if (profile.resumeData) {
+                    if (profile.resumeData.bio) document.getElementById('resBio').innerText = profile.resumeData.bio;
+                    if (profile.resumeData.education) document.getElementById('resEdu').innerText = profile.resumeData.education;
+                    
+                    if (profile.resumeData.skills) {
+                        const skillsArray = profile.resumeData.skills.split(',').map(s => s.trim());
+                        document.getElementById('resSkills').innerHTML = skillsArray.map(s => `<span class="skill-tag">${s}</span>`).join('');
+                    }
+
+                    if (profile.resumeData.linkedin) {
+                        const lnBtn = document.getElementById('resLinked');
+                        lnBtn.href = profile.resumeData.linkedin;
+                        lnBtn.style.display = 'inline-block';
+                    }
+                    if (profile.resumeData.github) {
+                        const ghBtn = document.getElementById('resGithub');
+                        ghBtn.href = profile.resumeData.github;
+                        ghBtn.style.display = 'inline-block';
+                    }
+                }
+
+                // Calculate Basic Score for flex factor
+                let score = 0;
+                verifiedAchs.forEach(a => score += 5); // Basic calculation: 5 pts per doc
+                if (profile.academicRecords && profile.academicRecords.length > 0) {
+                    const sorted = [...profile.academicRecords].sort((a,b) => parseInt(a.semester) - parseInt(b.semester));
+                    score += ((parseFloat(sorted[sorted.length - 1].cgpa) || 0) / 10) * 50;
+                }
+                document.getElementById('resScore').innerText = score.toFixed(1);
+
+                // Populate the Timeline
+                const achList = document.getElementById('achievementsList');
+                if (verifiedAchs.length === 0) {
+                    achList.innerHTML = `<p style="color: #94a3b8; font-style: italic;">No verified achievements uploaded yet.</p>`;
+                } else {
+                    achList.innerHTML = verifiedAchs.map(ach => `
+                        <div class="timeline-item">
+                            <div class="timeline-dot"></div>
+                            <h3 class="timeline-title">${ach.title} <span class="timeline-category">${ach.category}</span></h3>
+                            <p class="timeline-desc" style="font-size: 12px; margin-bottom: 5px;">
+                                <i class="fas fa-calendar-alt"></i> Date: ${new Date(ach.date).toLocaleDateString()}
+                            </p>
+                            <p class="timeline-desc">${ach.description || 'Achievement successfully verified by the institution faculty.'}</p>
+                        </div>
+                    `).join('');
+                }
+
+                // Hide loader and show resume!
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('resumeContent').style.display = 'block';
+
+            } catch (error) {
+                console.error(error);
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('error-msg').style.display = 'block';
+            }
+        }
+
+        // Run on load
+        loadPublicResume();
+    </script>
+</body>
+</html>
