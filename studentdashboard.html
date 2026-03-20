@@ -4481,8 +4481,9 @@ function previewResume() {
     if (!myStudentProfile || !myStudentProfile.rollNo) {
         return alert("Please wait for your profile to finish loading.");
     }
-    // This will open the new page in a new tab automatically!
-    window.open(`public-resume.html?student=${myStudentProfile.rollNo}`, '_blank');
+    // This automatically builds the URL and opens the new tab!
+    const currentPath = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
+    window.open(`${currentPath}/public-resume.html?student=${myStudentProfile.rollNo}`, '_blank');
 }
         function logout() { localStorage.clear(); window.location.href = "login.html"; }
         window.onload = () => { document.getElementById('completionDate').setAttribute('max', todayStr); loadProfile(); loadAchievements(); };
