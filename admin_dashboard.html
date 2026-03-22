@@ -4652,38 +4652,75 @@ window.addEventListener('load', () => {
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     
     <style>
+         /* ==========================================
+           1. CSS VARIABLES & THEME DEFINITIONS
+           ========================================== */
+        /* Light Theme (Default) Variables */
         :root {
-            --bg-color: #f3f4f6; --sidebar-bg: #1e293b; --sidebar-text: #e2e8f0; --card-bg: #ffffff;
-            --text-main: #1f2937; --text-muted: #6b7280; --border-color: #e5e7eb;
-            --primary: #4f46e5; --primary-hover: #4338ca; --success: #10b981; --danger: #ef4444;
+            --bg-color: #f3f4f6;
+            --sidebar-bg: #1e293b;
+            --sidebar-text: #e2e8f0; 
+            --card-bg: #ffffff;
+            --text-main: #1f2937; 
+            --text-muted: #6b7280; 
+            --border-color: #e5e7eb;
+            --primary: #4f46e5; 
+            --primary-hover: #4338ca; 
+            --success: #10b981; 
+            --danger: #ef4444;
         }
+         /* Dark Theme Override Variables */
         body.dark-mode {
-            --bg-color: #0f172a; --sidebar-bg: #020617; --card-bg: #1e293b;
-            --text-main: #f1f5f9; --text-muted: #94a3b8; --border-color: #334155;
+            --bg-color: #0f172a; 
+            --sidebar-bg: #020617; 
+            --card-bg: #1e293b;
+            --text-main: #f1f5f9; 
+            --text-muted: #94a3b8; 
+            --border-color: #334155;
         }
+         /* Base Resets */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        body { background-color: var(--bg-color); color: var(--text-main); display: flex; transition: 0.3s; }
-
-        /* SIDEBAR */
-        .sidebar { width: 260px; height: 100vh; background: var(--sidebar-bg); color: var(--sidebar-text); position: fixed; display: flex; flex-direction: column; z-index: 100; }
+        body { 
+            background-color: var(--bg-color); 
+            color: var(--text-main); 
+            display: flex; 
+            transition: 0.3s;  /* Smooth transition for theme toggling */
+         }
+/* ==========================================
+           2. SIDEBAR NAVIGATION
+           ========================================== */
+        .sidebar {
+             width: 260px; 
+             height: 100vh; 
+             background: var(--sidebar-bg); 
+             color: var(--sidebar-text); 
+             position: fixed; /* Fixed to the left */
+             display: flex; 
+             flex-direction: column; 
+             z-index: 100; }
         .sidebar-header { padding: 25px; font-size: 22px; font-weight: 700; border-bottom: 1px solid rgba(255,255,255,0.1); }
         .sidebar-menu { flex: 1; padding: 20px 0; }
+       /* Menu Items Formatting */
         .menu-item { width: 100%; padding: 15px 25px; background: none; border: none; color: var(--sidebar-text); text-align: left; cursor: pointer; font-size: 15px; display: flex; gap: 12px; transition: 0.2s; }
+        /* Active/Hover states for navigation */
         .menu-item:hover, .menu-item.active { background: rgba(255,255,255,0.1); border-left: 4px solid var(--primary); }
-        
+        /* Sidebar Footer Elements (Logout, Reset, Theme Toggle) */
         .sidebar-footer { padding: 20px; border-top: 1px solid rgba(255,255,255,0.1); }
         .action-btn { width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .btn-logout { background: #334155; color: white; }
         .btn-reset { background: #7f1d1d; color: #fecaca; }
         .theme-toggle { margin: 0 20px 20px; padding: 10px; background: rgba(255,255,255,0.1); border-radius: 8px; cursor: pointer; text-align: center; display: justify-content: center; display: flex; gap: 8px; }
-
-        /* MAIN CONTENT */
+ 
+        /* ==========================================
+           3. MAIN CONTENT AREA & LAYOUT
+           ========================================== */
+        /* Offset by sidebar width */
         .main-content { margin-left: 260px; padding: 30px; width: calc(100% - 260px); min-height: 100vh; }
+         /* Section display logic (SPA feel) */
         .section { display: none; animation: fadeIn 0.3s ease; }
         .active-section { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* CARDS & TABLES */
+         /* Dashboard Stat Cards */
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 30px; }
         .card { background: var(--card-bg); padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); border: 1px solid var(--border-color); position: relative; overflow: hidden; }
         .stats-grid .card { cursor: pointer; transition: 0.2s; }
@@ -4691,7 +4728,10 @@ window.addEventListener('load', () => {
         
         .card h2 { font-size: 28px; color: var(--primary); margin-top: 5px; }
         .card p { color: var(--text-muted); font-size: 14px; }
-
+ 
+        /* ==========================================
+           4. FORMS, TABLES & FILTER BARS
+           ========================================== */
         .header-actions { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
         input, select { padding: 10px 15px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-color); color: var(--text-main); outline: none; }
         .table-container { background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border-color); overflow: hidden; margin-top: 10px; }
@@ -4699,7 +4739,7 @@ window.addEventListener('load', () => {
         th { text-align: left; padding: 15px; background: var(--bg-color); color: var(--text-muted); border-bottom: 2px solid var(--border-color); }
         td { padding: 15px; border-bottom: 1px solid var(--border-color); font-size: 14px; }
         
-         /* STUDENT SQUARE CARDS */
+       /* Grid Layout for Individual Student/Achievement Cards */
         .student-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px; margin-top: 20px; align-items: stretch; }
         .student-card { background: var(--card-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); display: flex; flex-direction: column; justify-content: space-between; position: relative; transition: 0.2s; min-height: 100%; box-sizing: border-box; min-width: 0; word-wrap: break-word; }
         .student-card:hover { transform: translateY(-5px); border-color: var(--primary); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
@@ -4707,7 +4747,9 @@ window.addEventListener('load', () => {
         .student-card p { font-size: 13px; color: var(--text-muted); margin-bottom: 5px; display: flex; align-items: center; gap: 8px; }
         .student-card .actions { margin-top: 15px; display: flex; gap: 10px; border-top: 1px solid var(--border-color); padding-top: 15px; flex-wrap: wrap; }
 
-        /* BADGES */
+        /* ==========================================
+           5. BADGES & UI CHIPS
+           ========================================== */
         .status-pill { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; }
         .status-admin { background: #fee2e2; color: #b91c1c; } 
         .status-student { background: #dcfce7; color: #15803d; }
@@ -4718,9 +4760,12 @@ window.addEventListener('load', () => {
         .status-Pending { background: #fef3c7; color: #92400e; }
         .status-Rejected { background: #fee2e2; color: #991b1b; }
         .count-badge { background: rgba(0,0,0,0.1); padding: 2px 6px; border-radius: 50%; font-size: 10px; }
-
-        /* MODAL SYSTEM */
+ /* ==========================================
+           6. MODAL OVERLAYS & FORMS
+           ========================================== */
+        /* Full-screen blackout backdrop */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); justify-content: center; align-items: center; z-index: 1000; }
+        /* Modal content box */
         .modal-content { background: var(--card-bg); padding: 30px; border-radius: 16px; width: 480px; max-height: 90vh; overflow-y: auto; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); border: 1px solid var(--border-color); }
         .modal-content h3 { margin-bottom: 20px; color: var(--primary); display: flex; align-items: center; gap: 10px; }
         
@@ -4739,16 +4784,21 @@ window.addEventListener('load', () => {
         .btn-secondary { background: var(--bg-color); color: var(--text-muted); border: 1px solid var(--border-color); }
         .btn-danger { background: var(--danger); color: white; }
 
-        /* ACTIVITY LOG STYLES */
+       /* ==========================================
+           7. ACTIVITY LOG (Dashboard Feed)
+           ========================================== */
         .activity-card { background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border-color); display: flex; flex-direction: column; height: 400px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); overflow: hidden; }
         .activity-header { padding: 20px; border-bottom: 1px solid var(--border-color); background: var(--card-bg); font-weight: 700; font-size: 16px; color: var(--text-main); display: flex; align-items: center; gap: 10px; }
         .activity-feed { padding: 15px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 12px; }
+         /* Custom scrollbar for feeds */
         .activity-feed::-webkit-scrollbar { width: 6px; }
         .activity-feed::-webkit-scrollbar-track { background: transparent; }
         .activity-feed::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 10px; }
         .log-item { display: flex; align-items: center; gap: 15px; padding: 12px 15px; border-radius: 10px; background: var(--bg-color); border: 1px solid transparent; transition: 0.2s; }
         .log-item:hover { border-color: var(--border-color); transform: translateY(-2px); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
         .log-icon { width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+       
+         /* Log Icon Color variants */
         .icon-student { background: rgba(16, 185, 129, 0.15); color: #10b981; }
         .icon-faculty { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
         .icon-allocation { background: rgba(59, 130, 246, 0.15); color: #3b82f6; }
@@ -4757,7 +4807,10 @@ window.addEventListener('load', () => {
         .log-content p { margin: 0; font-size: 14px; color: var(--text-main); font-weight: 600; line-height: 1.4; }
         .log-time { font-size: 12px; color: var(--text-muted); margin-top: 5px; display: flex; align-items: center; gap: 6px; font-weight: 500; }
 
-        /* 🔥 SINGLE LINE FILTER BAR FOR VERIFICATION TAB 🔥 */
+          /* ==========================================
+           8. SPECIAL UI: VERIFICATION FILTERS & CALENDAR
+           ========================================== */
+        /* Ensures filters stay in one horizontally scrolling line on small screens */
         .single-line-filters { display: flex; flex-wrap: nowrap !important; gap: 8px !important; overflow-x: auto; padding: 12px !important; align-items: center; background: white; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 20px; }
         .single-line-filters::-webkit-scrollbar { height: 6px; }
         .single-line-filters::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
@@ -4800,7 +4853,7 @@ window.addEventListener('load', () => {
         }
         .calendar-clear-btn:hover { transform: scale(1.1); }
 
-        
+       
     </style>
 </head>
 <body>
