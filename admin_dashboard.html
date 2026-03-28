@@ -4852,7 +4852,15 @@ window.addEventListener('load', () => {
             font-size: 14px;
         }
         .calendar-clear-btn:hover { transform: scale(1.1); }
-
+/* Golden Achievers Clickable Row Effect */
+.student-row {
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+.student-row:hover {
+    background-color: #f8fafc !important; /* Forces hover color even on the #1 ranked yellow row */
+    transform: scale(1.01);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
        
     </style>
 </head>
@@ -4939,6 +4947,17 @@ window.addEventListener('load', () => {
                 <option value="5">Semester 5</option><option value="6">Semester 6</option>
                 <option value="7">Semester 7</option><option value="8">Semester 8</option>
             </select>
+
+<select id="rankCategoryFilter" onchange="calculateRankings()" style="padding: 6px 12px; border-radius: 6px; border: 1px solid #e2e8f0; font-size: 13px; color: #475569; outline: none; cursor: pointer;">
+    <option value="all">🏆 Overall Top 10 (Total Score)</option>
+    <option value="academic">📚 Top in Academics</option>
+    <option value="certs">📜 Top in Certificates</option>
+    <option value="ints">💼 Top in Internships</option>
+    <option value="comps">🏆 Top in Competitions</option>
+    <option value="sports">⚽ Top in Sports</option>
+    <option value="extras">🎨 Top in Extracurriculars</option>
+    <option value="bonus">⭐ Top in Proctor Bonus</option>
+</select>
 
             <button class="btn btn-report" style="margin-left: auto;" onclick="exportRankings()"><i class="fas fa-medal"></i> Export Top 10</button>
         </div>
@@ -6678,6 +6697,35 @@ window.addEventListener('load', () => {
 
     </div>
 </div>
+
+<div id="adminAnalyticsModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); z-index: 9999; align-items: center; justify-content: center; backdrop-filter: blur(4px);">
+    
+    <div style="background: white; width: 450px; border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); overflow: hidden;">
+        
+        <div style="background: linear-gradient(135deg, #1e293b, #0f172a); padding: 20px; color: white; display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <img id="statStudentPic" src="" style="width: 45px; height: 45px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.2);">
+                <div>
+                    <h3 id="statStudentName" style="margin: 0; font-size: 18px;">Loading...</h3>
+                    <p id="statStudentRoll" style="margin: 0; font-size: 12px; color: #94a3b8;"></p>
+                </div>
+            </div>
+            <button onclick="document.getElementById('adminAnalyticsModal').style.display='none'" style="background: none; border: none; color: #94a3b8; font-size: 20px; cursor: pointer;"><i class="fas fa-times"></i></button>
+        </div>
+
+        <div style="padding: 25px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px;">
+                <h4 style="margin: 0; color: #1e293b; font-size: 15px;"><i class="fas fa-chart-bar" style="color: #3b82f6;"></i> Score Distribution</h4>
+                <h2 id="statTotalScore" style="margin: 0; color: #f59e0b; font-size: 28px; font-weight: 800;">0</h2>
+            </div>
+            <div id="analyticsBarsContainer" style="display: flex; flex-direction: column; gap: 15px;">
+                <p style="text-align: center; color: #64748b; font-size: 13px;">Analyzing data...</p>
+            </div>
+        </div>
+
+    </div>
+</div>
+
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 <script>
     let adminFacInterval = null;
@@ -7094,7 +7142,7 @@ window.addEventListener('load', () => {
 
             const deptFilter = document.getElementById('rankDeptFilter').value;
             const semFilter = document.getElementById('rankSemFilter').value;
-
+            const categoryFilter = document.getElementById('rankCategoryFilter') ? document.getElementById('rankCategoryFilter').value : 'all';
             // 2. Filter students based ONLY on dropdowns 
             let eligibleStudents = allStudents.filter(s => {
                 if (deptFilter !== 'all' && s.dept !== deptFilter) return false;
@@ -7151,12 +7199,46 @@ window.addEventListener('load', () => {
                     academicScore: academicScore.toFixed(1),
                     achievementScore: achievementScore,
                     bonusPoints: totalBonus,
-                    totalScore: totalScore.toFixed(1)
+                    totalScore: totalScore.toFixed(1),
+
+                    // ⭐ ADD THESE SO WE CAN SORT BY THEM:
+                    certScore: certScore,
+                    intScore: intScore,
+                    compScore: compScore,
+                    sportScore: sportScore,
+                    extraScore: extraScore
                 };
             });
 
             // 4. Sort by Total Score (Highest First)
-            rankedList.sort((a, b) => parseFloat(b.totalScore) - parseFloat(a.totalScore));
+         /*   rankedList.sort((a, b) => parseFloat(b.totalScore) - parseFloat(a.totalScore));
+*/
+// 4. ⭐ DYNAMIC CATEGORY SORTING ENGINE ⭐
+            rankedList.sort((a, b) => {
+                let scoreA = 0, scoreB = 0;
+                
+                // Which score are we comparing?
+                if (categoryFilter === 'academic') { scoreA = a.academicScore; scoreB = b.academicScore; }
+                else if (categoryFilter === 'certs') { scoreA = a.certScore; scoreB = b.certScore; }
+                else if (categoryFilter === 'ints') { scoreA = a.intScore; scoreB = b.intScore; }
+                else if (categoryFilter === 'comps') { scoreA = a.compScore; scoreB = b.compScore; }
+                else if (categoryFilter === 'sports') { scoreA = a.sportScore; scoreB = b.sportScore; }
+                else if (categoryFilter === 'extras') { scoreA = a.extraScore; scoreB = b.extraScore; }
+                else if (categoryFilter === 'bonus') { scoreA = a.bonusPoints; scoreB = b.bonusPoints; }
+                else { scoreA = a.totalScore; scoreB = b.totalScore; }
+
+                // Convert to decimals for safe math
+                scoreA = parseFloat(scoreA);
+                scoreB = parseFloat(scoreB);
+
+                // If there is a tie in this specific category, let the Total Merit Score break the tie!
+                if (scoreA === scoreB) {
+                    return parseFloat(b.totalScore) - parseFloat(a.totalScore);
+                }
+                
+                // Otherwise, sort highest to lowest based on the selected category
+                return scoreB - scoreA; 
+            });
 
             // 5. Take the Top 10
             const top10 = rankedList.slice(0, 10);
@@ -7186,8 +7268,38 @@ window.addEventListener('load', () => {
                 // Cap the progress bar width at 100% so it doesn't break the UI if a student scores 115/100
                 const progressBarWidth = Math.min(student.totalScore, 100);
 
-                return `
+             /*   return `
                     <tr style="background: ${index === 0 ? '#fffbeb' : 'transparent'};">
+                        <td style="text-align: center;">${rankVisual}</td>
+                        <td>
+                            <b style="font-size:15px; color:var(--text);">${student.name}</b><br>
+                            <span style="font-size:12px; color:#64748b;">${student.rollNo} • ${student.deptSem}</span>
+                        </td>
+                        <td>
+                            <b style="color:#2563eb;">${student.academicScore}</b> / 50<br>
+                            <span style="font-size:11px; color:#64748b;">CGPA: ${student.cgpa}</span>
+                        </td>
+                        <td>
+                            <b style="color:${student.achievementScore === 50 ? '#10b981' : '#f59e0b'};">${student.achievementScore}</b> / 50<br>
+                            ${achLabel}
+                            ${bonusBadge}
+                        </td>
+                        <td>
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                <h3 style="margin:0; color:${student.bonusPoints > 0 ? '#d97706' : (index === 0 ? '#d97706' : 'var(--text)')};">${student.totalScore}</h3>
+                                <div style="flex:1; height:8px; background:#e2e8f0; border-radius:4px; overflow:hidden;">
+                                    <div style="width:${progressBarWidth}%; height:100%; background: linear-gradient(90deg, #3b82f6, #10b981);"></div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');*/
+
+
+// ⭐ CHANGED: Added 'student-row' class and 'onclick' to trigger the Analytics Modal!
+                return `
+                    <tr class="student-row" onclick="viewStudentAnalytics('${student.rollNo}')" style="background: ${index === 0 ? '#fffbeb' : 'transparent'}; cursor: pointer;">
                         <td style="text-align: center;">${rankVisual}</td>
                         <td>
                             <b style="font-size:15px; color:var(--text);">${student.name}</b><br>
@@ -7222,6 +7334,8 @@ window.addEventListener('load', () => {
             tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 30px; color: red;">Failed to load rankings. Check server connection.</td></tr>';
         }
     }
+
+    
 
 
 function downloadResultsTemplate() {
@@ -7326,6 +7440,96 @@ async function processResultsUpload() {
 function openResultsModal() {
     document.getElementById('resultsModal').style.display = 'flex';
 }
+
+
+// ... all your other functions (like calculateRankings) end up here ...
+
+    // ⭐ PASTE THIS AT THE ABSOLUTE BOTTOM IN THE GLOBAL SCOPE! ⭐
+    async function viewStudentAnalytics(rollNo) {
+        // 1. Show the modal
+        const modal = document.getElementById('adminAnalyticsModal');
+        modal.style.display = 'flex';
+        document.getElementById('analyticsBarsContainer').innerHTML = '<p style="text-align: center; color: #64748b;">Loading...</p>';
+
+        try {
+            // 2. Fetch the data
+            const API_URL = 'http://localhost:5000'; 
+            const [sRes, aRes] = await Promise.all([
+                fetch(`${API_URL}/students`),
+                fetch(`${API_URL}/achievements`)
+            ]);
+            
+            const students = await sRes.json();
+            const achievements = await aRes.json();
+
+            // 3. Find the specific student
+            const student = students.find(s => String(s.rollNo) === String(rollNo));
+            const verifiedAchs = achievements.filter(a => String(a.studentRoll) === String(rollNo) && a.status === 'Approved');
+
+            if (!student) throw new Error("Student not found");
+
+            // 4. Update Header UI
+            document.getElementById('statStudentName').innerText = student.name;
+            document.getElementById('statStudentRoll').innerText = `Roll: ${student.rollNo} | ${student.dept}`;
+            document.getElementById('statStudentPic').src = student.profilePic || `https://ui-avatars.com/api/?name=${student.name}&background=f1f5f9&color=0f172a`;
+
+            // 5. Calculate Category Scores
+            let categoryScores = {
+                'Academics': 0, 'Certificates': 0, 'Internships': 0, 
+                'Competitions': 0, 'Sports': 0, 'Extracurricular': 0, 'Proctor Bonus': 0
+            };
+
+            if (student.academicRecords && student.academicRecords.length > 0) {
+                const sorted = [...student.academicRecords].sort((a,b) => parseInt(a.semester) - parseInt(b.semester));
+                categoryScores['Academics'] = ((parseFloat(sorted[sorted.length - 1].cgpa) || 0) / 10) * 50;
+            }
+
+            verifiedAchs.forEach(ach => {
+                if (ach.category === 'Certificate') categoryScores['Certificates'] += 5;
+                if (ach.category === 'Internship') categoryScores['Internships'] += 10;
+                if (ach.category === 'Competition') categoryScores['Competitions'] += 10;
+                if (ach.category === 'Sports') categoryScores['Sports'] += 5;
+                if (ach.category === 'Extracurricular') categoryScores['Extracurricular'] += 5;
+                if (Number(ach.bonusPoints) > 0) categoryScores['Proctor Bonus'] += Number(ach.bonusPoints);
+            });
+
+            const totalScore = Object.values(categoryScores).reduce((a, b) => a + b, 0);
+            document.getElementById('statTotalScore').innerText = totalScore.toFixed(1);
+
+            // 6. Draw the Progress Bars
+            const colors = {
+                'Academics': '#3b82f6', 'Certificates': '#10b981', 'Internships': '#8b5cf6',
+                'Competitions': '#ef4444', 'Sports': '#f97316', 'Extracurricular': '#ec4899', 'Proctor Bonus': '#f59e0b'
+            };
+
+            const container = document.getElementById('analyticsBarsContainer');
+            container.innerHTML = '';
+            const maxScore = Math.max(...Object.values(categoryScores)) || 1;
+
+            for (const [category, score] of Object.entries(categoryScores)) {
+                if (score > 0) {
+                    const percentage = (score / maxScore) * 100;
+                    container.innerHTML += `
+                        <div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                                <span style="font-size: 13px; font-weight: 600; color: #475569;">${category}</span>
+                                <span style="font-size: 13px; font-weight: 700; color: #1e293b;">${score.toFixed(1)} <small style="color:#94a3b8; font-weight:normal;">pts</small></span>
+                            </div>
+                            <div style="width: 100%; background: #f1f5f9; height: 8px; border-radius: 4px; overflow: hidden;">
+                                <div style="width: ${percentage}%; background: ${colors[category]}; height: 100%; border-radius: 4px; transition: width 1s ease-out;"></div>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+            if (totalScore === 0) container.innerHTML = '<p style="text-align: center; color: #94a3b8; font-style: italic;">No verified points yet.</p>';
+
+        } catch (err) {
+            console.error(err);
+            document.getElementById('analyticsBarsContainer').innerHTML = '<p style="text-align: center; color: #ef4444;">Error loading analytics.</p>';
+        }
+    }
+
 </script>
 </body>
 </html>
