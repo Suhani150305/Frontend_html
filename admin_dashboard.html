@@ -7530,6 +7530,40 @@ function openResultsModal() {
         }
     }
 
+
+// --- ⭐ EXPORT RANKINGS TO CSV (EXCEL) ⭐ ---
+// Paste this at the ABSOLUTE BOTTOM of your script!
+function exportRankings() {
+    // Check if the data exists
+    if (!window.currentRankings || window.currentRankings.length === 0) {
+        return alert("No rankings available to export! Please wait for the table to load.");
+    }
+
+    // 1. Set up the CSV Headers
+    let csvContent = "data:text/csv;charset=utf-8,";
+    csvContent += "Rank,Student Name,Roll Number,Department & Sem,Total Merit Score,Academic Score,Achievement Score,Proctor Bonus\n";
+
+    // 2. Loop through the top 10 students and build the rows
+    window.currentRankings.forEach((student, index) => {
+        let rank = index + 1;
+        // We wrap text in quotes so commas in their names/departments don't break the Excel columns!
+        let row = `${rank},"${student.name}","${student.rollNo}","${student.deptSem}",${student.totalScore},${student.academicScore},${student.achievementScore},${student.bonusPoints}`;
+        csvContent += row + "\n";
+    });
+
+    // 3. Create a temporary download link and click it automatically
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    
+    // Add a timestamp to the file name so they don't overwrite old reports!
+    const dateStr = new Date().toISOString().split('T')[0];
+    link.setAttribute("download", `Golden_Achievers_${dateStr}.csv`);
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
 </script>
 </body>
 </html>
